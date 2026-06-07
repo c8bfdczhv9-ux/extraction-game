@@ -317,15 +317,21 @@ function drawCar(ca,c,t){
     fs('rgba(192,160,96,0.18)');fr(ppX2-3,cy+ch-46,7,7);
   }
 
-  // === LUGGAGE RACK with vintage suitcases (above windows) ===
-  fs('rgba(240,235,245,0.12)');fr(cx2+6,cy+uh*0.02,cw-12,6); // white rack shelf
-  ss('rgba(240,235,245,0.2)',0.5);cx.strokeRect(cx2+6,cy+uh*0.02,cw-12,6);
-  // Vintage suitcases on rack
-  var sc=[{x:0.12,c:'#5A3A2A',w:12,h:8},{x:0.28,c:'#6B2020',w:10,h:7},{x:0.43,c:'#3A3A30',w:13,h:9},{x:0.6,c:'#4A3020',w:11,h:7},{x:0.77,c:'#2A2020',w:10,h:8}];
+  // === LUGGAGE RACK — bright white, prominent ===
+  fs('rgba(250,248,245,0.35)');fr(cx2+8,cy+uh*0.02,cw-16,5);
+  ss('rgba(255,252,250,0.5)',1);cx.strokeRect(cx2+8,cy+uh*0.02,cw-16,5);
+  // Rack brackets
+  for(var bx4=cx2+14;bx4<cx2+cw-14;bx4+=cw*0.28){
+    fs('rgba(200,195,190,0.25)');fr(bx4,cy+uh*0.02-5,2,12);
+  }
+  // Vintage suitcases
+  var sc=[{x:0.14,c:'#5A3A2A',w:12},{x:0.3,c:'#6B2020',w:10},{x:0.46,c:'#3A3A30',w:13},{x:0.62,c:'#4A3020',w:11},{x:0.79,c:'#2A2020',w:10}];
   for(var si=0;si<sc.length;si++){
     var s=sc[si];
-    fs(s.c);fr(cx2+cw*s.x,cy+uh*0.02-3,s.w,Math.min(s.h,6));
-    ss('rgba(0,0,0,0.2)',0.3);cx.strokeRect(cx2+cw*s.x,cy+uh*0.02-3,s.w,Math.min(s.h,6));
+    fs(s.c);fr(cx2+cw*s.x,cy+uh*0.02-3,s.w,5);
+    ss('rgba(0,0,0,0.25)',0.4);cx.strokeRect(cx2+cw*s.x,cy+uh*0.02-3,s.w,5);
+    // Suitcase handle
+    ss('rgba(200,180,160,0.3)',0.5);cx.beginPath();cx.moveTo(cx2+cw*s.x+3,cy+uh*0.02-4);cx.lineTo(cx2+cw*s.x+s.w-3,cy+uh*0.02-4);cx.stroke();
   }
 
   // 绿皮火车 windows
@@ -348,18 +354,17 @@ function drawCar(ca,c,t){
     // Table newspaper pattern (tiny lines)
     ss('rgba(180,150,120,0.08)',0.3);
     for(var tl=0;tl<3;tl++){cx.beginPath();cx.moveTo(wxi+ww*0.35,wy3+wh*0.48+tl*ww*0.02);cx.lineTo(wxi+ww*0.65,wy3+wh*0.48+tl*ww*0.02);cx.stroke();}
-    // Left booth seat (high back, emerald green)
-    fs('#3D5A4A');fr(wxi+ww*0.02,wy3+wh*0.16,ww*0.22,wh*0.7);
-    ss('rgba(60,80,65,0.3)',0.5);cx.strokeRect(wxi+ww*0.02,wy3+wh*0.16,ww*0.22,wh*0.7);
-    // Seat cushion
-    fs('#4A6B5A');fr(wxi+ww*0.02,wy3+wh*0.55,ww*0.22,wh*0.18);
-    // Right booth seat (facing)
-    fs('#3D5A4A');fr(wxi+ww*0.76,wy3+wh*0.16,ww*0.22,wh*0.7);
-    ss('rgba(60,80,65,0.3)',0.5);cx.strokeRect(wxi+ww*0.76,wy3+wh*0.16,ww*0.22,wh*0.7);
-    fs('#4A6B5A');fr(wxi+ww*0.76,wy3+wh*0.55,ww*0.22,wh*0.18);
-    // Wood trim on seat tops
-    fs('rgba(140,100,60,0.4)');fr(wxi+ww*0.02,wy3+wh*0.16,ww*0.22,wh*0.04);
-    fs('rgba(140,100,60,0.4)');fr(wxi+ww*0.76,wy3+wh*0.16,ww*0.22,wh*0.04);
+    // Left booth seat (emerald green, tall back)
+    fs('#3A7D5A');fr(wxi+ww*0.02,wy3+wh*0.14,ww*0.24,wh*0.72);
+    ss('rgba(30,90,60,0.35)',0.6);cx.strokeRect(wxi+ww*0.02,wy3+wh*0.14,ww*0.24,wh*0.72);
+    fs('#4A8D6A');fr(wxi+ww*0.02,wy3+wh*0.55,ww*0.24,wh*0.18);
+    // Right booth seat
+    fs('#3A7D5A');fr(wxi+ww*0.74,wy3+wh*0.14,ww*0.24,wh*0.72);
+    ss('rgba(30,90,60,0.35)',0.6);cx.strokeRect(wxi+ww*0.74,wy3+wh*0.14,ww*0.24,wh*0.72);
+    fs('#4A8D6A');fr(wxi+ww*0.74,wy3+wh*0.55,ww*0.24,wh*0.18);
+    // Wood trim
+    fs('rgba(160,120,70,0.5)');fr(wxi+ww*0.02,wy3+wh*0.14,ww*0.24,wh*0.04);
+    fs('rgba(160,120,70,0.5)');fr(wxi+ww*0.74,wy3+wh*0.14,ww*0.24,wh*0.04);
     // Wall sconce glow (between windows, drawn on body above)
     // White window frame
     ss(C.bw,1.5);cx.globalAlpha=0.35;cx.strokeRect(wxi,wy3,ww,wh);cx.globalAlpha=1;
@@ -495,11 +500,11 @@ function drawCamp(t){
     // Round table
     fs('rgba(100,70,40,0.45)');cx.beginPath();cx.arc(wx6+ww2/2,wy6+wh2*0.52,ww2*0.1,0,6.28);cx.fill();
     // Left booth
-    fs('#3D5A4A');fr(wx6+ww2*0.02,wy6+wh2*0.18,ww2*0.22,wh2*0.65);
-    fs('#4A6B5A');fr(wx6+ww2*0.02,wy6+wh2*0.55,ww2*0.22,wh2*0.15);
+    fs('#3A7D5A');fr(wx6+ww2*0.02,wy6+wh2*0.16,ww2*0.24,wh2*0.64);
+    fs('#4A8D6A');fr(wx6+ww2*0.02,wy6+wh2*0.55,ww2*0.24,wh2*0.15);
     // Right booth
-    fs('#3D5A4A');fr(wx6+ww2*0.76,wy6+wh2*0.18,ww2*0.22,wh2*0.65);
-    fs('#4A6B5A');fr(wx6+ww2*0.76,wy6+wh2*0.55,ww2*0.22,wh2*0.15);
+    fs('#3A7D5A');fr(wx6+ww2*0.74,wy6+wh2*0.16,ww2*0.24,wh2*0.64);
+    fs('#4A8D6A');fr(wx6+ww2*0.74,wy6+wh2*0.55,ww2*0.24,wh2*0.15);
     ss(C.bw,1.4);cx.globalAlpha=0.3;cx.strokeRect(wx6,wy6,ww2,wh2);cx.globalAlpha=1;
     fs('rgba(240,235,245,0.03)');fr(wx6+ww2*0.04,wy6+wh2*0.02,ww2*0.05,wh2*0.5);
   }
