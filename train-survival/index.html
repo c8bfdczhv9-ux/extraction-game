@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>60 Seconds · 火车生存</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#0a0806;overflow:hidden;font-family:'Courier New',monospace;touch-action:none;user-select:none;-webkit-user-select:none;position:fixed}
+#w{position:relative;width:100vw;height:100vh;max-width:500px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{display:block;background:#1a1410;border-radius:6px;max-width:100vw;max-height:58vh;box-shadow:0 0 60px rgba(200,120,40,0.1);border:2px solid #3a2818}
+#hud{position:absolute;top:8px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;z-index:10}
+.hb{background:rgba(10,8,6,0.9);border:1px solid #4a3020;border-radius:4px;padding:4px 10px;font-size:13px;color:#c89860;letter-spacing:1px}
+#tm.warn{color:#c84040;animation:pulse .6s infinite}
+#inv{position:absolute;bottom:85px;left:10px;right:10px;display:flex;gap:3px;justify-content:center;pointer-events:none;z-index:10;flex-wrap:wrap}
+.iv{background:rgba(10,8,6,0.9);border:1px solid #4a3020;border-radius:3px;padding:3px 7px;font-size:9px;color:#a08060}
+/* Touch controls */
+#ctrls{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;z-index:10;pointer-events:none}
+#joystick{width:100px;height:100px;background:rgba(30,20,10,0.5);border:2px solid rgba(180,120,60,0.35);border-radius:50%;position:relative;pointer-events:auto}
+#stick{width:44px;height:44px;background:rgba(200,140,80,0.4);border:1px solid rgba(220,160,100,0.5);border-radius:50%;position:absolute;top:28px;left:28px;transition:none;pointer-events:none}
+#pickup{width:64px;height:64px;background:rgba(180,120,40,0.25);border:2px solid rgba(200,140,60,0.5);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:rgba(220,180,120,0.8);pointer-events:auto;margin-bottom:18px}
+#pickup:active{background:rgba(200,140,60,0.45)}
+#overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:20;background:rgba(6,4,2,0.95);border-radius:6px}
+#overlay.show{display:flex}
+.ot{font-size:22px;color:#c89860;letter-spacing:3px;margin-bottom:4px}
+.os{font-size:12px;color:#806040;margin-bottom:14px}
+.btn{background:rgba(180,100,40,0.2);border:1px solid rgba(200,140,80,0.4);color:#c89860;padding:10px 22px;border-radius:6px;font-size:13px;letter-spacing:2px;pointer-events:auto;cursor:pointer;margin:4px}
+.btn:active{background:rgba(200,140,80,0.3)}
+#hint{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);color:rgba(200,152,96,0.35);font-size:10px;letter-spacing:2px;pointer-events:none;z-index:5;transition:opacity 1s}
+#lastcar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#c87830;font-size:14px;letter-spacing:2px;pointer-events:none;z-index:5;opacity:0;transition:opacity .5s;text-align:center}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+<div id="w">
+<canvas id="g"></canvas>
+<div id="hud"><span class="hb" id="sc">⏱ 60</span><span class="hb">🚂 TRAIN</span></div>
+<div id="inv"></div>
+<div id="hint">拖动摇杆移动 · TAP 拾取</div>
+<div id="lastcar">⚠ LAST CAR<br>DETACHING...</div>
+<div id="ctrls">
+  <div id="joystick"><div id="stick"></div></div>
+  <div id="pickup">🖐</div>
+</div>
+<div id="overlay">
+<div class="ot" id="ot"></div><div class="os" id="os"></div>
+<button class="btn" onclick="rst()">↻ RETRY</button>
+</div>
+</div>
+
+<script>
+const C=document.getElementById('g'),X=C.getContext('2d');
+function rs(){const mw=Math.min(window.innerWidth-12,500),mh=Math.min(window.innerHeight*.55,600);C.width=mw;C.height=mh}
+rs();window.addEventListener('resize',rs);
+const W=()=>C.width,H=()=>C.height;
+
+const NUM_CARS=6;
+const CAR_W=()=>W()/3.5;
+const CAR_H=()=>H()*.7;
+let cars=[],player={x:0,y:0},camX=0;
+let gti=60,items={food:0,coal:0,water:0,weapon:0,radio:0,med:0};
+let st='playing',loot=[],particles=[],inLastCar=false,detachCount=0;
+
+const ITEM_DEFS=[
+  {k:'food',icon:'🥫',label:'CANNED',c:'#c89860',w:28},
+  {k:'coal',icon:'🪨',label:'COAL',c:'#707070',w:22},
+  {k:'water',icon:'💧',label:'WATER',c:'#6088c0',w:22},
+  {k:'weapon',icon:'🔫',label:'GUN',c:'#a0a0a0',w:22},
+  {k:'radio',icon:'📻',label:'RADIO',c:'#888060',w:18},
+  {k:'med',icon:'💊',label:'MEDS',c:'#c08080',w:18},
+];
+
+function genCar(idx){
+  const cw=CAR_W(),ch=CAR_H();
+  return {x:idx*cw,y:H()*.15,w:cw,h:ch,idx,color:['#2a1a0e','#251810','#2a1c10','#221408','#281a0c','#24160a'][idx%6],hasDetach:idx===NUM_CARS-1}
+}
+
+function spLoot(){
+  loot.length=0;
+  for(let c=0;c<NUM_CARS;c++){
+    const car=cars[c];const n=3+Math.floor(Math.random()*4);
+    for(let i=0;i<n;i++){
+      const def=ITEM_DEFS[Math.floor(Math.random()*ITEM_DEFS.length)];
+      loot.push({x:car.x+20+Math.random()*(car.w-60),y:car.y+car.h-30-Math.random()*25,car:c,def,co:false})
+    }
+  }
+}
+
+function genCars(){cars.length=0;for(let i=0;i<NUM_CARS;i++)cars.push(genCar(i))}
+
+function rst(){
+  gti=60;st='playing';items={food:0,coal:0,water:0,weapon:0,radio:0,med:0};inLastCar=false;detachCount=0;
+  particles.length=0;genCars();spLoot();
+  player.x=CAR_W()/2;camX=0;document.getElementById('overlay').classList.remove('show');
+  document.getElementById('hint').style.opacity='1';document.getElementById('lastcar').style.opacity='0';
+  upInv()
+}
+
+function upInv(){document.getElementById('inv').innerHTML=ITEM_DEFS.map(d=>`<span class=iv>${d.icon} ${items[d.k]}</span>`).join('')}
+
+function detach(){
+  st='detached';document.getElementById('overlay').classList.add('show');
+  document.getElementById('ot').textContent='🚃 DETACHED!';
+  const total=Object.values(items).reduce((a,b)=>a+b,0);
+  document.getElementById('os').textContent=`Collected ${total} items · Train exploded behind`;
+  document.getElementById('ctrls').style.display='none'
+}
+
+function explode(){
+  st='exploded';document.getElementById('overlay').classList.add('show');
+  document.getElementById('ot').textContent='💥 BOOM!';document.getElementById('os').textContent='Did not reach last car';
+  document.getElementById('ctrls').style.display='none'
+}
+
+function collect(item){
+  if(item.co)return;item.co=true;items[item.def.k]++;upInv();
+  for(let i=0;i<8;i++)particles.push({x:item.x,y:item.y,vx:(Math.random()-.5)*3,vy:-2-Math.random()*3,life:20,ml:20,c:item.def.c,s:2+Math.random()*2})
+}
+
+// Keyboard
+const keys={};
+window.addEventListener('keydown',e=>{
+  keys[e.key.toLowerCase()]=true;
+  if(e.key===' '&&st==='playing')pickupNearby()
+});
+window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+
+// Joystick
+const joy=document.getElementById('joystick'),stick=document.getElementById('stick');
+let joyOn=false,joyOX=0,joyOY=0,joyCX=50,joyCY=50;
+joy.addEventListener('pointerdown',e=>{e.preventDefault();joyOn=true;const r=joy.getBoundingClientRect();joyOX=e.clientX-r.left;joyOY=e.clientY-r.top});
+joy.addEventListener('pointermove',e=>{e.preventDefault();if(!joyOn)return;const r=joy.getBoundingClientRect();let dx=e.clientX-r.left-joyOX,dy=e.clientY-r.top-joyOY;const dist=Math.hypot(dx,dy);if(dist>34){dx=dx/dist*34;dy=dy/dist*34}stick.style.left=(28+dx)+'px';stick.style.top=(28+dy)+'px';joyCX=dx/34;joyCY=dy/34});
+joy.addEventListener('pointerup',()=>{joyOn=false;stick.style.left='28px';stick.style.top='28px';joyCX=0;joyCY=0});
+joy.addEventListener('pointerleave',()=>{joyOn=false;stick.style.left='28px';stick.style.top='28px';joyCX=0;joyCY=0});
+
+// Pickup button
+document.getElementById('pickup').addEventListener('pointerdown',e=>{e.preventDefault();if(st==='playing')pickupNearby()});
+
+function pickupNearby(){
+  for(const l of loot){if(l.co)continue;if(Math.abs(player.x-l.x)<35&&Math.abs(player.y-l.y)<40)collect(l)}
+}
+
+function up(dt){
+  if(st!=='playing'){particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}
+  gti-=dt;
+  if(gti<=0){gti=0;if(st==='playing')explode();}
+  document.getElementById('sc').textContent='⏱ '+Math.ceil(gti);
+  if(gti<15)document.getElementById('sc').className='hb warn';else document.getElementById('sc').className='hb';
+  if(gti<10)document.getElementById('hint').style.opacity='0';
+
+  // Movement: joystick + keyboard
+  let dx=joyCX;if(keys.arrowleft||keys.a)dx=-1;if(keys.arrowright||keys.d)dx+=1;
+  player.x+=dx*4.8*60*dt;
+  player.x=Math.max(10,Math.min(cars[NUM_CARS-1].x+cars[NUM_CARS-1].w-10,player.x));
+  const ci=Math.floor(player.x/CAR_W());
+  if(ci>=0&&ci<NUM_CARS)player.y=cars[ci].y+cars[ci].h-40;
+  camX=player.x-W()/2;camX=Math.max(0,Math.min(cars[NUM_CARS-1].x+cars[NUM_CARS-1].w-W(),camX));
+
+  // Auto-detach in last car
+  const inLast=ci===NUM_CARS-1;
+  if(inLast&&!inLastCar){inLastCar=true;detachCount=0;document.getElementById('lastcar').style.opacity='1'}
+  if(inLast&&inLastCar){detachCount+=dt;document.getElementById('lastcar').innerHTML='⚠ LAST CAR<br>DETACHING...<br>'+Math.ceil(3-detachCount)+'s';if(detachCount>=3)detach()}
+  if(!inLast&&inLastCar){inLastCar=false;detachCount=0;document.getElementById('lastcar').style.opacity='0'}
+
+  particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})
+}
+
+function drawCar(car){
+  const sx=car.x-camX,sy=car.y,sw=car.w,sh=car.h;
+  X.fillStyle=car.color;X.fillRect(sx,sy,sw,sh);
+  X.strokeStyle='#4a3020';X.lineWidth=2;X.strokeRect(sx,sy,sw,sh);
+  X.fillStyle='#3a2010';X.fillRect(sx,sy+sh-8,sw,8);
+  X.fillStyle='#2a1808';X.fillRect(sx,sy,sw,6);
+  if(car.idx<NUM_CARS-1){X.fillStyle='#1a0c04';X.fillRect(sx+sw-8,sy+sh*.3,8,sh*.4)}
+  if(car.hasDetach){
+    const p=Math.sin(Date.now()/400)*.3+.7;
+    X.fillStyle='rgba(200,120,40,0.2)';X.fillRect(sx,sy+sh-20,sw,20);
+    X.fillStyle='#c87830';X.font='10px monospace';X.textAlign='center';X.fillText('DETACH ZONE',sx+sw/2,sy+sh-6);
+    X.strokeStyle='rgba(200,120,40,'+p+')';X.lineWidth=2;X.strokeRect(sx+2,sy+2,sw-4,sh-4)
+  }
+  X.fillStyle='#604020';X.font='9px monospace';X.textAlign='left';X.fillText('CAR '+(car.idx+1),sx+6,sy+16)
+}
+
+function drawLootItems(){
+  for(const l of loot){if(l.co)continue;const sx=l.x-camX;if(sx<-40||sx>W()+40)continue;
+    X.fillStyle=l.def.c;X.font='14px sans-serif';X.textAlign='center';X.fillText(l.def.icon,sx,l.y)}
+}
+
+function drawPlayer(){
+  const sx=player.x-camX,sy=player.y;
+  X.fillStyle='#c89860';X.beginPath();X.arc(sx,sy-14,10,0,Math.PI*2);X.fill();
+  X.fillStyle='#e0c8a0';X.beginPath();X.arc(sx-2,sy-16,3,0,Math.PI*2);X.fill();
+  X.fillStyle='#806040';X.fillRect(sx-6,sy-4,12,18);
+  X.fillStyle='#604020';X.fillRect(sx-5,sy+12,5,10);X.fillRect(sx+1,sy+12,5,10);
+  X.fillStyle='#e0c0a0';X.font='8px monospace';X.textAlign='center';X.fillText('YOU',sx,sy-22)
+}
+
+function drawParticles(){
+  for(const p of particles){X.globalAlpha=p.life/p.ml;X.fillStyle=p.c;X.fillRect(p.x-camX,p.y,p.s,p.s)}X.globalAlpha=1
+}
+
+function draw(){
+  X.clearRect(0,0,W(),H());
+  const sky=X.createLinearGradient(0,0,0,H());sky.addColorStop(0,'#0a0604');sky.addColorStop(.3,'#1a1008');sky.addColorStop(1,'#0a0806');X.fillStyle=sky;X.fillRect(0,0,W(),H());
+  X.fillStyle='#1a1008';X.fillRect(0,H()*.85,W(),H()*.15);
+  X.strokeStyle='#3a2818';X.lineWidth=1;X.beginPath();X.moveTo(0,H()*.85+8);X.lineTo(W(),H()*.85+8);X.stroke();
+  X.beginPath();X.moveTo(0,H()*.85+18);X.lineTo(W(),H()*.85+18);X.stroke();
+  for(let x=(-camX%30);x<W();x+=30){X.fillStyle='#2a1808';X.fillRect(x,H()*.85+6,8,16)}
+  // Smoke
+  const t=Date.now()/200;
+  for(let i=0;i<3;i++){const sx=cars[0].x-camX-10;X.fillStyle='rgba(100,80,60,'+(.15+Math.sin(t+i)*.1)+')';X.beginPath();X.arc(sx-10-Math.sin(t+i)*5,50+i*12+Math.sin(t*2+i)*8,8+i*3,0,Math.PI*2);X.fill()}
+  for(const c of cars)drawCar(c);
+  drawLootItems();drawPlayer();drawParticles();
+  const v=X.createRadialGradient(W()/2,H()/2,W()*.3,W()/2,H()/2,W()*.8);v.addColorStop(0,'transparent');v.addColorStop(1,'rgba(4,2,0,0.5)');X.fillStyle=v;X.fillRect(0,0,W(),H())
+}
+
+let lt=0;
+function rn(ts){const dt=lt?Math.min((ts-lt)/1000,.1):.016;lt=ts;up(dt);draw();requestAnimationFrame(rn)}
+genCars();spLoot();upInv();requestAnimationFrame(rn);
+</script>
+</body>
+</html>
