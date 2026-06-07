@@ -605,7 +605,7 @@ var crewCount=0; // 已接到的人数
 var level=2; // 第1关=火车收集, 第2-10关=生存
 var day=1,logPage=1;
 var daysPerLevel=5; // 每关5天
-var res={food:0,water:0,coal:0,wood:0,iron:0,meds:0};
+var res={food:0,water:0,coal:0,wood:0,iron:0,meds:0,gear:0,ammo:0};
 var exploring=false,exploreTimer=0,exploreFinds=[];
 var eventToday=null,eventResolved=false;
 var crewHealth=3;
@@ -758,6 +758,10 @@ function showLogPage(){
       html+='<div class="lb-text">🐭 仓里进老鼠了！<br/>粮食被咬坏了一些</div>';
       var loss=eventToday.loss||2;
       html+='<div class="lb-res"><span class="lb-ri low">🍞 -'+loss+'</span></div>';
+      if(res.meds>0){
+        html+='<div class="lb-text" style="color:#7d9b8b">有医药箱可以驱鼠</div>';
+        html+='<button class="lb-btn" onclick="cureMice()">用药驱鼠 💊</button>';
+      }
       html+='<button class="lb-btn" onclick="resolveEvent()">知道了…</button>';
     }else if(eventToday.type==='sick'){
       html+='<div class="lb-text">🤒 有人生病了！<br/>需要医药箱治疗</div>';
@@ -776,7 +780,11 @@ function showLogPage(){
       eventToday.stolen=stolen;
       html+='<div class="lb-text">🔫 强盗来袭！<br/>被抢走了一些物资</div>';
       html+='<div class="lb-res"><span class="lb-ri low">🍞 -'+stolen.food+'</span><span class="lb-ri low">💧 -'+stolen.water+'</span></div>';
-      html+='<button class="lb-btn" onclick="resolveEvent()">无可奈何…</button>';
+      if(res.gear>0&&res.ammo>0){
+        html+='<div class="lb-text" style="color:#7d9b8b">你有猎枪和子弹！</div>';
+        html+='<button class="lb-btn" onclick="fightBandit()">开枪反击！</button>';
+      }
+      html+='<button class="lb-btn warn" onclick="resolveEvent()">无可奈何…</button>';
     }
   }
 
@@ -895,6 +903,24 @@ function skipEvent(){
   if(eventToday&&eventToday.type==='breakdown'){/* lose a day but no other penalty */}
   eventToday=null;endDay();
 }
+function fightBandit(){
+  res.ammo--;eventToday=null;
+  if(Math.random()<0.7){
+    var loot2=[];
+    if(Math.random()<0.6){res.iron+=2;loot2.push('🪨铁片×2');}
+    if(Math.random()<0.6){res.water+=3;loot2.push('💧水×3');}
+    if(loot2.length===0){res.food+=2;loot2.push('🍞食物×2');}
+    explorerFound=loot2.map(function(s){var p=s.split('×');return {name:p[0].slice(2),icon:p[0].slice(0,2),amt:parseInt(p[1])};});
+    endDay();return;
+  }else{
+    res.food=Math.max(0,res.food-2);res.water=Math.max(0,res.water-2);
+    endDay();return;
+  }
+}
+function cureMice(){
+  res.meds--;eventToday=null; // use medkit, no food loss
+  endDay();
+}
 function resolveEvent(){
   if(eventToday&&eventToday.type==='mice'){res.food=Math.max(0,res.food-eventToday.loss);}
   if(eventToday&&eventToday.type==='luck'){res.food+=2;res.water+=1;res.coal+=1;}
@@ -917,6 +943,8 @@ function endDay(){
         var t2=types2[Math.floor(Math.random()*types2.length)];
         var amt2=1+Math.floor(Math.random()*3);
         if(!t2.k.endsWith('2')){res[t2.k]=(res[t2.k]||0)+amt2;}
+        else if(t2.k==='gear2'){res.gear=(res.gear||0)+amt2;}
+        else if(t2.k==='ammo2'){res.ammo=(res.ammo||0)+amt2;}
         explorerFound.push({name:t2.n,icon:t2.icon,amt:amt2});
       }
     }
@@ -945,7 +973,7 @@ function endGamePhase2(win,msg){
 function startPhase2(){
   phase=2;st='play';level=2;showLevelIntro=true;
   res.food=inv.food;res.water=inv.water;res.coal=inv.coal;
-  res.meds=inv.med;res.wood=0;res.iron=0;
+  res.meds=inv.med;res.wood=0;res.iron=0;res.gear=inv.gear||0;res.ammo=inv.ammo||0;
   crewHealth=crewCount;
   day=1;logPage=1;
   exploreFinds=[];eventToday=null;
