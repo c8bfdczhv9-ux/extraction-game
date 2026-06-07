@@ -652,18 +652,20 @@ function showLogPage(){
     html+='<span class="lb-ri'+(res.food<rationFood?' low':'')+'">🍞 库存 '+res.food+'</span>';
     html+='<span class="lb-ri'+(res.water<rationWater?' low':'')+'">💧 库存 '+res.water+'</span>';
     html+='</div>';
-    // Food adjuster
-    html+='<div style="display:flex;align-items:center;gap:12px;margin:8px 0">';
-    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationFood=Math.max(0,rationFood-1);showLogPage();">−</button>';
-    html+='<span style="color:#d4c0e8;font-size:18px;min-width:30px">🍞×'+rationFood+'</span>';
-    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationFood=Math.min(res.food,rationFood+1);showLogPage();">+</button>';
+    // Food adjuster — big buttons
+    html+='<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0">';
+    html+='<button class="lb-btn" style="padding:10px 20px;font-size:20px;font-weight:600;min-width:48px" onclick="rationFood=Math.max(0,rationFood-1);showLogPage();">−1</button>';
+    html+='<span style="color:#d4c0e8;font-size:22px;min-width:80px;text-align:center">🍞 ×'+rationFood+'</span>';
+    html+='<button class="lb-btn" style="padding:10px 20px;font-size:20px;font-weight:600;min-width:48px" onclick="rationFood=Math.min(res.food,rationFood+1);showLogPage();">+1</button>';
     html+='</div>';
     // Water adjuster
-    html+='<div style="display:flex;align-items:center;gap:12px;margin:8px 0">';
-    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationWater=Math.max(0,rationWater-1);showLogPage();">−</button>';
-    html+='<span style="color:#d4c0e8;font-size:18px;min-width:30px">💧×'+rationWater+'</span>';
-    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationWater=Math.min(res.water,rationWater+1);showLogPage();">+</button>';
+    html+='<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0">';
+    html+='<button class="lb-btn" style="padding:10px 20px;font-size:20px;font-weight:600;min-width:48px" onclick="rationWater=Math.max(0,rationWater-1);showLogPage();">−1</button>';
+    html+='<span style="color:#d4c0e8;font-size:22px;min-width:80px;text-align:center">💧 ×'+rationWater+'</span>';
+    html+='<button class="lb-btn" style="padding:10px 20px;font-size:20px;font-weight:600;min-width:48px" onclick="rationWater=Math.min(res.water,rationWater+1);showLogPage();">+1</button>';
     html+='</div>';
+    // Skip all button
+    html+='<button class="lb-btn warn" style="margin-top:6px" onclick="rationFood=0;rationWater=0;showLogPage();">跳过 · 不给吃喝</button>';
     if(res.food<rationFood||res.water<rationWater){
       html+='<div class="lb-text" style="color:#e898a8">库存不足！配给会扣到0</div>';
     }
