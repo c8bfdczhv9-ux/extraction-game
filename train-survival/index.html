@@ -52,8 +52,8 @@ canvas{display:block;border-radius:8px;max-width:100vw;max-height:58vh;box-shado
 
 <script>
 const C=document.getElementById('g'),X=C.getContext('2d');
-function rs(){const mw=Math.min(window.innerWidth-12,500),mh=Math.min(window.innerHeight*.55,600);C.width=mw;C.height=mh;initStars()}
-rs();window.addEventListener('resize',rs);
+function rs(){const mw=Math.min(window.innerWidth-12,500),mh=Math.min(window.innerHeight*.55,600);C.width=mw;C.height=mh;initStars();draw()}
+rs();window.addEventListener('resize',()=>{rs();draw()});
 const W=()=>C.width,H=()=>C.height;
 
 // === COLOR PALETTE ===
@@ -496,7 +496,12 @@ function draw(){
 }
 
 let lt=0;
-function rn(ts){const dt=lt?Math.min((ts-lt)/1000,.1):.016;lt=ts;up(dt);draw();requestAnimationFrame(rn)}
+function rn(ts){
+  try{
+    const dt=lt?Math.min((ts-lt)/1000,.1):.016;lt=ts;up(dt);draw();
+  }catch(e){}
+  requestAnimationFrame(rn)
+}
 genCars();spLoot();upInv();initStars();requestAnimationFrame(rn);
 </script>
 </body>
