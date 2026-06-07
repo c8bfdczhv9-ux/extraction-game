@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>撤离 · Extraction</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { 
+    width: 100%; height: 100%; 
+    background: #080810; 
+    overflow: hidden;
+    font-family: -apple-system, 'SF Pro', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    position: fixed;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw; height: 100vh;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas { 
+    display: block; 
+    background: #0d0d18;
+    border-radius: 6px;
+    max-width: 100vw;
+    max-height: 70vh;
+    box-shadow: 0 0 40px rgba(80,40,160,0.2);
+  }
+  #hud {
+    position: absolute; top: 8px; left: 12px; right: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    pointer-events: none; z-index: 10;
+  }
+  .hud-item {
+    background: rgba(10,8,20,0.85);
+    border: 1px solid rgba(120,80,200,0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+  #score-display { color: #c4a8e0; }
+  #timer-display { color: #e0a860; }
+  #status-display { 
+    color: #6b5b7a; font-size: 11px; letter-spacing: 1.5px; 
+    text-transform: uppercase; 
+  }
+  #status-display.warning { color: #e0a860; animation: pulse 0.8s infinite; }
+  #status-display.extracted { color: #5ae0a0; }
+  #status-display.dead { color: #e0556a; }
+
+  /* Touch controls */
+  #touch-controls {
+    position: absolute; bottom: 20px; left: 0; right: 0;
+    display: none; /* shown on touch devices */
+    justify-content: center; gap: 8px;
+    z-index: 10; pointer-events: none;
+  }
+  .touch-btn {
+    width: 52px; height: 52px;
+    background: rgba(25,20,40,0.7);
+    border: 1px solid rgba(100,60,160,0.4);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: rgba(180,150,220,0.7);
+    pointer-events: auto;
+  }
+  .touch-btn:active { background: rgba(80,40,140,0.5); }
+
+  /* End screen overlay */
+  #end-screen {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 20;
+    background: rgba(6,4,14,0.92);
+    border-radius: 6px;
+  }
+  #end-screen.show { display: flex; }
+  .end-grade {
+    font-size: 72px; font-weight: 900; letter-spacing: 4px;
+    margin-bottom: 4px;
+  }
+  .grade-S { color: #ffd700; text-shadow: 0 0 40px rgba(255,215,0,0.6); }
+  .grade-A { color: #5ae0a0; text-shadow: 0 0 30px rgba(90,224,160,0.5); }
+  .grade-B { color: #60a0e0; text-shadow: 0 0 30px rgba(96,160,224,0.5); }
+  .grade-C { color: #a0a0c0; }
+  .grade-D { color: #e0556a; }
+  .end-label {
+    font-size: 14px; color: #8b7ba0; letter-spacing: 3px; 
+    margin-bottom: 16px;
+  }
+  .end-stats {
+    display: flex; gap: 24px; margin-bottom: 20px;
+  }
+  .end-stat {
+    text-align: center;
+  }
+  .end-stat-val {
+    font-size: 24px; font-weight: 700; color: #c4a8e0;
+  }
+  .end-stat-label {
+    font-size: 10px; color: #6b5b7a; letter-spacing: 1px; margin-top: 2px;
+  }
+  .end-share {
+    background: rgba(120,80,200,0.25);
+    border: 1px solid rgba(140,100,220,0.5);
+    color: #c4a8e0;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 13px; letter-spacing: 1px;
+    margin-bottom: 8px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .end-share:active { background: rgba(140,100,220,0.4); }
+  .end-retry {
+    color: #6b5b7a; font-size: 12px; letter-spacing: 1px;
+    pointer-events: auto; cursor: pointer;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <span class="hud-item" id="score-display">✦ 0</span>
+    <span class="hud-item" id="timer-display">5:00</span>
+    <span id="status-display">SEARCHING 搜集中</span>
+  </div>
+  <div id="touch-controls">
+    <button class="touch-btn" data-key="w">▲</button>
+    <button class="touch-btn" data-key="a">◀</button>
+    <button class="touch-btn" data-key="s">▼</button>
+    <button class="touch-btn" data-key="d">▶</button>
+  </div>
+  <div id="end-screen">
+    <div class="end-grade" id="end-grade">S</div>
+    <div class="end-label" id="end-label">EXTRACTION COMPLETE · 撤离成功</div>
+    <div class="end-stats">
+      <div class="end-stat">
+        <div class="end-stat-val" id="end-score">0</div>
+        <div class="end-stat-label">SCORE 得分</div>
+      </div>
+      <div class="end-stat">
+        <div class="end-stat-val" id="end-items">0</div>
+        <div class="end-stat-label">LOOT 物资</div>
+      </div>
+      <div class="end-stat">
+        <div class="end-stat-val" id="end-time">0s</div>
+        <div class="end-stat-label">TIME 用时</div>
+      </div>
+    </div>
+    <button class="end-share" onclick="shareResult()">📋 COPY RESULT · 复制战绩</button>
+    <div class="end-retry" onclick="resetGame()">↻ RETRY · 再来一局</div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// Responsive canvas
+function resize() {
+  const maxW = Math.min(window.innerWidth - 16, 500);
+  const maxH = Math.min(window.innerHeight * 0.65, 700);
+  const ratio = 4/3;
+  let w, h;
+  if (maxW / maxH > ratio) { h = maxH; w = h * ratio; }
+  else { w = maxW; h = w / ratio; }
+  canvas.width = w;
+  canvas.height = h;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const W = () => canvas.width;
+const H = () => canvas.height;
+
+// Detect touch device
+const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+if (isTouch) {
+  document.getElementById('touch-controls').style.display = 'flex';
+}
+
+// Game constants
+const GAME_DURATION = 300; // 5 minutes in seconds
+const STATE = { COLLECTING: 'collecting', EXTRACTED: 'extracted', DEAD: 'dead', TIMEOUT: 'timeout' };
+
+// Rarity system
+const RARITY = {
+  common:    { label: 'COMMON 普通',   color: '#a0a0c0', points: 5,  glow: 'rgba(160,160,192,0.3)', weight: 50 },
+  uncommon:  { label: 'UNCOMMON 稀有',  color: '#5ae0a0', points: 15, glow: 'rgba(90,224,160,0.3)', weight: 28 },
+  rare:      { label: 'RARE 史诗',     color: '#6090e0', points: 30, glow: 'rgba(96,144,224,0.3)', weight: 15 },
+  legendary: { label: 'LEGENDARY 传说',  color: '#ffd700', points: 60, glow: 'rgba(255,215,0,0.4)', weight: 7  },
+};
+
+// Generate weighted rarity
+function randomRarity() {
+  const r = Math.random() * 100;
+  let cumulative = 0;
+  for (const [key, data] of Object.entries(RARITY)) {
+    cumulative += data.weight;
+    if (r <= cumulative) return key;
+  }
+  return 'common';
+}
+
+// Game state
+let gameState = STATE.COLLECTING;
+let score = 0;
+let playerX, playerY;
+const PLAYER_SPEED = 2.8;
+const PLAYER_RADIUS = 9;
+const PICKUP_RANGE = 26;
+
+let enemies = [];
+const NUM_ENEMIES = 4;
+const ENEMY_SPEED = 0.75;
+
+let loot = [];
+const NUM_LOOT = 20;
+
+let extractX, extractY;
+const EXTRACT_RADIUS = 24;
+
+let gameTime = GAME_DURATION;
+let itemsCollected = 0;
+let rarityCounts = { common: 0, uncommon: 0, rare: 0, legendary: 0 };
+let particles = [];
+let startTime;
+
+// Input
+const keys = {};
+window.addEventListener('keydown', e => { 
+  keys[e.key.toLowerCase()] = true; 
+  if ((e.key.toLowerCase() === 'r' || e.key === ' ') && gameState !== STATE.COLLECTING) resetGame();
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// Touch controls
+document.querySelectorAll('.touch-btn').forEach(btn => {
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    keys[btn.dataset.key] = true;
+  });
+  btn.addEventListener('pointerup', e => {
+    e.preventDefault();
+    keys[btn.dataset.key] = false;
+  });
+  btn.addEventListener('pointerleave', e => {
+    keys[btn.dataset.key] = false;
+  });
+});
+
+function spawnParticles(x, y, count, color, life) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.5 + Math.random() * 3;
+    particles.push({
+      x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      life: life || 30, maxLife: life || 30, color,
+      size: 1 + Math.random() * 2.5
+    });
+  }
+}
+
+function spawnLoot() {
+  loot.length = 0;
+  for (let i = 0; i < NUM_LOOT; i++) {
+    let lx, ly, tooClose;
+    let attempts = 0;
+    do {
+      tooClose = false; attempts++;
+      lx = 40 + Math.random() * (W() - 80);
+      ly = 60 + Math.random() * (H() - 100);
+      if (Math.hypot(lx - playerX, ly - playerY) < 100) tooClose = true;
+      if (Math.hypot(lx - extractX, ly - extractY) < 120) tooClose = true;
+      for (const l of loot) {
+        if (Math.hypot(lx - l.x, ly - l.y) < 30) { tooClose = true; break; }
+      }
+    } while (tooClose && attempts < 30);
+    loot.push({
+      x: lx, y: ly, collected: false,
+      rarity: randomRarity(),
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function spawnEnemies() {
+  enemies.length = 0;
+  const corners = [[W()-80,70],[70,H()-70],[W()-80,H()-70],[W()/2, H()/2+80]];
+  for (let i = 0; i < NUM_ENEMIES; i++) {
+    enemies.push({
+      x: corners[i][0], y: corners[i][1],
+      targetX: corners[i][0], targetY: corners[i][1],
+      patrolTimer: 60 + Math.random() * 200,
+      patrolX: 60 + Math.random() * (W()-120),
+      patrolY: 60 + Math.random() * (H()-120),
+      alertLevel: 0
+    });
+  }
+}
+
+function resetGame() {
+  score = 0; itemsCollected = 0;
+  rarityCounts = { common: 0, uncommon: 0, rare: 0, legendary: 0 };
+  gameState = STATE.COLLECTING;
+  gameTime = GAME_DURATION;
+  startTime = Date.now();
+  playerX = 60; playerY = H() / 2;
+  extractX = W() - 50; extractY = H() - 50;
+  enemies.length = 0; particles.length = 0;
+  spawnEnemies(); spawnLoot();
+  updateHUD();
+  document.getElementById('end-screen').classList.remove('show');
+}
+
+function updateHUD() {
+  const mins = Math.floor(gameTime / 60);
+  const secs = Math.floor(gameTime % 60);
+  document.getElementById('score-display').textContent = `✦ ${score}`;
+  document.getElementById('timer-display').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+  
+  const statusEl = document.getElementById('status-display');
+  if (gameTime < 60) {
+    statusEl.textContent = '⏰ HURRY 快撤!';
+    statusEl.className = 'warning';
+  } else if (gameState === STATE.EXTRACTED) {
+    statusEl.textContent = 'EXTRACTED 已撤离';
+    statusEl.className = 'extracted';
+  } else if (gameState === STATE.DEAD) {
+    statusEl.textContent = 'KIA 被发现了';
+    statusEl.className = 'dead';
+  } else if (gameState === STATE.TIMEOUT) {
+    statusEl.textContent = 'MIA 超时失踪';
+    statusEl.className = 'dead';
+  } else {
+    statusEl.textContent = 'SEARCHING 搜集中';
+    statusEl.className = '';
+  }
+}
+
+function getGrade() {
+  if (score >= 200) return 'S';
+  if (score >= 120) return 'A';
+  if (score >= 60) return 'B';
+  if (score >= 20) return 'C';
+  return 'D';
+}
+
+function getGradeLabel(grade) {
+  const labels = {
+    'S': 'LEGENDARY EXTRACTION · 传说撤离',
+    'A': 'CLEAN EXTRACTION · 干得漂亮',
+    'B': 'SAFE EXTRACTION · 安全撤离',
+    'C': 'BARELY MADE IT · 勉强逃出',
+    'D': 'AT LEAST YOU TRIED · 活着就好'
+  };
+  return labels[grade] || '';
+}
+
+function showEndScreen() {
+  const grade = getGrade();
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  
+  const gradeEl = document.getElementById('end-grade');
+  gradeEl.textContent = grade;
+  gradeEl.className = 'end-grade grade-' + grade;
+  
+  document.getElementById('end-label').textContent = getGradeLabel(grade);
+  document.getElementById('end-score').textContent = score;
+  document.getElementById('end-items').textContent = itemsCollected;
+  document.getElementById('end-time').textContent = elapsed + 's';
+  
+  document.getElementById('end-screen').classList.add('show');
+}
+
+function shareResult() {
+  const grade = getGrade();
+  const rareCount = rarityCounts.rare + rarityCounts.legendary;
+  const text = `🚁 撤离 · Extraction\n⭐ Grade ${grade} · ${score}pts · ${itemsCollected} loot\n💎 ${rareCount} rare · ⏱ ${Math.floor((Date.now()-startTime)/1000)}s\n\nCan you beat this? 你敢贪吗？`;
+  
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.end-share');
+      btn.textContent = '✅ COPIED! · 甩到群里吧';
+      setTimeout(() => { btn.textContent = '📋 COPY RESULT · 复制战绩'; }, 2000);
+    });
+  }
+}
+
+function die() {
+  if (gameState !== STATE.COLLECTING) return;
+  gameState = STATE.DEAD;
+  spawnParticles(playerX, playerY, 50, '#e0556a', 50);
+  score = 0;
+  updateHUD();
+  document.getElementById('end-label').textContent = 'KIA · 被发现了';
+  document.getElementById('end-grade').textContent = '✕';
+  document.getElementById('end-grade').className = 'end-grade grade-D';
+  document.getElementById('end-screen').classList.add('show');
+}
+
+function extract() {
+  if (gameState !== STATE.COLLECTING) return;
+  gameState = STATE.EXTRACTED;
+  spawnParticles(playerX, playerY, 80, '#5ae0a0', 60);
+  // Bonus for remaining time
+  const timeBonus = Math.floor(gameTime / 5);
+  score += timeBonus;
+  updateHUD();
+  showEndScreen();
+}
+
+function timeout() {
+  if (gameState !== STATE.COLLECTING) return;
+  gameState = STATE.TIMEOUT;
+  score = 0;
+  updateHUD();
+  document.getElementById('end-label').textContent = 'MIA · 超时失踪';
+  document.getElementById('end-grade').textContent = '✕';
+  document.getElementById('end-grade').className = 'end-grade grade-D';
+  document.getElementById('end-screen').classList.add('show');
+}
+
+function update(dt) {
+  if (gameState !== STATE.COLLECTING) {
+    particles = particles.filter(p => { p.x += p.vx; p.y += p.vy; p.life--; return p.life > 0; });
+    return;
+  }
+
+  // Timer
+  gameTime -= dt;
+  if (gameTime <= 0) { gameTime = 0; timeout(); return; }
+  updateHUD();
+
+  // Movement
+  let dx = 0, dy = 0;
+  if (keys['w'] || keys['arrowup']) dy -= 1;
+  if (keys['s'] || keys['arrowdown']) dy += 1;
+  if (keys['a'] || keys['arrowleft']) dx -= 1;
+  if (keys['d'] || keys['arrowright']) dx += 1;
+  
+  const speed = PLAYER_SPEED * 60 * dt;
+  if (dx !== 0 || dy !== 0) {
+    const len = Math.hypot(dx, dy);
+    playerX += (dx / len) * speed;
+    playerY += (dy / len) * speed;
+  }
+  playerX = Math.max(PLAYER_RADIUS, Math.min(W() - PLAYER_RADIUS, playerX));
+  playerY = Math.max(PLAYER_RADIUS, Math.min(H() - PLAYER_RADIUS, playerY));
+
+  // Pickup
+  for (const l of loot) {
+    if (l.collected) continue;
+    if (Math.hypot(playerX - l.x, playerY - l.y) < PICKUP_RANGE) {
+      l.collected = true;
+      const r = RARITY[l.rarity];
+      score += r.points;
+      itemsCollected++;
+      rarityCounts[l.rarity]++;
+      spawnParticles(l.x, l.y, r.points > 20 ? 15 : 6, r.color, 25);
+    }
+  }
+
+  // Extraction
+  if (Math.hypot(playerX - extractX, playerY - extractY) < EXTRACT_RADIUS) {
+    extract();
+  }
+
+  // Enemies
+  const enemyDt = 60 * dt;
+  for (const enemy of enemies) {
+    const distToPlayer = Math.hypot(enemy.x - playerX, enemy.y - playerY);
+    if (distToPlayer < 180) enemy.alertLevel = Math.min(1, enemy.alertLevel + 0.03 * 60 * dt);
+    else enemy.alertLevel = Math.max(0, enemy.alertLevel - 0.008 * 60 * dt);
+
+    if (enemy.alertLevel > 0.4) {
+      enemy.targetX += (playerX - enemy.targetX) * 0.06;
+      enemy.targetY += (playerY - enemy.targetY) * 0.06;
+      const spd = ENEMY_SPEED + enemy.alertLevel * 2.0;
+      const tdx = enemy.targetX - enemy.x, tdy = enemy.targetY - enemy.y;
+      const tdist = Math.hypot(tdx, tdy);
+      if (tdist > 1) { enemy.x += (tdx/tdist) * spd * enemyDt; enemy.y += (tdy/tdist) * spd * enemyDt; }
+    } else {
+      enemy.patrolTimer -= enemyDt;
+      if (enemy.patrolTimer <= 0) {
+        enemy.patrolX = 60 + Math.random() * (W()-120);
+        enemy.patrolY = 60 + Math.random() * (H()-120);
+        enemy.patrolTimer = 120 + Math.random() * 300;
+      }
+      const pdx = enemy.patrolX - enemy.x, pdy = enemy.patrolY - enemy.y;
+      const pdist = Math.hypot(pdx, pdy);
+      if (pdist > 1) { enemy.x += (pdx/pdist) * ENEMY_SPEED * 0.4 * enemyDt; enemy.y += (pdy/pdist) * ENEMY_SPEED * 0.4 * enemyDt; }
+    }
+    if (distToPlayer < PLAYER_RADIUS + 14) die();
+  }
+
+  // Particles
+  particles = particles.filter(p => { p.x += p.vx; p.y += p.vy; p.life--; return p.life > 0; });
+}
+
+// ---- RENDER ----
+
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(25,20,45,0.5)';
+  ctx.lineWidth = 0.5;
+  const gs = Math.floor(W() / 18);
+  for (let x = 0; x < W(); x += gs) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H()); ctx.stroke(); }
+  for (let y = 0; y < H(); y += gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W(),y); ctx.stroke(); }
+}
+
+function drawExtraction() {
+  const pulse = Math.sin(Date.now()/700)*0.3+0.7;
+  // Rings
+  for (let i = 2; i >= 0; i--) {
+    ctx.strokeStyle = `rgba(90,224,160,${pulse*0.15*(i+1)})`;
+    ctx.lineWidth = i+1;
+    ctx.beginPath();
+    ctx.arc(extractX, extractY, EXTRACT_RADIUS+8+i*6+Math.sin(Date.now()/500+i)*3, 0, Math.PI*2);
+    ctx.stroke();
+  }
+  // Glow
+  const g = ctx.createRadialGradient(extractX, extractY, 0, extractX, extractY, EXTRACT_RADIUS+12);
+  g.addColorStop(0, `rgba(90,224,160,${pulse*0.2})`);
+  g.addColorStop(1, 'rgba(90,224,160,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(extractX, extractY, EXTRACT_RADIUS+12, 0, Math.PI*2); ctx.fill();
+  // Label
+  ctx.fillStyle = `rgba(90,224,160,${pulse*0.9})`;
+  ctx.font = `${Math.floor(W()/35)}px monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('▣', extractX, extractY);
+  ctx.fillStyle = `rgba(130,200,170,${pulse*0.7})`;
+  ctx.font = `${Math.floor(W()/55)}px -apple-system, sans-serif`;
+  ctx.fillText('EXTRACT 撤离', extractX, extractY-EXTRACT_RADIUS-12);
+}
+
+function drawLootItems() {
+  for (const l of loot) {
+    if (l.collected) continue;
+    l.pulse += 0.03;
+    const glow = Math.sin(l.pulse)*0.3+0.7;
+    const r = RARITY[l.rarity];
+    const size = l.rarity === 'legendary' ? 8 : l.rarity === 'rare' ? 7 : 5;
+    
+    const g = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, size+8);
+    g.addColorStop(0, r.glow.replace('0.3', String(glow*0.35)));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(l.x, l.y, size+8, 0, Math.PI*2); ctx.fill();
+    
+    ctx.fillStyle = r.color.replace(')', `,${glow*0.9})`).replace('rgb', 'rgba');
+    if (r.color.startsWith('#')) {
+      // hex to rgba
+      const hex = r.color;
+      const rr = parseInt(hex.slice(1,3),16), gg = parseInt(hex.slice(3,5),16), bb = parseInt(hex.slice(5,7),16);
+      ctx.fillStyle = `rgba(${rr},${gg},${bb},${glow*0.9})`;
+    }
+    ctx.beginPath(); ctx.arc(l.x, l.y, size, 0, Math.PI*2); ctx.fill();
+    
+    // Inner sparkle
+    ctx.fillStyle = `rgba(255,255,255,${glow*0.6})`;
+    ctx.beginPath(); ctx.arc(l.x-1, l.y-1, size-3, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+function drawEnemy(enemy) {
+  const a = 0.4 + enemy.alertLevel*0.6;
+  const rr = 180+enemy.alertLevel*75;
+  const gg = 40-enemy.alertLevel*30;
+  const bb = 50-enemy.alertLevel*40;
+  const r = 13;
+  
+  const g = ctx.createRadialGradient(enemy.x, enemy.y, 0, enemy.x, enemy.y, r+8);
+  g.addColorStop(0, `rgba(${rr},${gg},${bb},${a*0.3})`);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(enemy.x, enemy.y, r+8, 0, Math.PI*2); ctx.fill();
+  
+  ctx.fillStyle = `rgba(${rr},${gg},${bb},${a})`;
+  ctx.beginPath(); ctx.arc(enemy.x, enemy.y, r, 0, Math.PI*2); ctx.fill();
+  
+  ctx.fillStyle = `rgba(${rr+30},${gg+10},${bb+10},${a*0.5})`;
+  ctx.beginPath(); ctx.arc(enemy.x, enemy.y, r-4, 0, Math.PI*2); ctx.fill();
+  
+  if (enemy.alertLevel > 0.3) {
+    ctx.fillStyle = `rgba(255,50,50,${(enemy.alertLevel-0.3)*0.9})`;
+    ctx.font = `${Math.floor(W()/55)}px monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('!', enemy.x, enemy.y);
+  }
+}
+
+function drawPlayer() {
+  // Trail
+  const t = ctx.createRadialGradient(playerX, playerY, 0, playerX, playerY, PLAYER_RADIUS+10);
+  t.addColorStop(0, 'rgba(180,140,220,0.2)');
+  t.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = t;
+  ctx.beginPath(); ctx.arc(playerX, playerY, PLAYER_RADIUS+10, 0, Math.PI*2); ctx.fill();
+  
+  ctx.fillStyle = '#c4a8e0';
+  ctx.beginPath(); ctx.arc(playerX, playerY, PLAYER_RADIUS, 0, Math.PI*2); ctx.fill();
+  
+  ctx.fillStyle = 'rgba(230,210,255,0.6)';
+  ctx.beginPath(); ctx.arc(playerX-2, playerY-2, PLAYER_RADIUS-4, 0, Math.PI*2); ctx.fill();
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    const alpha = p.life/p.maxLife;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size*alpha, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawVignette() {
+  const v = ctx.createRadialGradient(W()/2, H()/2, W()*0.3, W()/2, H()/2, W()*0.75);
+  v.addColorStop(0, 'transparent');
+  v.addColorStop(1, 'rgba(4,2,10,0.5)');
+  ctx.fillStyle = v;
+  ctx.fillRect(0, 0, W(), H());
+}
+
+let lastTime = 0;
+function render(timestamp) {
+  const dt = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.1) : 0.016;
+  lastTime = timestamp;
+  
+  update(dt);
+  
+  ctx.clearRect(0, 0, W(), H());
+  ctx.fillStyle = '#0d0d18';
+  ctx.fillRect(0, 0, W(), H());
+  drawGrid();
+  drawExtraction();
+  drawLootItems();
+  for (const e of enemies) drawEnemy(e);
+  if (gameState !== STATE.DEAD) drawPlayer();
+  drawParticles();
+  drawVignette();
+  
+  ctx.strokeStyle = 'rgba(40,30,60,0.4)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0.5, 0.5, W()-1, H()-1);
+  
+  requestAnimationFrame(render);
+}
+
+resetGame();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
