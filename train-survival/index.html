@@ -771,6 +771,12 @@ function showLogPage(){
       html+='<div class="lb-text">🍀 好运降临！<br/>在轨道边发现了补给</div>';
       html+='<div class="lb-res"><span class="lb-ri">🍞 +2</span><span class="lb-ri">💧 +1</span><span class="lb-ri">🔥 +1</span></div>';
       html+='<button class="lb-btn" onclick="resolveEvent()">收下</button>';
+    }else if(eventToday.type==='bandit'){
+      var stolen=eventToday.stolen||{food:Math.min(res.food,1+Math.floor(Math.random()*2)),water:Math.min(res.water,1+Math.floor(Math.random()*2))};
+      eventToday.stolen=stolen;
+      html+='<div class="lb-text">🔫 强盗来袭！<br/>被抢走了一些物资</div>';
+      html+='<div class="lb-res"><span class="lb-ri low">🍞 -'+stolen.food+'</span><span class="lb-ri low">💧 -'+stolen.water+'</span></div>';
+      html+='<button class="lb-btn" onclick="resolveEvent()">无可奈何…</button>';
     }
   }
 
@@ -781,7 +787,15 @@ function showLogPage(){
 // PHASE 2: ACTIONS
 // ===================================================================
 function skipRation(){
-  rationFood=0;rationWater=0;logPage=2;showLogPage();
+  rationFood=0;rationWater=0;
+  // Consume nothing — skip to next page immediately
+  var ate=0,drank=0;
+  // Starvation risk from skipping all
+  var availCrew4=crewHealth-(explorerAway?1:0);
+  if(availCrew4>0&&Math.random()<0.3){crewHealth--;}
+  if(crewHealth<=0){endGamePhase2(false,'全员饥渴而亡');return;}
+  rationFood=0;rationWater=0;
+  logPage=2;showLogPage();
 }
 function doConsume(){
   var availCrew=crewHealth-(explorerAway?1:0);
@@ -823,38 +837,48 @@ function rollEvent(){
   var r=Math.random();
   var lv=level;
   // Level-dependent event probabilities
-  if(lv<=2){eventToday=null;return;}           // Level 2: no bad events
-  if(lv===3){                                   // Level 3: light events
+  if(lv===2){                                    // Level 2: easy intro
+    if(r<0.15)eventToday={type:'luck'};
+    else if(r<0.22)eventToday={type:'mice',loss:1};
+    else eventToday=null;return;
+  }
+  if(lv===3){                                    // Level 3: light
     if(r<0.1)eventToday={type:'luck'};
+    else if(r<0.18)eventToday={type:'mice',loss:1+Math.floor(Math.random()*2)};
+    else if(r<0.22)eventToday={type:'sick'};
     else eventToday=null;return;
   }
-  if(lv===8){                                   // Level 8: rain season
-    if(r<0.5)eventToday={type:'rain'};
-    else if(r<0.65)eventToday={type:'breakdown'};
-    else if(r<0.75)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
-    else if(r<0.8)eventToday={type:'sick'};
+  if(lv===8){                                    // Level 8: rain season
+    if(r<0.45)eventToday={type:'rain'};
+    else if(r<0.6)eventToday={type:'breakdown'};
+    else if(r<0.72)eventToday={type:'bandit'};
+    else if(r<0.82)eventToday={type:'mice',loss:2+Math.floor(Math.random()*2)};
+    else if(r<0.9)eventToday={type:'sick'};
     else eventToday=null;return;
   }
-  if(lv===9){                                   // Level 9: no luck, hard
+  if(lv===9){                                    // Level 9: hard
+    if(r<0.2)eventToday={type:'breakdown'};
+    else if(r<0.35)eventToday={type:'bandit'};
+    else if(r<0.5)eventToday={type:'mice',loss:2+Math.floor(Math.random()*3)};
+    else if(r<0.65)eventToday={type:'sick'};
+    else if(r<0.72)eventToday={type:'rain'};
+    else eventToday=null;return;
+  }
+  if(lv===10){                                   // Level 10: chaos
     if(r<0.25)eventToday={type:'breakdown'};
-    else if(r<0.45)eventToday={type:'mice',loss:2+Math.floor(Math.random()*3)};
+    else if(r<0.45)eventToday={type:'bandit'};
     else if(r<0.6)eventToday={type:'sick'};
-    else if(r<0.7)eventToday={type:'rain'};
-    else eventToday=null;return;
-  }
-  if(lv===10){                                  // Level 10: chaos
-    if(r<0.3)eventToday={type:'breakdown'};
-    else if(r<0.55)eventToday={type:'sick'};
-    else if(r<0.7)eventToday={type:'mice',loss:3+Math.floor(Math.random()*3)};
-    else if(r<0.78)eventToday={type:'rain'};
+    else if(r<0.72)eventToday={type:'mice',loss:3+Math.floor(Math.random()*3)};
+    else if(r<0.8)eventToday={type:'rain'};
     else eventToday={type:'luck'};return;
   }
-  // Levels 4-7: normal distribution
-  if(r<0.2)eventToday={type:'breakdown'};
-  else if(r<0.35)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
-  else if(r<0.45)eventToday={type:'sick'};
-  else if(r<0.55)eventToday={type:'rain'};
-  else if(r<0.65)eventToday={type:'luck'};
+  // Levels 4-7: normal
+  if(r<0.15)eventToday={type:'breakdown'};
+  else if(r<0.28)eventToday={type:'bandit'};
+  else if(r<0.4)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
+  else if(r<0.5)eventToday={type:'sick'};
+  else if(r<0.58)eventToday={type:'rain'};
+  else if(r<0.68)eventToday={type:'luck'};
   else eventToday=null;
 }
 
@@ -874,6 +898,7 @@ function skipEvent(){
 function resolveEvent(){
   if(eventToday&&eventToday.type==='mice'){res.food=Math.max(0,res.food-eventToday.loss);}
   if(eventToday&&eventToday.type==='luck'){res.food+=2;res.water+=1;res.coal+=1;}
+  if(eventToday&&eventToday.type==='bandit'&&eventToday.stolen){res.food=Math.max(0,res.food-eventToday.stolen.food);res.water=Math.max(0,res.water-eventToday.stolen.water);}
   eventToday=null;endDay();
 }
 
