@@ -53,7 +53,7 @@ canvas{display:block;background:#2a1040;border-radius:8px;max-width:100vw;max-he
 <body>
 <div id="wrap">
 <canvas id="g"></canvas>
-<div id="hud"><span class="hb" id="tm">60s</span><span class="hb">NIGHT TRAIN</span></div>
+<div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关 · 收集</span></div>
 <div id="inv"></div>
 <div id="hint">拖动摇杆 · 点击拾取</div>
 <div id="warn"></div>
@@ -70,7 +70,7 @@ canvas{display:block;background:#2a1040;border-radius:8px;max-width:100vw;max-he
   </div>
   <div class="lb-content" id="lb-content"></div>
   <div class="lb-nav" id="lb-nav"></div>
-  <div class="lb-small">50天抵达终点即为胜利</div>
+  <div class="lb-small">10关·50天·抵达远方</div>
 </div>
 <div id="over"><div class="ot" id="ot"></div><div class="os" id="os"></div><button class="btn" onclick="rst()">RETRY</button></div>
 </div>
@@ -524,11 +524,27 @@ var loot=[],pts=[],stars=[],inLast=false,dc=0;
 var NC=6;
 
 // Phase 2 state
+var level=2; // 第1关=火车收集, 第2-10关=生存
 var day=1,logPage=1;
+var daysPerLevel=5; // 每关5天
 var res={food:0,water:0,coal:0,wood:0,iron:0,meds:0};
 var exploring=false,exploreTimer=0,exploreFinds=[];
 var eventToday=null,eventResolved=false;
-var crewHealth=3; // 3 crew members
+var crewHealth=3;
+var showLevelIntro=true; // 关卡开场提示
+
+var LEVELS=[
+  {n:1, name:'收集', desc:'在火车上奔跑收集物资'},
+  {n:2, name:'扎营', desc:'熟悉营地生活·轻松开局'},
+  {n:3, name:'探索', desc:'外出搜索资源'},
+  {n:4, name:'采集', desc:'储备食物和水'},
+  {n:5, name:'维护', desc:'火车头需要更多照料'},
+  {n:6, name:'危机', desc:'危险事件增加'},
+  {n:7, name:'坚守', desc:'资源紧缺·坚持住'},
+  {n:8, name:'暴雨', desc:'雨季来临·难以外出'},
+  {n:9, name:'冲刺', desc:'最后冲刺·放手一搏'},
+  {n:10,name:'终点', desc:'最后的5天·抵达远方'}
+];
 
 function carW(){return W/3.5}
 function carH(){return H*0.65}
@@ -555,11 +571,25 @@ function showLogbook(){
 function hideLogbook(){lb.classList.remove('show');}
 
 function showLogPage(){
-  lbDay.textContent='DAY '+day;
+  var lv=LEVELS[level-1];
+  lbDay.textContent='第'+lv.n+'关 · '+lv.name+' · DAY '+(day-(level-2)*daysPerLevel);
   // Dots
   var dots='';
   for(var i=1;i<=4;i++)dots+='<div class="lb-dot'+(i===logPage?' active':'')+'"></div>';
   lbDots.innerHTML=dots;
+
+  // Level intro screen
+  if(showLevelIntro){
+    var html='<div class="lb-title">第'+lv.n+'关</div>';
+    html+='<div class="lb-text" style="font-size:14px;color:#d4c0e8;letter-spacing:4px">'+lv.name+'</div>';
+    html+='<div class="lb-text">'+lv.desc+'</div>';
+    html+='<div class="lb-res">';
+    html+='<span class="lb-ri">🍞 '+res.food+'</span><span class="lb-ri">💧 '+res.water+'</span><span class="lb-ri">🔥 '+res.coal+'</span>';
+    html+='<span class="lb-ri">🪨 '+res.iron+'</span><span class="lb-ri">🪵 '+res.wood+'</span><span class="lb-ri">💊 '+res.meds+'</span>';
+    html+='</div>';
+    html+='<button class="lb-btn" onclick="showLevelIntro=false;showLogPage();">开始</button>';
+    lbContent.innerHTML=html;return;
+  }
 
   var pages=['CONSUMPTION','EXPLORE','ENGINE','EVENT'];
   var title=pages[logPage-1];
@@ -669,6 +699,35 @@ function tendEngine(n){
 
 function rollEvent(){
   var r=Math.random();
+  var lv=level;
+  // Level-dependent event probabilities
+  if(lv<=2){eventToday=null;return;}           // Level 2: no bad events
+  if(lv===3){                                   // Level 3: light events
+    if(r<0.1)eventToday={type:'luck'};
+    else eventToday=null;return;
+  }
+  if(lv===8){                                   // Level 8: rain season
+    if(r<0.5)eventToday={type:'rain'};
+    else if(r<0.65)eventToday={type:'breakdown'};
+    else if(r<0.75)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
+    else if(r<0.8)eventToday={type:'sick'};
+    else eventToday=null;return;
+  }
+  if(lv===9){                                   // Level 9: no luck, hard
+    if(r<0.25)eventToday={type:'breakdown'};
+    else if(r<0.45)eventToday={type:'mice',loss:2+Math.floor(Math.random()*3)};
+    else if(r<0.6)eventToday={type:'sick'};
+    else if(r<0.7)eventToday={type:'rain'};
+    else eventToday=null;return;
+  }
+  if(lv===10){                                  // Level 10: chaos
+    if(r<0.3)eventToday={type:'breakdown'};
+    else if(r<0.55)eventToday={type:'sick'};
+    else if(r<0.7)eventToday={type:'mice',loss:3+Math.floor(Math.random()*3)};
+    else if(r<0.78)eventToday={type:'rain'};
+    else eventToday={type:'luck'};return;
+  }
+  // Levels 4-7: normal distribution
   if(r<0.2)eventToday={type:'breakdown'};
   else if(r<0.35)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
   else if(r<0.45)eventToday={type:'sick'};
@@ -698,7 +757,12 @@ function resolveEvent(){
 
 function endDay(){
   day++;
-  if(day>50){endGamePhase2(true,'抵达终点！');return;}
+  // Check level completion (every 5 days in survival levels)
+  if(level>=2 && (day-(level-2)*daysPerLevel)>daysPerLevel){
+    level++;
+    if(level>10){endGamePhase2(true,'抵达远方！50天旅程结束');return;}
+    showLevelIntro=true; // Show intro for new level
+  }
   logPage=1;eventToday=null;exploreFinds=[];
   showLogPage();
 }
@@ -706,15 +770,15 @@ function endDay(){
 function endGamePhase2(win,msg){
   phase=3;hideLogbook();
   document.getElementById('over').classList.add('show');
-  document.getElementById('ot').textContent=win?'✦ SURVIVED':'✧ LOST';
-  document.getElementById('os').textContent=msg+' (Day '+day+')';
+  document.getElementById('ot').textContent=win?'✦ 旅程完成':'✧ 旅程中断';
+  document.getElementById('os').textContent=msg+' (第'+(level>10?10:level)+'关 · Day '+day+')';
 }
 
 // ===================================================================
 // PHASE 1 → PHASE 2 TRANSITION
 // ===================================================================
 function startPhase2(){
-  phase=2;st='play';
+  phase=2;st='play';level=2;showLevelIntro=true;
   // Transfer collected items
   res.food=inv.food;res.water=inv.water;res.coal=inv.coal;
   res.meds=inv.med;res.wood=0;res.iron=0;
@@ -730,7 +794,8 @@ function startPhase2(){
 function updInv(){var h='';for(var i=0;i<ITEMS.length;i++)h+='<span class=iv>'+inv[ITEMS[i].k]+' '+ITEMS[i].n+'</span>';document.getElementById('inv').innerHTML=h;}
 
 function rst(){
-  phase=1;time=60;st='play';
+  phase=1;level=1;showLevelIntro=false;time=60;st='play';
+  document.getElementById('lv').textContent='第1关 · 收集';
   inv={food:0,coal:0,water:0,gear:0,comm:0,med:0};
   inLast=false;dc=0;pts=[];loot=[];
   makeCars();spawnLoot();makeStars();
@@ -748,8 +813,8 @@ function rst(){
 function gameOverP1(win){st='end';document.getElementById('over').classList.add('show');
   if(win){startPhase2();return;}
   var total=0;for(var k in inv)total+=inv[k];
-  document.getElementById('ot').textContent='✧ END';
-  document.getElementById('os').textContent='Did not reach last car';
+  document.getElementById('ot').textContent='第1关 失败';
+  document.getElementById('os').textContent='未抵达最后一节车厢';
   ctrlsDiv.style.display='none';
 }
 
@@ -793,7 +858,7 @@ function up(dt){
   cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));
   var inL=ci===NC-1;
   if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1';}
-  if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='LAST CAR<br>'+Math.ceil(3-dc)+'s';if(dc>=3)gameOverP1(true);}
+  if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true);}
   if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0';}
   pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});
 }
