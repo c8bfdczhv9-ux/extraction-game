@@ -52,10 +52,11 @@ canvas{display:block;border-radius:8px;max-width:100vw;max-height:58vh;box-shado
 
 <script>
 const C=document.getElementById('g'),X=C.getContext('2d');
-genCars();spLoot();
-function rs(){const mw=Math.min(window.innerWidth-12,500),mh=Math.min(window.innerHeight*.55,600);C.width=mw;C.height=mh;initStars();draw()}
-rs();window.addEventListener('resize',()=>{rs();draw()});
+function rs(){const mw=Math.min(window.innerWidth-12,500),mh=Math.min(window.innerHeight*.55,600);C.width=mw;C.height=mh}
+rs();window.addEventListener('resize',()=>{rs();initStars();draw()});
 const W=()=>C.width,H=()=>C.height;
+
+genCars();spLoot();initStars();
 
 // === COLOR PALETTE ===
 const CLR={
