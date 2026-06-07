@@ -578,7 +578,8 @@ var crewHealth=3;
 var showLevelIntro=true;
 var explorerAway=false;      // 是否有人外出探索
 var explorerReturnDay=0;     // 归队日期
-var explorerFound=[];        // 探索带回的物品 // 关卡开场提示
+var explorerFound=[];        // 探索带回的物品
+var rationFood=0,rationWater=0; // 可调配给量
 
 var LEVELS=[
   {n:1, name:'收集', desc:'在火车上奔跑收集物资'},
@@ -643,17 +644,30 @@ function showLogPage(){
   var html='<div class="lb-title">'+title+'</div>';
 
   if(logPage===1){
-    // Page 1: Consumption
-    var neededFood=crewHealth,neededWater=crewHealth;
-    html+='<div class="lb-text">今日消耗<br/>🍞 食物 ×'+neededFood+'&nbsp;&nbsp;💧 水 ×'+neededWater+'</div>';
+    // Page 1: Rationing with adjustable amounts
+    var availCrew3=crewHealth-(explorerAway?1:0);
+    if(rationFood===0&&rationWater===0){rationFood=availCrew3;rationWater=availCrew3;}
+    html+='<div class="lb-text">调配今日配给（'+availCrew3+'人）</div>';
     html+='<div class="lb-res">';
-    html+='<span class="lb-ri'+(res.food<neededFood?' low':'')+'">🍞 '+res.food+'</span>';
-    html+='<span class="lb-ri'+(res.water<neededWater?' low':'')+'">💧 '+res.water+'</span>';
+    html+='<span class="lb-ri'+(res.food<rationFood?' low':'')+'">🍞 库存 '+res.food+'</span>';
+    html+='<span class="lb-ri'+(res.water<rationWater?' low':'')+'">💧 库存 '+res.water+'</span>';
     html+='</div>';
-    if(res.food<neededFood||res.water<neededWater){
-      html+='<div class="lb-text" style="color:#e898a8">资源不足！有人会撑不下去…</div>';
+    // Food adjuster
+    html+='<div style="display:flex;align-items:center;gap:12px;margin:8px 0">';
+    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationFood=Math.max(0,rationFood-1);showLogPage();">−</button>';
+    html+='<span style="color:#d4c0e8;font-size:18px;min-width:30px">🍞×'+rationFood+'</span>';
+    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationFood=Math.min(res.food,rationFood+1);showLogPage();">+</button>';
+    html+='</div>';
+    // Water adjuster
+    html+='<div style="display:flex;align-items:center;gap:12px;margin:8px 0">';
+    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationWater=Math.max(0,rationWater-1);showLogPage();">−</button>';
+    html+='<span style="color:#d4c0e8;font-size:18px;min-width:30px">💧×'+rationWater+'</span>';
+    html+='<button class="lb-btn" style="padding:6px 14px;font-size:14px" onclick="rationWater=Math.min(res.water,rationWater+1);showLogPage();">+</button>';
+    html+='</div>';
+    if(res.food<rationFood||res.water<rationWater){
+      html+='<div class="lb-text" style="color:#e898a8">库存不足！配给会扣到0</div>';
     }
-    html+='<button class="lb-btn" onclick="doConsume()">确认消耗</button>';
+    html+='<button class="lb-btn" onclick="doConsume()">确认配给</button>';
   }else if(logPage===2){
     // Page 2: Exploration
     if(explorerAway){
@@ -724,17 +738,17 @@ function showLogPage(){
 // ===================================================================
 function doConsume(){
   var availCrew=crewHealth-(explorerAway?1:0);
-  var needF=availCrew,needW=availCrew;
-  if(res.food>=needF&&res.water>=needW){
-    res.food-=needF;res.water-=needW;
-    logPage=2;showLogPage();
-  }else{
-    // Starvation
-    crewHealth--;
-    res.food=Math.max(0,res.food-needF);res.water=Math.max(0,res.water-needW);
-    if(crewHealth<=0){endGamePhase2(false,'全员饥饿而亡');return;}
-    logPage=2;showLogPage();
+  var needF=rationFood||availCrew,needW=rationWater||availCrew;
+  // Consume what was set
+  var ate=Math.min(res.food,needF),drank=Math.min(res.water,needW);
+  res.food-=ate;res.water-=drank;
+  // Shortfall may cause starvation
+  if(ate<availCrew||drank<availCrew){
+    if(Math.random()<0.3){crewHealth--;}
   }
+  if(crewHealth<=0){endGamePhase2(false,'配给不足，全员饥饿而亡');return;}
+  rationFood=0;rationWater=0; // reset for next day
+  logPage=2;showLogPage();
 }
 
 function startExplore(){
