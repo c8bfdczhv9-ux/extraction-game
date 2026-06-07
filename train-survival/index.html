@@ -292,9 +292,14 @@ function drawCar(ca,c,t){
   ss('#D4B830',0.7);cx.globalAlpha=0.45;
   cx.beginPath();cx.moveTo(cx2+6,cy+ch-14);cx.lineTo(cx2+cw-6,cy+ch-14);cx.stroke();
   cx.globalAlpha=1;
-  // Crystal Over top highlight
+  // Crystal Over reflective top edge — corpus technique: translucent shimmer
   var hl=cx.createLinearGradient(cx2,cy,cx2,cy+12);
-  hl.addColorStop(0,'rgba(155,184,168,0.22)');hl.addColorStop(1,'transparent');fs(hl);fr(cx2,cy,cw,12);
+  hl.addColorStop(0,'rgba(200,220,210,0.18)');hl.addColorStop(0.5,'rgba(180,200,190,0.08)');hl.addColorStop(1,'transparent');
+  fs(hl);fr(cx2,cy,cw,12);
+  // Crystal Over body veil — subtle sheen across entire upper body
+  var cov=cx.createLinearGradient(cx2,cy,cx2,cy+uh*0.6);
+  cov.addColorStop(0,'rgba(220,240,230,0.03)');cov.addColorStop(1,'transparent');
+  fs(cov);fr(cx2,cy,cw,uh*0.6);
 
   // === CREW MEMBER in this car (cars 1, 3, 5) ===
   var crewCars=[0,2,4]; // cars with people
@@ -384,12 +389,16 @@ function drawCar(ca,c,t){
     cx.lineTo(bx3+15,by4+1);cx.stroke();
     for(var wi2=0;wi2<2;wi2++){
       var wx4=bx3-5+wi2*14,wy4=by4+9;
-      fs('#1A0A30');cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.fill();
-      ss(C.fg,2.2);cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.stroke();
-      ss('rgba(155,139,176,0.3)',0.8);cx.beginPath();cx.arc(wx4,wy4,7,0,6.28);cx.stroke();
-      fs(C.fg2);cx.beginPath();cx.arc(wx4,wy4,3,0,6.28);cx.fill();
-      ss(C.fg,1);cx.beginPath();cx.arc(wx4,wy4,3,0,6.28);cx.stroke();
-      fs(C.go);cx.beginPath();cx.arc(wx4,wy4,1.2,0,6.28);cx.fill();
+      // Wheel — Black PVD dark metallic corpus aesthetic
+      fs('#1A1622');cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.fill();
+      var pvd=cx.createRadialGradient(wx4-1,wy4-1,7,wx4,wy4,9);
+      pvd.addColorStop(0,'#2A2535');pvd.addColorStop(0.85,'#1A1622');pvd.addColorStop(1,'#3A3040');
+      fs(pvd);cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.fill();
+      ss(C.fg,1.2);cx.globalAlpha=0.35;cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.stroke();cx.globalAlpha=1;
+      ss('rgba(60,50,70,0.5)',0.6);cx.beginPath();cx.arc(wx4,wy4,7,0,6.28);cx.stroke();
+      fs('#2A2535');cx.beginPath();cx.arc(wx4,wy4,2.5,0,6.28);cx.fill();
+      ss('#3A3040',0.8);cx.beginPath();cx.arc(wx4,wy4,2.5,0,6.28);cx.stroke();
+      fs(C.go);cx.globalAlpha=0.35;cx.beginPath();cx.arc(wx4,wy4,1,0,6.28);cx.fill();cx.globalAlpha=1;
       ss('rgba(125,155,139,0.35)',1);
       for(var sp=0;sp<6;sp++){
         var ang=sp*Math.PI/3+t*3;
@@ -423,15 +432,15 @@ function drawCar(ca,c,t){
 // PHASE 2: SMALL LOCO + SURVIVAL CAR
 // ===================================================================
 function drawCamp(t){
-  // Sky — changes with events
-  var moodColor=C.tp3;
-  var moodAlpha=1;
-  if(eventToday&&eventToday.type==='rain'){moodColor='#1A2030';moodAlpha=0.7;}
-  else if(eventToday&&eventToday.type==='bandit'){moodColor='#3A1020';moodAlpha=0.8;}
-  var sky3=cx.createLinearGradient(0,0,0,H);
-  sky3.addColorStop(0,moodColor);sky3.addColorStop(0.4,C.tp2);sky3.addColorStop(0.7,C.tp);sky3.addColorStop(1,'#2A1030');
-  fs(sky3);fr(0,0,W,H);
-  cx.globalAlpha=moodAlpha;
+  // 凝夜紫 Crystal Over sky (same as Phase 1)
+  var sky4=cx.createLinearGradient(0,0,0,H);
+  sky4.addColorStop(0,'#12061E');sky4.addColorStop(0.15,'#1E0C32');
+  sky4.addColorStop(0.35,'#2A1048');sky4.addColorStop(0.55,'#4E1D73');
+  sky4.addColorStop(0.72,'#6B30A0');sky4.addColorStop(0.85,'#3A2050');
+  sky4.addColorStop(1,'#1A0C28');fs(sky4);fr(0,0,W,H);
+  var co2=cx.createLinearGradient(0,0,W*0.3,H*0.4);
+  co2.addColorStop(0,'rgba(180,140,220,0.04)');co2.addColorStop(0.5,'rgba(200,160,230,0.02)');
+  co2.addColorStop(1,'transparent');fs(co2);fr(0,0,W,H);
   // Stars
   for(var i=0;i<stars.length;i++){
     var s=stars[i];fs(C.bw);cx.globalAlpha=s.a*(0.5+0.5*Math.sin(t*s.ts+s.tw));
@@ -580,17 +589,48 @@ function drawCamp(t){
 
 // ===================================================================
 // ENVIRONMENT (Phase 1)
-// ===================================================================
 function drawSky(){
+  // 凝夜紫 — Crystal Over depth gradient (4-layer translucent)
   var sky=cx.createLinearGradient(0,0,0,H);
-  sky.addColorStop(0,C.tp3);sky.addColorStop(0.2,C.tp2);sky.addColorStop(0.4,C.tp);
-  sky.addColorStop(0.6,C.tp4);sky.addColorStop(0.8,'#4A2050');sky.addColorStop(1,'#2A1030');
+  sky.addColorStop(0,'#12061E');      // 凝夜紫 deepest — coagulated night
+  sky.addColorStop(0.15,'#1E0C32');   // deep aubergine
+  sky.addColorStop(0.35,'#2A1048');   // Tucana Purple base
+  sky.addColorStop(0.55,'#4E1D73');   // Tucana Purple
+  sky.addColorStop(0.72,'#6B30A0');   // lighter Tucana
+  sky.addColorStop(0.85,'#3A2050');   // twilight transition
+  sky.addColorStop(1,'#1A0C28');      // horizon depth
   fs(sky);fr(0,0,W,H);
+  // Crystal Over — translucent shimmer veil
+  var co=cx.createLinearGradient(0,0,W*0.3,H*0.4);
+  co.addColorStop(0,'rgba(180,140,220,0.04)');
+  co.addColorStop(0.5,'rgba(200,160,230,0.02)');
+  co.addColorStop(1,'transparent');
+  fs(co);fr(0,0,W,H);
+
   var t=Date.now()/1000;
+  // Static stars
   for(var i=0;i<stars.length;i++){
-    var s=stars[i];fs(C.bw);cx.globalAlpha=s.a*(0.5+0.5*Math.sin(t*s.ts+s.tw));
+    var s=stars[i];
+    // Colored stars — corpus palette (white, pale purple, pale gold)
+    var sc=s.c||C.bw;
+    fs(sc);cx.globalAlpha=s.a*(0.4+0.6*Math.sin(t*s.ts+s.tw));
     cx.beginPath();cx.arc(s.x-cam*0.02,s.y,s.r,0,6.28);cx.fill();
-  }cx.globalAlpha=1;
+  }
+  // Shooting stars — Shooting Starlight (occasional, dynamic)
+  if(!shootingStar){makeShootingStar();}
+  if(shootingStar){
+    var ss2=shootingStar;
+    ss2.x-=ss2.vx;ss2.y+=ss2.vy;ss2.life--;
+    fs(C.bw);cx.globalAlpha=ss2.life/ss2.maxLife;
+    cx.beginPath();cx.moveTo(ss2.x,ss2.y);
+    cx.lineTo(ss2.x+ss2.vx*8,ss2.y-ss2.vy*8);cx.stroke();
+    // Trail
+    var trail=cx.createLinearGradient(ss2.x,ss2.y,ss2.x-ss2.vx*12,ss2.y+ss2.vy*12);
+    trail.addColorStop(0,'rgba(200,180,240,0.6)');trail.addColorStop(1,'transparent');
+    ss(trail,1.5);cx.stroke();
+    if(ss2.life<=0)shootingStar=null;
+  }
+  cx.globalAlpha=1;
 }
 function drawGround(){
   fs('#180828');fr(0,H*0.78,W,H*0.22);
@@ -651,6 +691,7 @@ var cars=[],player={x:0,y:0},cam=0,time=60,st='play';
 var inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};
 var loot=[],pts=[],stars=[],inLast=false,dc=0;
 var NC=6;
+var shootingStar=null; // Shooting Starlight 流星
 var crewFound=[false,false,false,false,false,false]; // 哪些车厢的小人已接
 var crewCount=0; // 已接到的人数
 
@@ -695,7 +736,17 @@ function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];
     loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h-38-Math.random()*20,ci:i,d:d,got:false});
   }
 }}
-function makeStars(){stars=[];for(var i=0;i<200;i++)stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3});}
+function makeStars(){stars=[];for(var i=0;i<200;i++){
+  var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,'#c4a0e0','#d4c0a0','#a0c0d4'];
+  stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,
+    a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,
+    c:cols[Math.floor(Math.random()*cols.length)]});
+}}
+function makeShootingStar(){
+  if(Math.random()<0.003){ // rare, occasional
+    shootingStar={x:W+20,y:Math.random()*H*0.4,vx:3+Math.random()*4,vy:1+Math.random()*2,life:40+Math.random()*30,maxLife:70};
+  }else{shootingStar={empty:true,life:-1,maxLife:1};}
+}
 
 // ===================================================================
 // PHASE 2: LOGBOOK UI
