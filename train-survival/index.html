@@ -262,29 +262,25 @@ function drawCar(ca,c,t){
   var hl=cx.createLinearGradient(cx2,cy,cx2,cy+12);
   hl.addColorStop(0,'rgba(155,184,168,0.22)');hl.addColorStop(1,'transparent');fs(hl);fr(cx2,cy,cw,12);
 
-  // === CAR 1: 3 crew members standing inside ===
-  if(ca.ci===0&&!car1Freed){
-    var ppBaseY=cy+uh*0.45;
-    for(var pi2=0;pi2<3;pi2++){
-      var ppx3=cx2+cw*0.18+pi2*cw*0.28;
-      // Shadow
-      fs('rgba(20,5,25,0.3)');cx.beginPath();cx.ellipse(ppx3,ppBaseY+14,5,1.5,0,0,6.28);cx.fill();
-      // Legs
-      ss(C.bg2,2);cx.lineCap='round';
-      cx.beginPath();cx.moveTo(ppx3-2,ppBaseY+3);cx.lineTo(ppx3-3,ppBaseY+14);cx.stroke();
-      cx.beginPath();cx.moveTo(ppx3+2,ppBaseY+3);cx.lineTo(ppx3+3,ppBaseY+14);cx.stroke();
-      // Body
-      fs('rgba(40,30,50,0.6)');fr(ppx3-4,ppBaseY-6,8,10);
-      // Head
-      fs('rgba(40,30,50,0.65)');cx.beginPath();cx.arc(ppx3,ppBaseY-9,4,0,6.28);cx.fill();
-      // Eyes (small white dots)
-      fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(ppx3-1.2,ppBaseY-10,0.8,0,6.28);cx.fill();
-      cx.beginPath();cx.arc(ppx3+1.2,ppBaseY-10,0.8,0,6.28);cx.fill();cx.globalAlpha=1;
-    }
-    // Items on floor near people
-    fs('rgba(192,160,96,0.18)');fr(cx2+cw*0.12,cy+ch-46,7,7);
-    fs('rgba(100,135,160,0.18)');fr(cx2+cw*0.38,cy+ch-44,7,7);
-    fs('rgba(110,100,130,0.18)');fr(cx2+cw*0.62,cy+ch-48,7,7);
+  // === CREW MEMBER in this car (cars 1, 3, 5) ===
+  var crewCars=[0,2,4]; // cars with people
+  if(crewCars.indexOf(ca.ci)>=0&&!crewFound[ca.ci]){
+    var ppBaseY2=cy+uh*0.45, ppX2=cx2+cw*0.5;
+    // Shadow
+    fs('rgba(20,5,25,0.3)');cx.beginPath();cx.ellipse(ppX2,ppBaseY2+14,5,1.5,0,0,6.28);cx.fill();
+    // Legs
+    ss(C.bg2,2);cx.lineCap='round';
+    cx.beginPath();cx.moveTo(ppX2-2,ppBaseY2+3);cx.lineTo(ppX2-3,ppBaseY2+14);cx.stroke();
+    cx.beginPath();cx.moveTo(ppX2+2,ppBaseY2+3);cx.lineTo(ppX2+3,ppBaseY2+14);cx.stroke();
+    // Body
+    fs('rgba(40,30,50,0.6)');fr(ppX2-4,ppBaseY2-6,8,10);
+    // Head
+    fs('rgba(40,30,50,0.65)');cx.beginPath();cx.arc(ppX2,ppBaseY2-9,4,0,6.28);cx.fill();
+    // Eyes
+    fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(ppX2-1.2,ppBaseY2-10,0.8,0,6.28);cx.fill();
+    cx.beginPath();cx.arc(ppX2+1.2,ppBaseY2-10,0.8,0,6.28);cx.fill();cx.globalAlpha=1;
+    // Item on ground
+    fs('rgba(192,160,96,0.18)');fr(ppX2-3,cy+ch-46,7,7);
   }
 
   // 绿皮火车 windows — horizontal rectangle (wider than tall), 3 per car
@@ -463,7 +459,8 @@ function drawCamp(t){
   var crewX=W-130,crewY=H*0.58;
   fs('rgba(20,5,25,0.5)');fr(crewX-10,crewY-5,110,30);
   ss('rgba(125,155,139,0.15)',0.5);cx.strokeRect(crewX-10,crewY-5,110,30);
-  for(var mi=0;mi<crewHealth;mi++){
+  var availCrew2=crewHealth-(explorerAway?1:0);
+  for(var mi=0;mi<availCrew2;mi++){
     var mx3=crewX+20+mi*32,my3=crewY;
     // Body
     fs('rgba(60,40,50,0.55)');fr(mx3-5,my3+2,10,14);
@@ -567,7 +564,8 @@ var cars=[],player={x:0,y:0},cam=0,time=60,st='play';
 var inv={food:0,coal:0,water:0,gear:0,comm:0,med:0};
 var loot=[],pts=[],stars=[],inLast=false,dc=0;
 var NC=6;
-var car1Freed=false; // 车1小人是否已释放
+var crewFound=[false,false,false,false,false,false]; // 哪些车厢的小人已接
+var crewCount=0; // 已接到的人数
 
 // Phase 2 state
 var level=2; // 第1关=火车收集, 第2-10关=生存
@@ -577,7 +575,10 @@ var res={food:0,water:0,coal:0,wood:0,iron:0,meds:0};
 var exploring=false,exploreTimer=0,exploreFinds=[];
 var eventToday=null,eventResolved=false;
 var crewHealth=3;
-var showLevelIntro=true; // 关卡开场提示
+var showLevelIntro=true;
+var explorerAway=false;      // 是否有人外出探索
+var explorerReturnDay=0;     // 归队日期
+var explorerFound=[];        // 探索带回的物品 // 关卡开场提示
 
 var LEVELS=[
   {n:1, name:'收集', desc:'在火车上奔跑收集物资'},
@@ -655,15 +656,12 @@ function showLogPage(){
     html+='<button class="lb-btn" onclick="doConsume()">确认消耗</button>';
   }else if(logPage===2){
     // Page 2: Exploration
-    html+='<div class="lb-text">派小女孩外出搜索<br/>可能找到：🪨铁片 🔥煤炭 💧水 🪵木材</div>';
-    html+='<button class="lb-btn" id="explore-btn" onclick="startExplore()">出发探索</button>';
-    if(exploreFinds.length>0){
-      html+='<div class="lb-res">';
-      for(var fi=0;fi<exploreFinds.length;fi++){
-        var f=exploreFinds[fi];
-        html+='<span class="lb-ri">'+f.icon+' '+f.name+' +'+f.amt+'</span>';
-      }
-      html+='</div>';
+    if(explorerAway){
+      html+='<div class="lb-text">🚶 有人在外探索中<br/>预计第'+explorerReturnDay+'天归来</div>';
+      html+='<button class="lb-btn" onclick="logPage=3;showLogPage();">继续</button>';
+    }else{
+      html+='<div class="lb-text">派一人外出搜索<br/>离开'+crewHealth+'人，将离开1~6天</div>';
+      html+='<button class="lb-btn" id="explore-btn" onclick="startExplore()">出发探索</button>';
     }
   }else if(logPage===3){
     // Page 3: Engine tending
@@ -675,8 +673,22 @@ function showLogPage(){
     html+='<button class="lb-btn" onclick="tendEngine(1)">投入 1🔥 + 1💧</button>';
     html+='<button class="lb-btn" style="opacity:0.5;font-size:10px" onclick="tendEngine(0)">跳过（减员风险）</button>';
   }else if(logPage===4){
-    // Page 4: Random event
-    if(!eventToday){
+   // Check explorer return first
+   if(explorerFound.length>0&&!explorerAway){
+     if(explorerFound[0].icon==='💀'){
+       html+='<div class="lb-text" style="color:#e898a8">💀 探索者未能归来…<br/>失去了一位同伴</div>';
+     }else{
+       html+='<div class="lb-text">🚶 探索者归队！<br/>带回了：</div>';
+       html+='<div class="lb-res">';
+       for(var ef=0;ef<explorerFound.length;ef++){
+         var f3=explorerFound[ef];
+         html+='<span class="lb-ri">'+f3.icon+' '+f3.name+' +'+f3.amt+'</span>';
+       }
+       html+='</div>';
+     }
+     explorerFound=[];
+     html+='<button class="lb-btn" onclick="endDay()">确认</button>';
+   }else if(!eventToday){
       html+='<div class="lb-text">今日平安无事</div>';
       html+='<button class="lb-btn" onclick="endDay()">结束这一天</button>';
     }else if(eventToday.type==='breakdown'){
@@ -711,7 +723,8 @@ function showLogPage(){
 // PHASE 2: ACTIONS
 // ===================================================================
 function doConsume(){
-  var needF=crewHealth,needW=crewHealth;
+  var availCrew=crewHealth-(explorerAway?1:0);
+  var needF=availCrew,needW=availCrew;
   if(res.food>=needF&&res.water>=needW){
     res.food-=needF;res.water-=needW;
     logPage=2;showLogPage();
@@ -725,17 +738,12 @@ function doConsume(){
 }
 
 function startExplore(){
-  // Instant exploration — no animation
-  var types=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'}];
-  var finds=1+Math.floor(Math.random()*2);
-  exploreFinds=[];
-  for(var fi2=0;fi2<finds;fi2++){
-    var t=types[Math.floor(Math.random()*types.length)];
-    var amt=1+Math.floor(Math.random()*2);
-    res[t.k]=(res[t.k]||0)+amt;
-    exploreFinds.push({name:t.n,icon:t.icon,amt:amt});
-  }
-  logPage=3;showLogPage(); // immediately advance to engine page
+  // Send one crew member exploring for 1-6 days
+  explorerAway=true;
+  explorerReturnDay=day+1+Math.floor(Math.random()*6);
+  explorerFound=[];
+  document.getElementById('explore-btn')&&(document.getElementById('explore-btn').disabled=true);
+  logPage=3;showLogPage();
 }
 
 function tendEngine(n){
@@ -810,6 +818,24 @@ function resolveEvent(){
 
 function endDay(){
   day++;
+  // Check explorer return
+  if(explorerAway&&day>=explorerReturnDay){
+    explorerAway=false;
+    // Explorer returns with items (or small chance of loss)
+    if(Math.random()<0.15){crewHealth--;explorerFound=[{name:'未归',icon:'💀',amt:0}];}
+    else{
+      var types2=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'}];
+      explorerFound=[];
+      var fcount=2+Math.floor(Math.random()*3);
+      for(var fi3=0;fi3<fcount;fi3++){
+        var t2=types2[Math.floor(Math.random()*types2.length)];
+        var amt2=1+Math.floor(Math.random()*3);
+        res[t2.k]=(res[t2.k]||0)+amt2;
+        explorerFound.push({name:t2.n,icon:t2.icon,amt:amt2});
+      }
+    }
+    if(crewHealth<=0){endGamePhase2(false,'探索者未归，全员覆没');return;}
+  }
   // Check level completion (every 5 days in survival levels)
   if(level>=2 && (day-(level-2)*daysPerLevel)>daysPerLevel){
     level++;
@@ -832,12 +858,11 @@ function endGamePhase2(win,msg){
 // ===================================================================
 function startPhase2(){
   phase=2;st='play';level=2;showLevelIntro=true;
-  // Transfer collected items
   res.food=inv.food;res.water=inv.water;res.coal=inv.coal;
   res.meds=inv.med;res.wood=0;res.iron=0;
-  crewHealth=3;
+  crewHealth=crewCount;
   day=1;logPage=1;
-  exploreFinds=[];eventToday=null;exploring=false;
+  exploreFinds=[];eventToday=null;
   showLogbook();
 }
 
@@ -850,7 +875,7 @@ function rst(){
   phase=1;level=1;showLevelIntro=false;time=60;st='play';
   document.getElementById('lv').textContent='第1关 · 收集';
   inv={food:0,coal:0,water:0,gear:0,comm:0,med:0};
-  inLast=false;dc=0;pts=[];loot=[];car1Freed=false;
+  inLast=false;dc=0;pts=[];loot=[];crewFound=[false,false,false,false,false,false];crewCount=0;
   makeCars();spawnLoot();makeStars();
   player.x=carW()/2;cam=0;
   document.getElementById('over').classList.remove('show');
@@ -889,15 +914,16 @@ function up(dt){
   var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;
   player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));
   var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h-42;
-  // Free car 1 people on first entry
-  if(ci===0&&!car1Freed){
-    car1Freed=true;crewHealth=3;
-    // Spawn 3 items on car 1 floor
-    var c1=cars[0];
+  // Find crew members in cars 1, 3, 5
+  var crewCars2=[0,2,4];
+  if(crewCars2.indexOf(ci)>=0&&!crewFound[ci]){
+    crewFound[ci]=true;crewCount++;
+    var c2=cars[ci];
     var et=[ITEMS[0],ITEMS[2],ITEMS[4]]; // food, water, comm
-    for(var ei=0;ei<3;ei++)loot.push({x:c1.x+30+ei*(c1.w-60)/2,y:c1.y+c1.h-38,ci:0,d:et[ei],got:false});
+    loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h-38,ci:ci,d:et[0],got:false});
+    loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h-38,ci:ci,d:et[1],got:false});
     document.getElementById('warn').style.opacity='1';
-    document.getElementById('warn').innerHTML='人马汇合！';
+    document.getElementById('warn').innerHTML='找到同伴！('+crewCount+'/3)';
     setTimeout(function(){document.getElementById('warn').style.opacity='0';},1500);
   }
   cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));
