@@ -70,11 +70,18 @@ canvas::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;backg
 .btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));
   border:1px solid rgba(125,155,139,0.2);color:#B496D2;padding:10px 26px;border-radius:4px;font-size:11px;letter-spacing:2px;cursor:pointer;margin:4px;font-weight:300}
 .btn:active{background:rgba(125,155,139,0.2);color:#D4C0E8}
+/* Style toggle */
+#styletog{position:absolute;top:9px;right:14px;z-index:12;
+  background:rgba(18,6,30,0.85);border:1px solid rgba(232,152,168,0.25);border-radius:3px;
+  color:#E898A8;font-size:9px;padding:4px 10px;letter-spacing:1.5px;cursor:pointer;font-weight:300}
+#styletog:active{background:rgba(232,152,168,0.12)}
+#styletog.stencil{color:#F0EBF5;border-color:rgba(240,235,245,0.6)}
 </style>
 </head>
 <body>
 <div id="wrap">
 <canvas id="g"></canvas>
+<button id="styletog" onclick="toggleStyle()">◈ 晶层</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关 · 夜行</span></div>
 <div id="inv"></div>
 <div id="hint">拖动摇杆 · 点击拾取</div>
@@ -877,7 +884,9 @@ function draw(){
   cx.clearRect(0,0,W,H);
   if(phase===2){
     drawCamp(Date.now()/1000,level);
+    if(styleMode==='stencil'){cx.filter='contrast(2.4) grayscale(0.88) brightness(0.92)';}
     drawVignette();
+    cx.filter='none';
     return;
   }
   drawSky(level);
@@ -896,13 +905,21 @@ function draw(){
     cx.beginPath();cx.moveTo(p.x-cam,p.y-p.s);cx.lineTo(p.x-cam+p.s,p.y);
     cx.lineTo(p.x-cam,p.y+p.s);cx.lineTo(p.x-cam-p.s,p.y);cx.closePath();cx.fill();
   }cx.globalAlpha=1;
+  // Stencil mode: high-contrast near-monochrome filter (Banksy aesthetic)
+  if(styleMode==='stencil'){cx.filter='contrast(2.4) grayscale(0.88) brightness(0.92)';}
   drawVignette();
+  cx.filter='none';
 }
 
 // ===================================================================
 // GAME STATE
 // ===================================================================
 var phase=1;
+var styleMode='crystal'; // 'crystal' | 'stencil'
+function toggleStyle(){styleMode=styleMode==='crystal'?'stencil':'crystal';
+  var b=document.getElementById('styletog');
+  b.textContent=styleMode==='crystal'?'◈ 晶层':'◈ 模版';
+  b.className=styleMode;}
 var cars=[],player={x:0,y:0},cam=0,time=60,st='play';
 var inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};
 var loot=[],pts=[],stars=[],inLast=false,dc=0;
