@@ -878,15 +878,49 @@ function drawVignette(){
 }
 
 // ===================================================================
+// STENCIL: Balloon-only redraw (for post-filter accent)
+// ===================================================================
+function drawBalloonOnly(px,py,t){
+  var s=2.2;cx.save();cx.translate(px,py-28*s);
+  var blowY=28*s-22*s,bstrTop=-30*s;
+  ss(C.bg,1.2*s);cx.lineCap='round';
+  cx.beginPath();cx.moveTo(5*s,blowY-7*s);
+  cx.quadraticCurveTo(7*s+Math.sin(t*1.7)*0.6*s,blowY-16*s,6*s,bstrTop);cx.stroke();
+  var bx2=6*s,by2=bstrTop-6*s;
+  cx.save();cx.translate(bx2,by2);
+  fs(C.dustyCoral);cx.globalAlpha=0.92;cx.beginPath();
+  cx.moveTo(0,2.5*s);cx.bezierCurveTo(-4.5*s,-3.5*s,-9*s,1*s,0,7*s);
+  cx.bezierCurveTo(9*s,1*s,4.5*s,-3.5*s,0,2.5*s);cx.fill();
+  fs(C.bw);cx.globalAlpha=0.28;cx.beginPath();cx.arc(-2*s,-1.5*s,1.8*s,0,6.28);cx.fill();
+  cx.globalAlpha=1;cx.restore();cx.restore();
+}
+function drawStencilOverlay(t){
+  // Copy canvas to offscreen with stencil filter (high-contrast monochrome)
+  var off=document.createElement('canvas');off.width=W;off.height=H;
+  var octx=off.getContext('2d');
+  octx.filter='contrast(2.6) grayscale(0.94) brightness(0.85)';
+  octx.drawImage(g,0,0);
+  cx.clearRect(0,0,W,H);cx.drawImage(off,0,0);
+  // Spray-paint texture — random dots near edges (Banksy stencil overspray)
+  var sprayCount=80;
+  for(var i=0;i<sprayCount;i++){
+    var sx=Math.random()*W,sy=Math.random()*H;
+    var sr=0.3+Math.random()*1.2;
+    fs(Math.random()<0.5?'#000':'#FFF');cx.globalAlpha=0.08+Math.random()*0.12;
+    cx.beginPath();cx.arc(sx,sy,sr,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+  // Redraw Dusty Coral balloon — the ONLY color in the scene
+  if(lastPX)drawBalloonOnly(lastPX,lastPY,t);
+}
+// ===================================================================
 // MAIN DRAW
 // ===================================================================
 function draw(){
   cx.clearRect(0,0,W,H);
   if(phase===2){
     drawCamp(Date.now()/1000,level);
-    if(styleMode==='stencil'){cx.filter='contrast(2.4) grayscale(0.88) brightness(0.92)';}
     drawVignette();
-    cx.filter='none';
+    if(styleMode==='stencil')drawStencilOverlay(Date.now()/1000);
     return;
   }
   drawSky(level);
@@ -899,16 +933,16 @@ function draw(){
     var lx=l.x-cam;if(lx<-40||lx>W+40)continue;
     l.d.draw(lx,l.y);
   }
-  drawPlayer(player.x-cam,player.y,t,level);
+  var dpx=player.x-cam,dpy=player.y;drawPlayer(dpx,dpy,t,level);
+  // Save for stencil balloon redraw
+  lastPX=dpx;lastPY=dpy;lastPT=t;
   for(var pi=0;pi<pts.length;pi++){
     var p=pts[pi];cx.globalAlpha=p.life/p.ml;fs(p.c);
     cx.beginPath();cx.moveTo(p.x-cam,p.y-p.s);cx.lineTo(p.x-cam+p.s,p.y);
     cx.lineTo(p.x-cam,p.y+p.s);cx.lineTo(p.x-cam-p.s,p.y);cx.closePath();cx.fill();
   }cx.globalAlpha=1;
-  // Stencil mode: high-contrast near-monochrome filter (Banksy aesthetic)
-  if(styleMode==='stencil'){cx.filter='contrast(2.4) grayscale(0.88) brightness(0.92)';}
   drawVignette();
-  cx.filter='none';
+  if(styleMode==='stencil')drawStencilOverlay(t);
 }
 
 // ===================================================================
@@ -916,6 +950,7 @@ function draw(){
 // ===================================================================
 var phase=1;
 var styleMode='crystal'; // 'crystal' | 'stencil'
+var lastPX=0,lastPY=0,lastPT=0; // for stencil balloon redraw
 function toggleStyle(){styleMode=styleMode==='crystal'?'stencil':'crystal';
   var b=document.getElementById('styletog');
   b.textContent=styleMode==='crystal'?'◈ 晶层':'◈ 模版';
