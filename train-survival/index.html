@@ -317,30 +317,55 @@ function drawCar(ca,c,t){
     fs('rgba(192,160,96,0.18)');fr(ppX2-3,cy+ch-46,7,7);
   }
 
-  // 绿皮火车 windows — horizontal rectangle (wider than tall), 3 per car
+  // === LUGGAGE RACK with vintage suitcases (above windows) ===
+  fs('rgba(240,235,245,0.12)');fr(cx2+6,cy+uh*0.02,cw-12,6); // white rack shelf
+  ss('rgba(240,235,245,0.2)',0.5);cx.strokeRect(cx2+6,cy+uh*0.02,cw-12,6);
+  // Vintage suitcases on rack
+  var sc=[{x:0.12,c:'#5A3A2A',w:12,h:8},{x:0.28,c:'#6B2020',w:10,h:7},{x:0.43,c:'#3A3A30',w:13,h:9},{x:0.6,c:'#4A3020',w:11,h:7},{x:0.77,c:'#2A2020',w:10,h:8}];
+  for(var si=0;si<sc.length;si++){
+    var s=sc[si];
+    fs(s.c);fr(cx2+cw*s.x,cy+uh*0.02-3,s.w,Math.min(s.h,6));
+    ss('rgba(0,0,0,0.2)',0.3);cx.strokeRect(cx2+cw*s.x,cy+uh*0.02-3,s.w,Math.min(s.h,6));
+  }
+
+  // 绿皮火车 windows
   var ww=cw*0.28,wh=ww*0.72,wy3=cy+uh*0.12;
   var wGap=(cw-ww*3)/4;
   for(var wi=0;wi<3;wi++){
     var wxi=cx2+wGap+wi*(ww+wGap);
-    // Interior wall behind glass
-    fs('rgba(40,25,30,0.7)');fr(wxi,wy3,ww,wh);
-    // === SEATS visible through window ===
-    // Bench seat bottom
-    fs('rgba(120,90,60,0.35)');fr(wxi+ww*0.08,wy3+wh*0.55,ww*0.84,wh*0.1);
-    // Seat backrest
-    fs('rgba(140,100,70,0.28)');fr(wxi+ww*0.08,wy3+wh*0.28,ww*0.84,wh*0.28);
-    // Seat cushion highlight
-    fs('rgba(180,140,100,0.08)');fr(wxi+ww*0.12,wy3+wh*0.56,ww*0.76,wh*0.06);
-    // Passenger silhouettes (simple)
-    for(var ps=0;ps<2;ps++){
-      var ppx=wxi+ww*0.2+ps*ww*0.3;
-      fs('rgba(30,20,25,0.5)');cx.beginPath();cx.arc(ppx+ww*0.05,wy3+wh*0.25,ww*0.07,0,6.28);cx.fill();
-      fs('rgba(30,20,25,0.4)');fr(ppx,wy3+wh*0.32,ww*0.1,wh*0.25);
-    }
-    // White painted window frame (绿皮火车 style — simple rectangle)
+    // === DINING CAR INTERIOR through window ===
+    // Warm amber wall
+    var wallGrad=cx.createLinearGradient(wxi,wy3,wxi,wy3+wh);
+    wallGrad.addColorStop(0,'#5A4030');wallGrad.addColorStop(0.5,'#4A3025');wallGrad.addColorStop(1,'#3A2018');
+    fs(wallGrad);fr(wxi,wy3,ww,wh);
+    // Warm light glow from sconce
+    var glow=cx.createRadialGradient(wxi+ww/2,wy3+wh*0.15,0,wxi+ww/2,wy3+wh*0.15,ww*0.5);
+    glow.addColorStop(0,'rgba(220,180,100,0.12)');glow.addColorStop(1,'transparent');
+    fs(glow);fr(wxi,wy3,ww,wh);
+    // Round table (center)
+    fs('rgba(100,70,40,0.5)');cx.beginPath();cx.arc(wxi+ww/2,wy3+wh*0.52,ww*0.1,0,6.28);cx.fill();
+    ss('rgba(140,100,60,0.35)',0.5);cx.stroke();
+    // Table newspaper pattern (tiny lines)
+    ss('rgba(180,150,120,0.08)',0.3);
+    for(var tl=0;tl<3;tl++){cx.beginPath();cx.moveTo(wxi+ww*0.35,wy3+wh*0.48+tl*ww*0.02);cx.lineTo(wxi+ww*0.65,wy3+wh*0.48+tl*ww*0.02);cx.stroke();}
+    // Left booth seat (high back, emerald green)
+    fs('#3D5A4A');fr(wxi+ww*0.02,wy3+wh*0.16,ww*0.22,wh*0.7);
+    ss('rgba(60,80,65,0.3)',0.5);cx.strokeRect(wxi+ww*0.02,wy3+wh*0.16,ww*0.22,wh*0.7);
+    // Seat cushion
+    fs('#4A6B5A');fr(wxi+ww*0.02,wy3+wh*0.55,ww*0.22,wh*0.18);
+    // Right booth seat (facing)
+    fs('#3D5A4A');fr(wxi+ww*0.76,wy3+wh*0.16,ww*0.22,wh*0.7);
+    ss('rgba(60,80,65,0.3)',0.5);cx.strokeRect(wxi+ww*0.76,wy3+wh*0.16,ww*0.22,wh*0.7);
+    fs('#4A6B5A');fr(wxi+ww*0.76,wy3+wh*0.55,ww*0.22,wh*0.18);
+    // Wood trim on seat tops
+    fs('rgba(140,100,60,0.4)');fr(wxi+ww*0.02,wy3+wh*0.16,ww*0.22,wh*0.04);
+    fs('rgba(140,100,60,0.4)');fr(wxi+ww*0.76,wy3+wh*0.16,ww*0.22,wh*0.04);
+    // Wall sconce glow (between windows, drawn on body above)
+    // White window frame
     ss(C.bw,1.5);cx.globalAlpha=0.35;cx.strokeRect(wxi,wy3,ww,wh);cx.globalAlpha=1;
-    // Glass reflection
-    fs('rgba(240,235,245,0.04)');fr(wxi+ww*0.06,wy3+wh*0.05,ww*0.15,wh*0.35);
+    // Sheer curtain hint
+    fs('rgba(240,235,245,0.04)');fr(wxi+ww*0.03,wy3+wh*0.02,ww*0.06,wh*0.6);
+    fs('rgba(240,235,245,0.04)');fr(wxi+ww*0.91,wy3+wh*0.02,ww*0.06,wh*0.6);
   }
   fs('#3A2040');fr(cx2,cy+ch-10,cw,12);
   ss('rgba(155,139,176,0.12)',0.5);cx.strokeRect(cx2,cy+ch-10,cw,12);
@@ -460,19 +485,23 @@ function drawCamp(t){
   var wGap2=(cw2-ww2*2)/3;
   for(var wi5=0;wi5<2;wi5++){
     var wx6=cx3+wGap2+wi5*(ww2+wGap2);
-    // Interior
-    fs('rgba(40,25,30,0.7)');fr(wx6,wy6,ww2,wh2);
-    // Seats
-    fs('rgba(120,90,60,0.3)');fr(wx6+ww2*0.08,wy6+wh2*0.55,ww2*0.84,wh2*0.1);
-    fs('rgba(140,100,70,0.24)');fr(wx6+ww2*0.08,wy6+wh2*0.28,ww2*0.84,wh2*0.28);
-    // Passengers
-    for(var ps=0;ps<2;ps++){
-      var ppx=wx6+ww2*0.2+ps*ww2*0.3;
-      fs('rgba(30,20,25,0.4)');cx.beginPath();cx.arc(ppx+ww2*0.05,wy6+wh2*0.25,ww2*0.06,0,6.28);cx.fill();
-      fs('rgba(30,20,25,0.35)');fr(ppx,wy6+wh2*0.32,ww2*0.08,wh2*0.22);
-    }
+    // Dining car interior
+    var wallG2=cx.createLinearGradient(wx6,wy6,wx6,wy6+wh2);
+    wallG2.addColorStop(0,'#5A4030');wallG2.addColorStop(1,'#3A2018');
+    fs(wallG2);fr(wx6,wy6,ww2,wh2);
+    var glow2=cx.createRadialGradient(wx6+ww2/2,wy6+wh2*0.15,0,wx6+ww2/2,wy6+wh2*0.15,ww2*0.5);
+    glow2.addColorStop(0,'rgba(220,180,100,0.1)');glow2.addColorStop(1,'transparent');
+    fs(glow2);fr(wx6,wy6,ww2,wh2);
+    // Round table
+    fs('rgba(100,70,40,0.45)');cx.beginPath();cx.arc(wx6+ww2/2,wy6+wh2*0.52,ww2*0.1,0,6.28);cx.fill();
+    // Left booth
+    fs('#3D5A4A');fr(wx6+ww2*0.02,wy6+wh2*0.18,ww2*0.22,wh2*0.65);
+    fs('#4A6B5A');fr(wx6+ww2*0.02,wy6+wh2*0.55,ww2*0.22,wh2*0.15);
+    // Right booth
+    fs('#3D5A4A');fr(wx6+ww2*0.76,wy6+wh2*0.18,ww2*0.22,wh2*0.65);
+    fs('#4A6B5A');fr(wx6+ww2*0.76,wy6+wh2*0.55,ww2*0.22,wh2*0.15);
     ss(C.bw,1.4);cx.globalAlpha=0.3;cx.strokeRect(wx6,wy6,ww2,wh2);cx.globalAlpha=1;
-    fs('rgba(240,235,245,0.03)');fr(wx6+ww2*0.06,wy6+wh2*0.05,ww2*0.12,wh2*0.3);
+    fs('rgba(240,235,245,0.03)');fr(wx6+ww2*0.04,wy6+wh2*0.02,ww2*0.05,wh2*0.5);
   }
   // Car roof
   fs('#2A0845');fr(cx3,cy3-6,cw2,7);
