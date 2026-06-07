@@ -186,10 +186,44 @@ var ITEMS=[
   {k:'food',n:'FOOD',c:C.go, draw:drawFood},
   {k:'coal',n:'COAL',c:'#5a4a60', draw:drawCoal},
   {k:'water',n:'WATER',c:C.fg, draw:drawWater},
-  {k:'gear',n:'ARM',c:C.bg, draw:drawGun},
-  {k:'comm',n:'COMM',c:'#9B8B70', draw:drawRadio},
+  {k:'gear',n:'RIFLE',c:C.bg, draw:drawGun},
+  {k:'ammo',n:'AMMO',c:'#c0a060', draw:drawAmmo},
+  {k:'comm',n:'RADIO',c:'#9B8B70', draw:drawRadio},
+  {k:'chess',n:'CHESS',c:'#8B7060', draw:drawChess},
   {k:'med',n:'MED',c:C.dc, draw:drawMed}
 ];
+
+// === AMMO — Bullet box ===
+function drawAmmo(x,y){
+  var s=1.1;cx.save();cx.translate(x-4*s,y-5*s);
+  fs('rgba(30,10,50,0.3)');fa(4*s,8*s,4*s);
+  // Box
+  fs('rgba(180,140,80,0.35)');fr(0,1*s,8*s,6*s);
+  ss('#C0A060',0.8*s);cx.strokeRect(0,1*s,8*s,6*s);
+  // Bullets inside
+  fs('rgba(192,160,96,0.5)');
+  for(var bi2=0;bi2<3;bi2++){fr(1.5*s+bi2*2*s,2*s,1*s,4*s);}
+  ss('#C0A060',0.3*s);
+  for(var bi3=0;bi3<3;bi3++){cx.strokeRect(1.5*s+bi3*2*s,2*s,1*s,4*s);}
+  cx.restore();
+}
+
+// === CHESS — Board game ===
+function drawChess(x,y){
+  var s=1.1;cx.save();cx.translate(x-5*s,y-6*s);
+  fs('rgba(30,10,50,0.3)');fa(5*s,9*s,5*s);
+  // Board
+  fs('rgba(120,100,80,0.4)');fr(0,0,10*s,8*s);
+  ss('#8B7060',1*s);cx.strokeRect(0,0,10*s,8*s);
+  // Grid
+  ss('rgba(139,112,96,0.25)',0.3*s);
+  for(var gi=1;gi<4;gi++){cx.beginPath();cx.moveTo(gi*2.5*s,0);cx.lineTo(gi*2.5*s,8*s);cx.stroke();}
+  for(var gj=1;gj<4;gj++){cx.beginPath();cx.moveTo(0,gj*2*s);cx.lineTo(10*s,gj*2*s);cx.stroke();}
+  // Pieces
+  fs('rgba(30,20,25,0.5)');fa(2*s,2*s,1*s);fa(7*s,2*s,1*s);
+  fs('rgba(220,200,180,0.4)');fa(2*s,6*s,1*s);fa(7*s,6*s,1*s);
+  cx.restore();
+}
 
 // ===================================================================
 // PLAYER — Banksy girl with balloon
@@ -561,7 +595,7 @@ function draw(){
 // ===================================================================
 var phase=1; // 1=running, 2=survival
 var cars=[],player={x:0,y:0},cam=0,time=60,st='play';
-var inv={food:0,coal:0,water:0,gear:0,comm:0,med:0};
+var inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};
 var loot=[],pts=[],stars=[],inLast=false,dc=0;
 var NC=6;
 var crewFound=[false,false,false,false,false,false]; // 哪些车厢的小人已接
@@ -597,7 +631,15 @@ var LEVELS=[
 function carW(){return W/3.5}
 function carH(){return H*0.65}
 function makeCars(){cars=[];for(var i=0;i<NC;i++){var cw=carW(),ch=carH();cars.push({x:i*cw,y:H*0.2,w:cw,h:ch,last:i===NC-1});}}
-function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i],n=3+Math.floor(Math.random()*4);for(var j=0;j<n;j++){var d=ITEMS[Math.floor(Math.random()*ITEMS.length)];loot.push({x:c.x+24+Math.random()*(c.w-50),y:c.y+c.h-38-Math.random()*16,ci:i,d:d,got:false});}}}
+function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];
+  // Spawn more items per car, bias toward food/water
+  var n=4+Math.floor(Math.random()*5);
+  var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];
+  for(var j=0;j<n;j++){
+    var d=biased[Math.floor(Math.random()*biased.length)];
+    loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h-38-Math.random()*20,ci:i,d:d,got:false});
+  }
+}}
 function makeStars(){stars=[];for(var i=0;i<200;i++)stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3});}
 
 // ===================================================================
@@ -665,7 +707,7 @@ function showLogPage(){
     html+='<button class="lb-btn" style="padding:10px 20px;font-size:20px;font-weight:600;min-width:48px" onclick="rationWater=Math.min(res.water,rationWater+1);showLogPage();">+1</button>';
     html+='</div>';
     // Skip all button
-    html+='<button class="lb-btn warn" style="margin-top:6px" onclick="rationFood=0;rationWater=0;showLogPage();">跳过 · 不给吃喝</button>';
+    html+='<button class="lb-btn warn" style="margin-top:6px" onclick="skipRation()">跳过 · 不给吃喝</button>';
     if(res.food<rationFood||res.water<rationWater){
       html+='<div class="lb-text" style="color:#e898a8">库存不足！配给会扣到0</div>';
     }
@@ -738,6 +780,9 @@ function showLogPage(){
 // ===================================================================
 // PHASE 2: ACTIONS
 // ===================================================================
+function skipRation(){
+  rationFood=0;rationWater=0;logPage=2;showLogPage();
+}
 function doConsume(){
   var availCrew=crewHealth-(explorerAway?1:0);
   var needF=rationFood||availCrew,needW=rationWater||availCrew;
@@ -840,13 +885,13 @@ function endDay(){
     // Explorer returns with items (or small chance of loss)
     if(Math.random()<0.15){crewHealth--;explorerFound=[{name:'未归',icon:'💀',amt:0}];}
     else{
-      var types2=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'}];
+      var types2=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'},{n:'子弹',icon:'🔫',k:'ammo2'},{n:'猎枪',icon:'🔫',k:'gear2'},{n:'收音机',icon:'📻',k:'comm2'},{n:'棋盘',icon:'♟️',k:'chess2'}];
       explorerFound=[];
       var fcount=2+Math.floor(Math.random()*3);
       for(var fi3=0;fi3<fcount;fi3++){
         var t2=types2[Math.floor(Math.random()*types2.length)];
         var amt2=1+Math.floor(Math.random()*3);
-        res[t2.k]=(res[t2.k]||0)+amt2;
+        if(!t2.k.endsWith('2')){res[t2.k]=(res[t2.k]||0)+amt2;}
         explorerFound.push({name:t2.n,icon:t2.icon,amt:amt2});
       }
     }
@@ -890,7 +935,7 @@ function updInv(){var h='';for(var i=0;i<ITEMS.length;i++)h+='<span class=iv>'+i
 function rst(){
   phase=1;level=1;showLevelIntro=false;time=60;st='play';
   document.getElementById('lv').textContent='第1关 · 收集';
-  inv={food:0,coal:0,water:0,gear:0,comm:0,med:0};
+  inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};
   inLast=false;dc=0;pts=[];loot=[];crewFound=[false,false,false,false,false,false];crewCount=0;
   makeCars();spawnLoot();makeStars();
   player.x=carW()/2;cam=0;
