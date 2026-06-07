@@ -393,9 +393,15 @@ function drawCar(ca,c,t){
 // PHASE 2: SMALL LOCO + SURVIVAL CAR
 // ===================================================================
 function drawCamp(t){
-  // Sky + ground
-  var sky2=cx.createLinearGradient(0,0,0,H);
-  sky2.addColorStop(0,C.tp3);sky2.addColorStop(0.4,C.tp2);sky2.addColorStop(0.7,C.tp);sky2.addColorStop(1,'#2A1030');fs(sky2);fr(0,0,W,H);
+  // Sky — changes with events
+  var moodColor=C.tp3;
+  var moodAlpha=1;
+  if(eventToday&&eventToday.type==='rain'){moodColor='#1A2030';moodAlpha=0.7;}
+  else if(eventToday&&eventToday.type==='bandit'){moodColor='#3A1020';moodAlpha=0.8;}
+  var sky3=cx.createLinearGradient(0,0,0,H);
+  sky3.addColorStop(0,moodColor);sky3.addColorStop(0.4,C.tp2);sky3.addColorStop(0.7,C.tp);sky3.addColorStop(1,'#2A1030');
+  fs(sky3);fr(0,0,W,H);
+  cx.globalAlpha=moodAlpha;
   // Stars
   for(var i=0;i<stars.length;i++){
     var s=stars[i];fs(C.bw);cx.globalAlpha=s.a*(0.5+0.5*Math.sin(t*s.ts+s.tw));
@@ -515,8 +521,21 @@ function drawCamp(t){
     ss('rgba(160,130,90,0.2)',0.5);cx.strokeRect(W-50,H*0.73-4,30,6);
   }
 
-  // Girl by the fire (small version)
+  // Girl by the fire
   var gx2=W-60,gy2=H*0.68;
+
+  // === DISTANCE PROGRESS BAR ===
+  var barW=W-40,barH=6,barX=20,barY=H*0.96;
+  fs('rgba(20,5,30,0.6)');fr(barX-2,barY-2,barW+4,barH+4);
+  ss('rgba(125,155,139,0.2)',0.5);cx.strokeRect(barX-2,barY-2,barW+4,barH+4);
+  var pct=Math.min(1,distance/goalDistance);
+  var barFill=cx.createLinearGradient(barX,barY,barX+barW,barY);
+  barFill.addColorStop(0,C.tp4);barFill.addColorStop(0.5,C.fg);barFill.addColorStop(1,C.go);
+  fs(barFill);fr(barX,barY,barW*pct,barH);
+  // Label
+  fs('rgba(212,192,232,0.7)');cx.font='8px system-ui';cx.textAlign='center';
+  cx.fillText(Math.floor(distance)+' / '+goalDistance+' km',W/2,barY-6);
+  cx.fillText('距目的地',W/2,barY-16);
   fs(C.bw);cx.globalAlpha=0.8;cx.beginPath();cx.arc(gx2,gy2-16,7,0,6.28);cx.fill();
   fs('rgba(20,5,30,0.6)');cx.beginPath();cx.arc(gx2-2,gy2-18,1.2,0,6.28);cx.fill();
   cx.beginPath();cx.arc(gx2+2,gy2-18,1.2,0,6.28);cx.fill();cx.globalAlpha=1;
@@ -606,6 +625,8 @@ var level=2; // 第1关=火车收集, 第2-10关=生存
 var day=1,logPage=1;
 var daysPerLevel=5; // 每关5天
 var res={food:0,water:0,coal:0,wood:0,iron:0,meds:0,gear:0,ammo:0};
+var distance=0,goalDistance=1000; // 距离目的地
+var score=0; // 最终评分
 var exploring=false,exploreTimer=0,exploreFinds=[];
 var eventToday=null,eventResolved=false;
 var crewHealth=3;
@@ -785,6 +806,16 @@ function showLogPage(){
         html+='<button class="lb-btn" onclick="fightBandit()">开枪反击！</button>';
       }
       html+='<button class="lb-btn warn" onclick="resolveEvent()">无可奈何…</button>';
+    }else if(eventToday.type==='choice'){
+      if(eventToday.subtype==='supplies'){
+        html+='<div class="lb-text">📦 发现废弃补给箱<br/>打开可能有惊喜，也可能有陷阱…</div>';
+        html+='<button class="lb-btn" onclick="doChoice(true)">打开箱子</button>';
+        html+='<button class="lb-btn warn" onclick="doChoice(false)">安全起见，绕开</button>';
+      }else{
+        html+='<div class="lb-text">🧑 路边有个陌生人求救<br/>帮他？可能会报答你，也可能是强盗伪装的…</div>';
+        html+='<button class="lb-btn" onclick="doChoice(true)">伸出援手</button>';
+        html+='<button class="lb-btn warn" onclick="doChoice(false)">不理他，继续走</button>';
+      }
     }
   }
 
@@ -830,11 +861,11 @@ function startExplore(){
 }
 
 function tendEngine(n){
-  if(n>0&&res.coal>=1&&res.water>=1){res.coal-=1;res.water-=1;}
+  if(n>0&&res.coal>=1&&res.water>=1){res.coal-=1;res.water-=1;distance+=22+Math.floor(Math.random()*6);}
   else if(n>0){
-    // Can't fuel — risk injury
     if(Math.random()<0.3){crewHealth--;if(crewHealth<=0){endGamePhase2(false,'锅炉熄火，冻死了');return;}}
-  }
+    distance+=8+Math.floor(Math.random()*5); // slow without fuel
+  }else{distance+=8+Math.floor(Math.random()*5);}
   logPage=4;
   // Roll random event
   rollEvent();
@@ -847,7 +878,8 @@ function rollEvent(){
   // Level-dependent event probabilities
   if(lv===2){                                    // Level 2: easy intro
     if(r<0.15)eventToday={type:'luck'};
-    else if(r<0.22)eventToday={type:'mice',loss:1};
+    else if(r<0.25)eventToday={type:'choice',subtype:'supplies'};
+    else if(r<0.32)eventToday={type:'mice',loss:1};
     else eventToday=null;return;
   }
   if(lv===3){                                    // Level 3: light
@@ -881,12 +913,13 @@ function rollEvent(){
     else eventToday={type:'luck'};return;
   }
   // Levels 4-7: normal
-  if(r<0.15)eventToday={type:'breakdown'};
-  else if(r<0.28)eventToday={type:'bandit'};
-  else if(r<0.4)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
-  else if(r<0.5)eventToday={type:'sick'};
-  else if(r<0.58)eventToday={type:'rain'};
-  else if(r<0.68)eventToday={type:'luck'};
+  if(r<0.12)eventToday={type:'breakdown'};
+  else if(r<0.22)eventToday={type:'choice',subtype:Math.random()<0.5?'supplies':'stranger'};
+  else if(r<0.34)eventToday={type:'bandit'};
+  else if(r<0.44)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};
+  else if(r<0.52)eventToday={type:'sick'};
+  else if(r<0.6)eventToday={type:'rain'};
+  else if(r<0.7)eventToday={type:'luck'};
   else eventToday=null;
 }
 
@@ -918,8 +951,32 @@ function fightBandit(){
   }
 }
 function cureMice(){
-  res.meds--;eventToday=null; // use medkit, no food loss
+  res.meds--;eventToday=null;
   endDay();
+}
+function doChoice(take){
+  var sub=eventToday?eventToday.subtype:'supplies';
+  eventToday=null;
+  if(take){
+    if(Math.random()<0.65){
+      if(sub==='supplies'){res.food+=3;res.water+=2;res.coal+=2;}
+      else{res.food+=2;res.water+=2;res.iron+=1;}
+      endDay();return;
+    }else{
+      // Bad outcome — ambush!
+      res.food=Math.max(0,res.food-3);res.water=Math.max(0,res.water-2);
+      if(Math.random()<0.3){crewHealth--;}
+      endDay();return;
+    }
+  }else{
+    // Safe — skip
+    endDay();return;
+  }
+}
+function calcScore(){
+  score=Math.floor(distance*0.5+res.food*10+res.water*8+res.coal*5+res.iron*15+res.wood*8+crewHealth*200+res.gear*30+res.ammo*20);
+  var rating=score>800?'S':score>600?'A':score>400?'B':score>200?'C':'D';
+  return rating;
 }
 function resolveEvent(){
   if(eventToday&&eventToday.type==='mice'){res.food=Math.max(0,res.food-eventToday.loss);}
@@ -950,6 +1007,8 @@ function endDay(){
     }
     if(crewHealth<=0){endGamePhase2(false,'探索者未归，全员覆没');return;}
   }
+  // Distance victory
+  if(distance>=goalDistance){endGamePhase2(true,'提前抵达远方！');return;}
   // Check level completion (every 5 days in survival levels)
   if(level>=2 && (day-(level-2)*daysPerLevel)>daysPerLevel){
     level++;
@@ -962,11 +1021,12 @@ function endDay(){
 
 function endGamePhase2(win,msg){
   phase=3;hideLogbook();
+  var rating=calcScore();
   document.getElementById('over').classList.add('show');
   document.getElementById('ot').textContent=win?'✦ 旅程完成':'✧ 旅程中断';
-  document.getElementById('os').textContent=msg+' (第'+(level>10?10:level)+'关 · Day '+day+')';
+  document.getElementById('os').innerHTML=msg+'<br/>评分: '+rating+' ('+score+'分)<br/>距离: '+Math.floor(distance)+'km · 存活: '+crewHealth+'人';
+  document.getElementById('ctrls').style.display='none';
 }
-
 // ===================================================================
 // PHASE 1 → PHASE 2 TRANSITION
 // ===================================================================
@@ -975,7 +1035,7 @@ function startPhase2(){
   res.food=inv.food;res.water=inv.water;res.coal=inv.coal;
   res.meds=inv.med;res.wood=0;res.iron=0;res.gear=inv.gear||0;res.ammo=inv.ammo||0;
   crewHealth=crewCount;
-  day=1;logPage=1;
+  day=1;logPage=1;distance=0;
   exploreFinds=[];eventToday=null;
   showLogbook();
 }
