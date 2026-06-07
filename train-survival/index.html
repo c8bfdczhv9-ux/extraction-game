@@ -255,27 +255,30 @@ function drawCar(ca,c,t){
   cx.beginPath();cx.moveTo(cx2+10,cy+uh);cx.lineTo(cx2+cw-10,cy+uh);cx.stroke();cx.globalAlpha=1;
   var hl=cx.createLinearGradient(cx2,cy,cx2,cy+12);
   hl.addColorStop(0,'rgba(155,184,168,0.22)');hl.addColorStop(1,'transparent');fs(hl);fr(cx2,cy,cw,12);
-  var ww=cw*0.21,wh=uh*0.7,wx3=cx2+cw*0.055,wy3=cy+uh*0.1;
-  for(var wi=0;wi<4;wi++){
-    var wxi=wx3+wi*(ww+5);
-    fs(C.bw);cx.globalAlpha=0.18;cx.beginPath();
-    cx.moveTo(wxi+3,wy3);cx.lineTo(wxi+ww-3,wy3);
-    cx.quadraticCurveTo(wxi+ww,wy3,wxi+ww,wy3+3);cx.lineTo(wxi+ww,wy3+wh);
-    cx.lineTo(wxi,wy3+wh);cx.lineTo(wxi,wy3+3);
-    cx.quadraticCurveTo(wxi,wy3,wxi+3,wy3);cx.closePath();cx.fill();cx.globalAlpha=1;
-    ss(C.bg,0.7);cx.globalAlpha=0.3;cx.stroke();
-    fs('rgba(20,8,35,0.6)');cx.beginPath();
-    cx.moveTo(wxi+5,wy3+3);cx.lineTo(wxi+ww-5,wy3+3);
-    cx.quadraticCurveTo(wxi+ww-2,wy3+3,wxi+ww-2,wy3+6);cx.lineTo(wxi+ww-2,wy3+wh-2);
-    cx.lineTo(wxi+2,wy3+wh-2);cx.lineTo(wxi+2,wy3+6);
-    cx.quadraticCurveTo(wxi+2,wy3+3,wxi+5,wy3+3);cx.closePath();cx.fill();
-    fs('rgba(200,180,140,0.06)');cx.beginPath();
-    cx.moveTo(wxi+6,wy3+5);cx.lineTo(wxi+ww-6,wy3+5);
-    cx.quadraticCurveTo(wxi+ww-3,wy3+5,wxi+ww-3,wy3+8);cx.lineTo(wxi+ww-3,wy3+wh*0.5);
-    cx.lineTo(wxi+3,wy3+wh*0.5);cx.lineTo(wxi+3,wy3+8);
-    cx.quadraticCurveTo(wxi+3,wy3+5,wxi+6,wy3+5);cx.closePath();cx.fill();cx.globalAlpha=1;
-    ss(C.bg,0.35);cx.globalAlpha=0.25;
-    cx.beginPath();cx.moveTo(wxi+2,wy3+wh/2);cx.lineTo(wxi+ww-2,wy3+wh/2);cx.stroke();cx.globalAlpha=1;
+  // 绿皮火车 windows — horizontal rectangle (wider than tall), 3 per car
+  var ww=cw*0.28,wh=ww*0.72,wy3=cy+uh*0.12;
+  var wGap=(cw-ww*3)/4;
+  for(var wi=0;wi<3;wi++){
+    var wxi=cx2+wGap+wi*(ww+wGap);
+    // Interior wall behind glass
+    fs('rgba(40,25,30,0.7)');fr(wxi,wy3,ww,wh);
+    // === SEATS visible through window ===
+    // Bench seat bottom
+    fs('rgba(120,90,60,0.35)');fr(wxi+ww*0.08,wy3+wh*0.55,ww*0.84,wh*0.1);
+    // Seat backrest
+    fs('rgba(140,100,70,0.28)');fr(wxi+ww*0.08,wy3+wh*0.28,ww*0.84,wh*0.28);
+    // Seat cushion highlight
+    fs('rgba(180,140,100,0.08)');fr(wxi+ww*0.12,wy3+wh*0.56,ww*0.76,wh*0.06);
+    // Passenger silhouettes (simple)
+    for(var ps=0;ps<2;ps++){
+      var ppx=wxi+ww*0.2+ps*ww*0.3;
+      fs('rgba(30,20,25,0.5)');cx.beginPath();cx.arc(ppx+ww*0.05,wy3+wh*0.25,ww*0.07,0,6.28);cx.fill();
+      fs('rgba(30,20,25,0.4)');fr(ppx,wy3+wh*0.32,ww*0.1,wh*0.25);
+    }
+    // White painted window frame (绿皮火车 style — simple rectangle)
+    ss(C.bw,1.5);cx.globalAlpha=0.35;cx.strokeRect(wxi,wy3,ww,wh);cx.globalAlpha=1;
+    // Glass reflection
+    fs('rgba(240,235,245,0.04)');fr(wxi+ww*0.06,wy3+wh*0.05,ww*0.15,wh*0.35);
   }
   fs('#3A2040');fr(cx2,cy+ch-10,cw,12);
   ss('rgba(155,139,176,0.12)',0.5);cx.strokeRect(cx2,cy+ch-10,cw,12);
@@ -378,13 +381,24 @@ function drawCamp(t){
   lg4.addColorStop(0,C.fg);lg4.addColorStop(1,C.fg2);fs(lg4);fr(cx3,cy3+ch2*0.5,cw2,ch2*0.5);
   // Coachline
   ss(C.bw,1);cx.globalAlpha=0.5;cx.beginPath();cx.moveTo(cx3+6,cy3+ch2*0.5);cx.lineTo(cx3+cw2-6,cy3+ch2*0.5);cx.stroke();cx.globalAlpha=1;
-  // Windows
-  var ww2=cw2*0.28,wh2=ch2*0.18,wy6=cy3+ch2*0.12;
+  // Windows — 绿皮火车 style, horizontal rectangle, 2 per car
+  var ww2=cw2*0.36,wh2=ww2*0.72,wy6=cy3+ch2*0.14;
+  var wGap2=(cw2-ww2*2)/3;
   for(var wi5=0;wi5<2;wi5++){
-    var wx6=cx3+cw2*0.1+wi5*(ww2+6);
-    fs(C.bw);cx.globalAlpha=0.15;fr(wx6,wy6,ww2,wh2);cx.globalAlpha=1;
-    ss(C.bg,0.6);cx.globalAlpha=0.3;cx.strokeRect(wx6,wy6,ww2,wh2);cx.globalAlpha=1;
-    fs('rgba(200,180,140,0.04)');fr(wx6+2,wy6+2,ww2-4,wh2*0.4);
+    var wx6=cx3+wGap2+wi5*(ww2+wGap2);
+    // Interior
+    fs('rgba(40,25,30,0.7)');fr(wx6,wy6,ww2,wh2);
+    // Seats
+    fs('rgba(120,90,60,0.3)');fr(wx6+ww2*0.08,wy6+wh2*0.55,ww2*0.84,wh2*0.1);
+    fs('rgba(140,100,70,0.24)');fr(wx6+ww2*0.08,wy6+wh2*0.28,ww2*0.84,wh2*0.28);
+    // Passengers
+    for(var ps=0;ps<2;ps++){
+      var ppx=wx6+ww2*0.2+ps*ww2*0.3;
+      fs('rgba(30,20,25,0.4)');cx.beginPath();cx.arc(ppx+ww2*0.05,wy6+wh2*0.25,ww2*0.06,0,6.28);cx.fill();
+      fs('rgba(30,20,25,0.35)');fr(ppx,wy6+wh2*0.32,ww2*0.08,wh2*0.22);
+    }
+    ss(C.bw,1.4);cx.globalAlpha=0.3;cx.strokeRect(wx6,wy6,ww2,wh2);cx.globalAlpha=1;
+    fs('rgba(240,235,245,0.03)');fr(wx6+ww2*0.06,wy6+wh2*0.05,ww2*0.12,wh2*0.3);
   }
   // Car roof
   fs('#2A0845');fr(cx3,cy3-6,cw2,7);
