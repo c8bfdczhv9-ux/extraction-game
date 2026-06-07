@@ -250,9 +250,15 @@ function drawCar(ca,c,t){
   var ug=cx.createLinearGradient(cx2,cy,cx2,cy+uh);
   ug.addColorStop(0,C.fg3);ug.addColorStop(0.4,C.fg);ug.addColorStop(1,C.fg2);fs(ug);fr(cx2,cy,cw,uh);
   var lg2=cx.createLinearGradient(cx2,cy+uh,cx2,cy+ch);
-  lg2.addColorStop(0,C.fg);lg2.addColorStop(0.5,C.fg2);lg2.addColorStop(1,'#4A6B5A');fs(lg2);fr(cx2,cy+uh,cw,ch-uh);
-  ss(C.bw,1.2);cx.globalAlpha=0.55;
-  cx.beginPath();cx.moveTo(cx2+10,cy+uh);cx.lineTo(cx2+cw-10,cy+uh);cx.stroke();cx.globalAlpha=1;
+  // Coachline — YELLOW (绿皮火车 signature)
+  ss('#D4B830',1.6);cx.globalAlpha=0.7;
+  cx.beginPath();cx.moveTo(cx2+10,cy+uh);cx.lineTo(cx2+cw-10,cy+uh);cx.stroke();
+  cx.globalAlpha=1;
+  // Thin bottom yellow stripe
+  ss('#D4B830',0.7);cx.globalAlpha=0.45;
+  cx.beginPath();cx.moveTo(cx2+6,cy+ch-14);cx.lineTo(cx2+cw-6,cy+ch-14);cx.stroke();
+  cx.globalAlpha=1;
+  // Crystal Over top highlight
   var hl=cx.createLinearGradient(cx2,cy,cx2,cy+12);
   hl.addColorStop(0,'rgba(155,184,168,0.22)');hl.addColorStop(1,'transparent');fs(hl);fr(cx2,cy,cw,12);
   // 绿皮火车 windows — horizontal rectangle (wider than tall), 3 per car
@@ -379,8 +385,14 @@ function drawCamp(t){
   ug2.addColorStop(0,C.fg3);ug2.addColorStop(0.5,C.fg);ug2.addColorStop(1,C.fg2);fs(ug2);fr(cx3,cy3,cw2,ch2*0.5);
   var lg4=cx.createLinearGradient(cx3,cy3+ch2*0.5,cx3,cy3+ch2);
   lg4.addColorStop(0,C.fg);lg4.addColorStop(1,C.fg2);fs(lg4);fr(cx3,cy3+ch2*0.5,cw2,ch2*0.5);
-  // Coachline
-  ss(C.bw,1);cx.globalAlpha=0.5;cx.beginPath();cx.moveTo(cx3+6,cy3+ch2*0.5);cx.lineTo(cx3+cw2-6,cy3+ch2*0.5);cx.stroke();cx.globalAlpha=1;
+  // Coachline — YELLOW
+  ss('#D4B830',1.4);cx.globalAlpha=0.6;
+  cx.beginPath();cx.moveTo(cx3+6,cy3+ch2*0.5);cx.lineTo(cx3+cw2-6,cy3+ch2*0.5);cx.stroke();
+  cx.globalAlpha=1;
+  // Thin bottom yellow stripe
+  ss('#D4B830',0.6);cx.globalAlpha=0.4;
+  cx.beginPath();cx.moveTo(cx3+4,cy3+ch2-12);cx.lineTo(cx3+cw2-4,cy3+ch2-12);cx.stroke();
+  cx.globalAlpha=1;
   // Windows — 绿皮火车 style, horizontal rectangle, 2 per car
   var ww2=cw2*0.36,wh2=ww2*0.72,wy6=cy3+ch2*0.14;
   var wGap2=(cw2-ww2*2)/3;
