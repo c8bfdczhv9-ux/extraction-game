@@ -1312,7 +1312,10 @@ function up(dt){
 
 // Loop
 var lt=0;
-function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;try{up(dt);}catch(e){}try{draw();}catch(e){}requestAnimationFrame(loop);}
+function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;
+  try{up(dt);}catch(e){cx.fillStyle='#E898A8';cx.fillText('up:'+e.message,10,40);}
+  try{draw();}catch(e){cx.fillStyle='#E898A8';cx.fillText('draw:'+e.message,10,60);}
+  requestAnimationFrame(loop);}
 
 // Input
 var joyX=0,joyActive=false,joyOX=0,joyOY=0,keys={};
