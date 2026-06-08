@@ -878,55 +878,14 @@ function drawVignette(){
 }
 
 // ===================================================================
-// STENCIL: Balloon-only redraw (for post-filter accent)
-// ===================================================================
-function drawBalloonOnly(px,py,t){
-  var s=2.2;cx.save();cx.translate(px,py-28*s);
-  var blowY=28*s-22*s,bstrTop=-30*s;
-  ss(C.bg,1.2*s);cx.lineCap='round';
-  cx.beginPath();cx.moveTo(5*s,blowY-7*s);
-  cx.quadraticCurveTo(7*s+Math.sin(t*1.7)*0.6*s,blowY-16*s,6*s,bstrTop);cx.stroke();
-  var bx2=6*s,by2=bstrTop-6*s;
-  cx.save();cx.translate(bx2,by2);
-  fs(C.dustyCoral);cx.globalAlpha=0.92;cx.beginPath();
-  cx.moveTo(0,2.5*s);cx.bezierCurveTo(-4.5*s,-3.5*s,-9*s,1*s,0,7*s);
-  cx.bezierCurveTo(9*s,1*s,4.5*s,-3.5*s,0,2.5*s);cx.fill();
-  fs(C.bw);cx.globalAlpha=0.28;cx.beginPath();cx.arc(-2*s,-1.5*s,1.8*s,0,6.28);cx.fill();
-  cx.globalAlpha=1;cx.restore();cx.restore();
-}
-function drawStencilOverlay(t){
-  // Copy canvas to offscreen with stencil filter (high-contrast monochrome)
-  if(!stencilBuf){stencilBuf=document.createElement('canvas');}
-  stencilBuf.width=W;stencilBuf.height=H;
-  var octx=stencilBuf.getContext('2d');
-  octx.filter='contrast(2.6) grayscale(0.94) brightness(0.85)';
-  octx.drawImage(g,0,0);
-  cx.clearRect(0,0,W,H);cx.drawImage(stencilBuf,0,0);
-  // Spray-paint texture — Banksy stencil overspray (stable per-frame seed)
-  var seed=t*1000%100000;
-  for(var i=0;i<60;i++){
-    seed=(seed*16807)%2147483647;
-    var sx=(seed%10000)/10000*W;
-    seed=(seed*16807)%2147483647;
-    var sy=(seed%10000)/10000*H;
-    var sr=0.3+(seed%100)/100*1.2;
-    fs(seed%2===0?'#000':'#FFF');cx.globalAlpha=0.06+(seed%8)/100;
-    cx.beginPath();cx.arc(sx,sy,sr,0,6.28);cx.fill();
-  }cx.globalAlpha=1;
-  // Redraw Dusty Coral balloon — the ONLY color in the scene
-  if(balloonSaved)drawBalloonOnly(balloonPX,balloonPY,t);
-}
-// ===================================================================
 // MAIN DRAW
 // ===================================================================
 function draw(){
   cx.clearRect(0,0,W,H);
   if(phase===2){
     drawCamp(Date.now()/1000,level);
-    // Save camp balloon for stencil redraw
-    balloonSaved=true;balloonPX=W-65+5;balloonPY=H*0.68-46;
     drawVignette();
-    if(styleMode==='stencil')drawStencilOverlay(Date.now()/1000);
+    if(styleMode==='stencil'){cx.filter='contrast(2.4) grayscale(0.88) brightness(0.92)';drawVignette();cx.filter='none';}
     return;
   }
   drawSky(level);
@@ -939,16 +898,14 @@ function draw(){
     var lx=l.x-cam;if(lx<-40||lx>W+40)continue;
     l.d.draw(lx,l.y);
   }
-  var dpx=player.x-cam,dpy=player.y;drawPlayer(dpx,dpy,t,level);
-  // Save balloon pos for stencil redraw
-  balloonSaved=true;balloonPX=dpx;balloonPY=dpy;
+  drawPlayer(player.x-cam,player.y,t,level);
   for(var pi=0;pi<pts.length;pi++){
     var p=pts[pi];cx.globalAlpha=p.life/p.ml;fs(p.c);
     cx.beginPath();cx.moveTo(p.x-cam,p.y-p.s);cx.lineTo(p.x-cam+p.s,p.y);
     cx.lineTo(p.x-cam,p.y+p.s);cx.lineTo(p.x-cam-p.s,p.y);cx.closePath();cx.fill();
   }cx.globalAlpha=1;
   drawVignette();
-  if(styleMode==='stencil')drawStencilOverlay(t);
+  if(styleMode==='stencil'){cx.filter='contrast(2.4) grayscale(0.88) brightness(0.92)';drawVignette();cx.filter='none';}
 }
 
 // ===================================================================
@@ -956,7 +913,6 @@ function draw(){
 // ===================================================================
 var phase=1;
 var styleMode='crystal'; // 'crystal' | 'stencil'
-var balloonSaved=false,balloonPX=0,balloonPY=0,stencilBuf=null; // stencil state
 function toggleStyle(){styleMode=styleMode==='crystal'?'stencil':'crystal';
   var b=document.getElementById('styletog');
   b.textContent=styleMode==='crystal'?'◈ 晶层':'◈ 模版';
@@ -1262,7 +1218,7 @@ function rst(){
   var lv=LEVELS[0];
   document.getElementById('lv').textContent=lv.name+' · '+lv.eng;
   inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};
-  inLast=false;dc=0;pts=[];loot=[];crewFound=[false,false,false,false,false,false];crewCount=0;balloonSaved=false;
+  inLast=false;dc=0;pts=[];loot=[];crewFound=[false,false,false,false,false,false];crewCount=0;
   makeCars();spawnLoot();makeStars();
   player.x=carW()/2;cam=0;
   document.getElementById('over').classList.remove('show');
