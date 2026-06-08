@@ -56,7 +56,7 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 <canvas id="g"></canvas>
 <button id="styletog" onclick="toggleStyle()">◈ 晶层</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
-<div id="ver">v28</div>
+<div id="ver">v29</div>
 <div id="inv"></div>
 <div id="hint">拖动摇杆 · 点击拾取</div>
 <div id="warn"></div>
@@ -271,194 +271,238 @@ var ITEMS=[
   {k:'chess',n:'棋盘',c:'#8B7060',draw:drawChess},{k:'med',n:'医药',c:C.dustyCoral,draw:drawMed}
 ];
 
-// ===== PLAYER — Banksy stencil silhouette =====
+// ===== PLAYER — Banksy stencil girl =====
 function drawPlayer(px,py,t){
-  var s=2.3;cx.save();cx.translate(px,py-30*s);
-  
-  // Drop shadow (canvas shadowBlur)
-  cx.shadowColor='rgba(10,3,20,0.5)';cx.shadowBlur=4*s;cx.shadowOffsetY=2*s;
-  
-  // === BALLOON (keep this iconic element) ===
-  var blowY=28*s-22*s, bstrTop=-32*s;
-  // String — thin, delicate
-  ss('rgba(200,170,210,0.6)',0.5*s);cx.lineCap='round';
-  var sway=Math.sin(t*1.7)*0.8*s;
-  cx.beginPath();cx.moveTo(5*s,blowY-7*s);
-  cx.quadraticCurveTo(7*s+sway,blowY-18*s,6*s+sway,bstrTop);cx.stroke();
+  var s=2.1;cx.save();cx.translate(px,py-26*s);
+
+  // Ground shadow
+  fs('rgba(10,3,20,0.25)');cx.beginPath();cx.ellipse(0,26*s,6*s,1.4*s,0,0,6.28);cx.fill();
+
+  // === HEART BALLOON ===
+  var sway=Math.sin(t*1.5)*0.7*s;
+  var stringTop=-28*s;
+  // String
+  ss('rgba(180,160,190,0.4)',0.5*s);cx.lineCap='round';
+  cx.beginPath();cx.moveTo(4*s,10*s-10*s);cx.quadraticCurveTo(6*s+sway,14*s-16*s,5*s+sway,stringTop);cx.stroke();
   // Heart
-  var hx=6*s+sway, hy=bstrTop-7*s;
-  cx.save();cx.translate(hx,hy);
-  cx.shadowColor='rgba(232,152,168,0.4)';cx.shadowBlur=3*s;cx.shadowOffsetY=0;
+  cx.save();cx.translate(5*s+sway,stringTop-6*s);
   fs(C.dustyCoral);cx.globalAlpha=0.9;cx.beginPath();
   cx.moveTo(0,3*s);cx.bezierCurveTo(-5*s,-4*s,-10*s,1.5*s,0,8*s);
   cx.bezierCurveTo(10*s,1.5*s,5*s,-4*s,0,3*s);cx.fill();
-  // Highlight
-  fs('rgba(255,255,255,0.3)');cx.globalAlpha=0.4;
-  cx.beginPath();cx.arc(-2.5*s,-1*s,2*s,0,6.28);cx.fill();
+  fs('rgba(255,255,255,0.25)');cx.beginPath();cx.arc(-2*s,-0.5*s,1.8*s,0,6.28);cx.fill();
   cx.restore();
-  
-  // === BODY — Banksy stencil silhouette ===
-  cx.shadowColor='rgba(10,3,20,0.6)';cx.shadowBlur=4*s;cx.shadowOffsetY=2.5*s;
-  
+
+  // === BODY — white stencil silhouette ===
+  var girlColor='#E8E4E0'; // warm off-white, paper texture feel
+  var skirtWave=Math.sin(t*3.5)*0.8*s;
+
   // Dress — flowing A-line
-  var skirtWave=Math.sin(t*4)*1.2*s;
-  var ds='#2A1A3A'; // deep purple-black for stencil look
-  fs(ds);cx.globalAlpha=0.92;cx.beginPath();
-  // Left side of dress
-  cx.moveTo(-6*s+skirtWave,6*s);
-  cx.lineTo(-7.5*s+skirtWave*1.3,12*s);
-  cx.quadraticCurveTo(-8*s,16*s,-2*s,16.5*s+skirtWave*0.4);
-  // Right side
-  cx.quadraticCurveTo(7*s,14.5*s,7*s+skirtWave*0.7,12*s);
-  cx.lineTo(5*s+skirtWave*0.5,6*s);
+  fs(girlColor);cx.globalAlpha=0.94;cx.beginPath();
+  cx.moveTo(-5*s+skirtWave,5*s);
+  cx.lineTo(-7*s+skirtWave*1.2,11*s);
+  cx.quadraticCurveTo(-7.5*s,15*s,-1.5*s,15*s+skirtWave*0.3);
+  cx.quadraticCurveTo(6.5*s,13.5*s,6*s+skirtWave*0.6,11*s);
+  cx.lineTo(4.5*s+skirtWave*0.4,5*s);
   cx.closePath();cx.fill();
-  
-  // Dress hem highlight (vapour violet glow)
-  ss(C.vapourViolet,1*s);cx.globalAlpha=0.5;cx.shadowBlur=0;
-  cx.beginPath();cx.moveTo(-7*s+skirtWave*1.2,12*s);
-  cx.quadraticCurveTo(-2*s,17*s+skirtWave*0.4,6.5*s+skirtWave*0.6,12*s);cx.stroke();
+
+  // Dress hem line
+  ss('rgba(160,140,180,0.3)',0.7*s);cx.globalAlpha=0.4;
+  cx.beginPath();cx.moveTo(-6.5*s+skirtWave*1.2,11*s);
+  cx.quadraticCurveTo(-1.5*s,15.5*s+skirtWave*0.3,6*s+skirtWave*0.5,11*s);cx.stroke();
   cx.globalAlpha=1;
-  
-  // Torso — fitted top
-  fs(ds);cx.globalAlpha=0.95;
-  cx.shadowColor='rgba(10,3,20,0.6)';cx.shadowBlur=4*s;cx.shadowOffsetY=2*s;
-  cx.beginPath();cx.moveTo(-4*s,-6*s);cx.lineTo(-5.5*s,6*s);
-  cx.lineTo(5.5*s,6*s);cx.lineTo(4*s,-6*s);cx.closePath();cx.fill();
-  
-  // Waist accent (vapour violet belt)
-  ss(C.vapourViolet,1.2*s);cx.globalAlpha=0.65;cx.shadowBlur=0;
-  cx.beginPath();cx.moveTo(-5.5*s,6*s);cx.lineTo(5.5*s,6*s);cx.stroke();
-  cx.globalAlpha=1;
-  
-  // === ARMS (animated, stencil-style) ===
-  var armSwing=Math.sin(t*5)*2.5*s;
-  cx.shadowColor='rgba(10,3,20,0.4)';cx.shadowBlur=3*s;cx.shadowOffsetY=1*s;
-  ss(ds,2.8*s);cx.lineCap='round';cx.globalAlpha=0.92;
-  // Left arm
-  cx.beginPath();cx.moveTo(-3.5*s,-2*s);
-  cx.quadraticCurveTo(-8*s+armSwing*0.5,-6*s,-7*s+armSwing,3*s);cx.stroke();
-  // Right arm
-  cx.beginPath();cx.moveTo(3.5*s,-2*s);
-  cx.quadraticCurveTo(8*s-armSwing*0.5,-6*s,7*s-armSwing,3*s);cx.stroke();
-  
+
+  // Torso
+  fs(girlColor);cx.globalAlpha=0.96;cx.beginPath();
+  cx.moveTo(-3.5*s,-5*s);cx.lineTo(-5*s,5*s);cx.lineTo(5*s,5*s);cx.lineTo(3.5*s,-5*s);cx.closePath();cx.fill();
+
+  // Waist line
+  ss('rgba(160,140,180,0.35)',0.9*s);cx.globalAlpha=0.5;
+  cx.beginPath();cx.moveTo(-5*s,5*s);cx.lineTo(5*s,5*s);cx.stroke();cx.globalAlpha=1;
+
+  // === ARMS (simple, animated) ===
+  var armSwing=Math.sin(t*4.5)*2*s;
+  ss(girlColor,2.4*s);cx.lineCap='round';cx.globalAlpha=0.92;
+  cx.beginPath();cx.moveTo(-3*s,-1*s);
+  cx.quadraticCurveTo(-7*s+armSwing*0.4,-4*s,-6*s+armSwing,4*s);cx.stroke();
+  cx.beginPath();cx.moveTo(3*s,-1*s);
+  cx.quadraticCurveTo(7*s-armSwing*0.4,-4*s,6*s-armSwing,4*s);cx.stroke();
+
   // === HEAD ===
-  cx.shadowColor='rgba(10,3,20,0.5)';cx.shadowBlur=4*s;cx.shadowOffsetY=2*s;
-  fs(ds);cx.globalAlpha=0.95;cx.beginPath();cx.arc(0,-11*s,5*s,0,6.28);cx.fill();
-  
-  // Hair — flowing back
-  fs('#1A0C28');cx.globalAlpha=0.9;cx.shadowBlur=0;
-  cx.beginPath();cx.arc(-1*s,-10.5*s,5.2*s,Math.PI*0.7,Math.PI*1.6);cx.fill();
-  cx.beginPath();cx.arc(0,-9*s,5.3*s,Math.PI*0.1,Math.PI*0.7);cx.fill();
-  // Hair detail strands
-  ss('#12061E',1*s);cx.globalAlpha=0.4;
-  cx.beginPath();cx.moveTo(-3*s,-15*s);cx.quadraticCurveTo(-5*s,-8*s,-2*s,-4*s);cx.stroke();
-  cx.beginPath();cx.moveTo(-4*s,-14*s);cx.quadraticCurveTo(-7*s,-9*s,-3*s,-5*s);cx.stroke();
-  
-  // === FACE (minimal, stencil-style) ===
-  // Eyes — two white dots
-  cx.shadowBlur=0;cx.globalAlpha=1;
-  fs(C.bw);cx.beginPath();cx.arc(-1.8*s,-12*s,0.7*s,0,6.28);cx.fill();
-  cx.beginPath();cx.arc(1.8*s,-12*s,0.7*s,0,6.28);cx.fill();
-  
+  fs(girlColor);cx.globalAlpha=0.96;cx.beginPath();cx.arc(0,-9.5*s,4.2*s,0,6.28);cx.fill();
+
+  // Hair — simple sweep
+  fs('#D8D0C8');cx.globalAlpha=0.85;cx.beginPath();
+  cx.arc(-0.5*s,-9*s,4.3*s,Math.PI*0.6,Math.PI*1.5);cx.fill();
+  cx.beginPath();cx.arc(0,-8*s,4.4*s,Math.PI*0.15,Math.PI*0.65);cx.fill();
+
   // === LEGS (animated stride) ===
-  var legPhase=t*7;
-  cx.shadowColor='rgba(10,3,20,0.3)';cx.shadowBlur=2*s;cx.shadowOffsetY=1*s;
-  ss(ds,3*s);cx.lineCap='round';cx.globalAlpha=0.9;
-  cx.beginPath();cx.moveTo(-2.5*s,14*s);
-  cx.lineTo(-4*s+Math.sin(legPhase)*5.5*s,24*s);cx.stroke();
-  cx.beginPath();cx.moveTo(2.5*s,14*s);
-  cx.lineTo(4*s+Math.sin(legPhase+Math.PI)*5.5*s,24*s);cx.stroke();
-  
-  // Feet
-  ss(ds,2.5*s);
-  cx.beginPath();cx.moveTo(-4*s+Math.sin(legPhase)*5.5*s,24*s);
-  cx.lineTo(-4.5*s+Math.sin(legPhase)*5.5*s,26*s);cx.stroke();
-  cx.beginPath();cx.moveTo(4*s+Math.sin(legPhase+Math.PI)*5.5*s,24*s);
-  cx.lineTo(4.5*s+Math.sin(legPhase+Math.PI)*5.5*s,26*s);cx.stroke();
-  
-  // Reset shadow
-  cx.shadowBlur=0;cx.shadowOffsetY=0;cx.globalAlpha=1;
-  
-  // === GROUND SHADOW ===
-  fs('rgba(10,3,20,0.25)');cx.beginPath();
-  cx.ellipse(0,27*s,6*s,1.5*s,0,0,6.28);cx.fill();
-  
+  var legPhase=t*6;
+  ss(girlColor,2.6*s);cx.lineCap='round';cx.globalAlpha=0.9;
+  cx.beginPath();cx.moveTo(-2*s,13*s);
+  cx.lineTo(-3*s+Math.sin(legPhase)*5*s,23*s);cx.stroke();
+  cx.beginPath();cx.moveTo(2*s,13*s);
+  cx.lineTo(3*s+Math.sin(legPhase+Math.PI)*5*s,23*s);cx.stroke();
+  cx.globalAlpha=1;
+
   cx.restore();
 }
 
-// ===== TRAIN CAR =====
+// ===== TRAIN CAR — interior view =====
 function drawCar(ca,c,t){
-  var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h,uh=ch*0.40;
-  fs(C.nightDeep);fr(cx2,cy-7,cw,8);
-  // Upper body
-  var ug=cx.createLinearGradient(cx2,cy,cx2,cy+uh);
-  ug.addColorStop(0,C.fameLight);ug.addColorStop(0.4,C.fameGreen);ug.addColorStop(1,C.fameDark);fs(ug);fr(cx2,cy,cw,uh);
-  // Lower body
-  var lg=cx.createLinearGradient(cx2,cy+uh,cx2,cy+ch);
-  lg.addColorStop(0,C.fameGreen);lg.addColorStop(1,C.fameDeep);fs(lg);fr(cx2,cy+uh,cw,ch-uh);
-  // Coachline
-  ss(C.coach,1.7);cx.globalAlpha=0.65;cx.beginPath();cx.moveTo(cx2+10,cy+uh);cx.lineTo(cx2+cw-10,cy+uh);cx.stroke();cx.globalAlpha=1;
-  ss(C.coach,0.8);cx.globalAlpha=0.4;cx.beginPath();cx.moveTo(cx2+6,cy+ch-14);cx.lineTo(cx2+cw-6,cy+ch-14);cx.stroke();cx.globalAlpha=1;
-  // Crystal Over
-  var hl=cx.createLinearGradient(cx2,cy,cx2,cy+14);
-  hl.addColorStop(0,'rgba(200,220,210,0.2)');hl.addColorStop(0.5,'rgba(180,200,190,0.1)');hl.addColorStop(1,'transparent');fs(hl);fr(cx2,cy,cw,14);
-  // Rivets on upper body
-  for(var ri=0;ri<3;ri++){var rx=cx2+12+ri*(cw-24)/2;fs('rgba(180,200,190,0.2)');cx.beginPath();cx.arc(rx,cy+5,1.2,0,6.28);cx.fill();cx.beginPath();cx.arc(rx,cy+uh-8,1.2,0,6.28);cx.fill()}
-  // Panel seam — vertical between windows
-  ss('rgba(40,30,20,0.2)',0.5);cx.beginPath();cx.moveTo(cx2+cw*0.47,cy+uh*0.2);cx.lineTo(cx2+cw*0.47,cy+uh*0.85);cx.stroke();
-  cx.beginPath();cx.moveTo(cx2+cw*0.53,cy+uh*0.2);cx.lineTo(cx2+cw*0.53,cy+uh*0.85);cx.stroke();
-  // Crew members in cars 1,3,5
-  if([0,2,4].indexOf(ca.ci)>=0&&!crewFound[ca.ci]){
-    var pb=cy+uh*0.45,px2=cx2+cw*0.5;
-    fs('rgba(20,5,25,0.3)');cx.beginPath();cx.ellipse(px2,pb+14,6,1.5,0,0,6.28);cx.fill();
-    ss(C.bgDark,2.2);cx.beginPath();cx.moveTo(px2-2.5,pb+3);cx.lineTo(px2-3.5,pb+14);cx.stroke();
-    cx.beginPath();cx.moveTo(px2+2.5,pb+3);cx.lineTo(px2+3.5,pb+14);cx.stroke();
-    fs('rgba(40,30,50,0.6)');fr(px2-5,pb-7,10,12);
-    fs('rgba(40,30,50,0.65)');cx.beginPath();cx.arc(px2,pb-10,4.5,0,6.28);cx.fill();
-    fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(px2-1.4,pb-11,0.9,0,6.28);cx.fill();
-    cx.beginPath();cx.arc(px2+1.4,pb-11,0.9,0,6.28);cx.fill();cx.globalAlpha=1;
+  var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h;
+
+  // === CEILING (curved top of carriage) ===
+  var ceil=cx.createLinearGradient(cx2,cy,cx2,cy+ch*0.08);
+  ceil.addColorStop(0,'#3A3448');ceil.addColorStop(0.5,'#4A4458');ceil.addColorStop(1,'#3A3440');
+  fs(ceil);fr(cx2,cy,cw,ch*0.08);
+
+  // Ceiling curve — arched
+  fs('#3A3448');cx.beginPath();
+  cx.moveTo(cx2,cy);cx.quadraticCurveTo(cx2+cw/2,cy-ch*0.04,cx2+cw,cy);
+  cx.lineTo(cx2+cw,cy+ch*0.06);cx.quadraticCurveTo(cx2+cw/2,cy+ch*0.02,cx2,cy+ch*0.06);
+  cx.closePath();cx.fill();
+
+  // Ceiling lamps — warm glow
+  for(var li=0;li<4;li++){
+    var lx=cx2+cw*0.15+li*cw*0.23;
+    var lg=cx.createRadialGradient(lx,cy+ch*0.03,0,lx,cy+ch*0.03,ch*0.04);
+    lg.addColorStop(0,'rgba(255,220,180,0.3)');lg.addColorStop(0.5,'rgba(255,200,150,0.08)');lg.addColorStop(1,'transparent');
+    fs(lg);fr(lx-ch*0.04,cy-ch*0.02,ch*0.08,ch*0.12);
+    fs('rgba(255,220,180,0.6)');fr(lx-1.2,cy+ch*0.025,2.4,1.5);
   }
-  // Luggage rack
-  fs('rgba(250,248,245,0.38)');fr(cx2+8,cy+uh*0.02,cw-16,5);
-  // Windows
-  var ww=cw*0.28,wh=ww*0.72,wy=cy+uh*0.12,wGap=(cw-ww*3)/4;
+
+  // === BACK WALL (far wall with wood paneling) ===
+  var backH=ch*0.62;
+  var wallTop=cy+ch*0.06;
+  // Wood paneling gradient
+  var woodg=cx.createLinearGradient(cx2,wallTop,cx2,wallTop+backH);
+  woodg.addColorStop(0,'#5A4A40');woodg.addColorStop(0.15,'#6B5A50');woodg.addColorStop(0.5,'#7A6858');
+  woodg.addColorStop(0.85,'#6B5A50');woodg.addColorStop(1,'#4A3A32');
+  fs(woodg);fr(cx2,wallTop,cw,backH);
+
+  // Vertical wood panel lines
+  ss('rgba(40,30,22,0.15)',0.4);
+  for(var pi=0;pi<8;pi++){
+    cx.beginPath();cx.moveTo(cx2+cw*(pi/8),wallTop);cx.lineTo(cx2+cw*(pi/8),wallTop+backH);cx.stroke();
+  }
+
+  // Horizontal rail (dado rail at window bottom)
+  ss('rgba(60,45,35,0.6)',2.5);cx.lineCap='butt';
+  cx.beginPath();cx.moveTo(cx2+4,wallTop+backH*0.58);cx.lineTo(cx2+cw-4,wallTop+backH*0.58);cx.stroke();
+
+  // === WINDOWS (showing night landscape outside) ===
+  var ww2=cw*0.22,wh2=backH*0.35,wy2=wallTop+backH*0.12,wGap2=(cw-ww2*3)/4;
   for(var wi=0;wi<3;wi++){
-    var wx=cx2+wGap+wi*(ww+wGap);
-    var wall=cx.createLinearGradient(wx,wy,wx,wy+wh);
-    wall.addColorStop(0,'#5A4030');wall.addColorStop(0.5,'#4A3025');wall.addColorStop(1,'#3A2018');fs(wall);fr(wx,wy,ww,wh);
-    var glow=cx.createRadialGradient(wx+ww/2,wy+wh*0.15,0,wx+ww/2,wy+wh*0.15,ww*0.5);
-    glow.addColorStop(0,'rgba(220,180,100,0.14)');glow.addColorStop(1,'transparent');fs(glow);fr(wx,wy,ww,wh);
-    fs('rgba(100,70,40,0.5)');cx.beginPath();cx.arc(wx+ww/2,wy+wh*0.52,ww*0.1,0,6.28);cx.fill();
-    fs('#3A7D5A');fr(wx+ww*0.02,wy+wh*0.14,ww*0.24,wh*0.72);fs('#4A8D6A');fr(wx+ww*0.02,wy+wh*0.55,ww*0.24,wh*0.18);
-    fs('#3A7D5A');fr(wx+ww*0.74,wy+wh*0.14,ww*0.24,wh*0.72);fs('#4A8D6A');fr(wx+ww*0.74,wy+wh*0.55,ww*0.24,wh*0.18);
-    ss(C.bw,1.5);cx.globalAlpha=0.35;cx.strokeRect(wx,wy,ww,wh);cx.globalAlpha=1;
-  }
-  // Chassis + wheels
-  fs(C.nightDeep);fr(cx2,cy+ch-10,cw,12);
-  for(var bi=0;bi<2;bi++){
-    var bx3=cx2+cw*0.2+bi*cw*0.55,by=cy+ch-4;
-    fs(C.deepBg);fr(bx3-18,by-2,36,10);
-    for(var wi2=0;wi2<2;wi2++){
-      var wx4=bx3-5+wi2*14,wy4=by+9;
-      var pvd=cx.createRadialGradient(wx4-1,wy4-1,7,wx4,wy4,9);
-      pvd.addColorStop(0,C.pvdMid);pvd.addColorStop(0.85,C.pvdDark);pvd.addColorStop(1,C.pvdEdge);
-      fs(pvd);cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.fill();
-      ss(C.fameGreen,1.2);cx.globalAlpha=0.35;cx.beginPath();cx.arc(wx4,wy4,9,0,6.28);cx.stroke();cx.globalAlpha=1;
-      fs(C.pvdMid);cx.beginPath();cx.arc(wx4,wy4,2.5,0,6.28);cx.fill();
-      fs(C.petraGold);cx.globalAlpha=0.35;cx.beginPath();cx.arc(wx4,wy4,1,0,6.28);cx.fill();cx.globalAlpha=1;
-      ss('rgba(125,155,139,0.35)',1);
-      for(var sp=0;sp<6;sp++){var ang=sp*Math.PI/3+t*3;cx.beginPath();cx.moveTo(wx4+Math.cos(ang)*3.3,wy4+Math.sin(ang)*3.3);cx.lineTo(wx4+Math.cos(ang)*7.5,wy4+Math.sin(ang)*7.5);cx.stroke()}
+    var wx2=cx2+wGap2+wi*(ww2+wGap2);
+    // Window frame — dark metal
+    fs('#2A2228');fr(wx2-1.5,wy2-1.5,ww2+3,wh2+3);
+    // Glass — night outside
+    var glass=cx.createLinearGradient(wx2,wy2,wx2,wy2+wh2);
+    glass.addColorStop(0,'#0A0A18');glass.addColorStop(0.4,'#121028');glass.addColorStop(1,'#080818');
+    fs(glass);fr(wx2,wy2,ww2,wh2);
+    // Stars through window
+    for(var si=0;si<5;si++){
+      fs(C.bw);cx.globalAlpha=0.15+Math.sin(t*2+wi*3+si)*0.08;
+      cx.beginPath();cx.arc(wx2+3+si*ww2*0.2,wy2+3+Math.sin(wi+si)*wh2*0.4,0.4,0,6.28);cx.fill();
     }
+    // Distant mountain silhouette through window
+    fs('rgba(20,15,40,0.6)');cx.beginPath();
+    cx.moveTo(wx2,wy2+wh2);cx.lineTo(wx2+ww2*0.2,wy2+wh2*0.5);
+    cx.lineTo(wx2+ww2*0.5,wy2+wh2*0.65);cx.lineTo(wx2+ww2*0.8,wy2+wh2*0.4);
+    cx.lineTo(wx2+ww2,wy2+wh2);cx.closePath();cx.fill();
+    // Window glow
+    var wing=cx.createRadialGradient(wx2+ww2/2,wy2+wh2*0.3,0,wx2+ww2/2,wy2+wh2*0.3,ww2*0.4);
+    wing.addColorStop(0,'rgba(255,200,150,0.05)');wing.addColorStop(1,'transparent');
+    fs(wing);fr(wx2,wy2,ww2,wh2);
+    cx.globalAlpha=1;
+    // Window frame inner
+    ss('rgba(60,50,45,0.5)',1.2);cx.strokeRect(wx2,wy2,ww2,wh2);
   }
-  // Coupler
-  if(!ca.last){fs(C.deepBg);fr(cx2+cw-6,cy+ch*0.36,7,ch*0.16)}
-  // Last car glow
+
+  // === GREEN BENCH SEATS (below windows, along wall) ===
+  var seatY=wallTop+backH*0.62;
+  for(var si=0;si<3;si++){
+    var sx2=cx2+wGap2+si*(ww2+wGap2);
+    // Seat back (against wall)
+    var sb=cx.createLinearGradient(sx2,seatY,sx2+ww2,seatY);
+    sb.addColorStop(0,'#2A5A42');sb.addColorStop(0.5,'#3A7D5A');sb.addColorStop(1,'#2A5A42');
+    fs(sb);fr(sx2,seatY-wh2*0.28,ww2,wh2*0.28);
+    // Seat cushion
+    fs('#3A7D5A');fr(sx2+2,seatY,ww2-4,ch*0.04);
+    // Seat highlight
+    fs('rgba(180,220,190,0.12)');fr(sx2+3,seatY,ww2-6,1);
+  }
+
+  // === FLOOR ===
+  var floorY=wallTop+backH;
+  var fl=cx.createLinearGradient(cx2,floorY,cx2,floorY+ch*0.32);
+  fl.addColorStop(0,'#3A3028');fl.addColorStop(0.3,'#4A3A30');fl.addColorStop(1,'#2A2018');
+  fs(fl);fr(cx2,floorY,cw,ch*0.32);
+
+  // Floor plank lines
+  ss('rgba(20,15,10,0.2)',0.4);
+  for(var fi=0;fi<6;fi++){
+    cx.beginPath();cx.moveTo(cx2,floorY+fi*ch*0.053);cx.lineTo(cx2+cw,floorY+fi*ch*0.053);cx.stroke();
+  }
+
+  // Warm light pool on floor from ceiling lamps
+  for(var li=0;li<4;li++){
+    var lx2=cx2+cw*0.15+li*cw*0.23;
+    var fg=cx.createRadialGradient(lx2,floorY+ch*0.08,0,lx2,floorY+ch*0.08,ch*0.1);
+    fg.addColorStop(0,'rgba(255,200,150,0.06)');fg.addColorStop(1,'transparent');
+    fs(fg);fr(lx2-ch*0.06,floorY,ch*0.12,ch*0.15);
+  }
+
+  // === LUGGAGE RACK (above windows) ===
+  fs('rgba(60,50,42,0.5)');fr(cx2+4,wallTop+ch*0.01,cw-8,ch*0.015);
+  // Rack support brackets
+  ss('rgba(50,40,35,0.4)',1.2);
+  for(var bi=0;bi<6;bi++){
+    var bx=cx2+8+bi*(cw-16)/5;
+    cx.beginPath();cx.moveTo(bx,wallTop+ch*0.025);cx.lineTo(bx,wallTop-backH*0.02);cx.stroke();
+  }
+
+  // === HANDRAILS (vertical poles) ===
+  for(var hi=0;hi<3;hi++){
+    var hx=cx2+cw*0.2+hi*cw*0.3;
+    ss('rgba(180,160,140,0.25)',1.8);cx.lineCap='round';
+    cx.beginPath();cx.moveTo(hx,wallTop+ch*0.015);cx.lineTo(hx,floorY+ch*0.1);cx.stroke();
+    // Pole mount points
+    fs('rgba(180,160,140,0.2)');cx.beginPath();cx.arc(hx,wallTop+ch*0.015,1.5,0,6.28);cx.fill();
+    cx.beginPath();cx.arc(hx,floorY+ch*0.1,1.5,0,6.28);cx.fill();
+  }
+
+  // === CREW (waiting to be rescued in cars 1,3,5) ===
+  if([0,2,4].indexOf(ca.ci)>=0&&!crewFound[ca.ci]){
+    var cx4=cx2+cw*0.4,cy4=floorY+ch*0.06;
+    fs('rgba(20,5,25,0.3)');cx.beginPath();cx.ellipse(cx4,cy4+ch*0.06,5,1.3,0,0,6.28);cx.fill();
+    ss('#4A3A50',1.8);cx.beginPath();cx.moveTo(cx4-2,cy4-ch*0.02);cx.lineTo(cx4-3,cy4+ch*0.06);cx.stroke();
+    cx.beginPath();cx.moveTo(cx4+2,cy4-ch*0.02);cx.lineTo(cx4+3,cy4+ch*0.06);cx.stroke();
+    fs('#4A3A50');fr(cx4-4,cy4-ch*0.08,8,ch*0.06);
+    fs('#5A4A60');cx.beginPath();cx.arc(cx4,cy4-ch*0.1,3.5,0,6.28);cx.fill();
+  }
+
+  // === WHEELS (still visible below) ===
+  var whY=floorY+ch*0.3;
+  for(var wi=0;wi<2;wi++){
+    var wx3=cx2+cw*0.22+wi*cw*0.5,wy3=whY+2;
+    fs(C.deepBg);fr(wx3-14,wy3-6,28,16);
+    var pvd=cx.createRadialGradient(wx3,wy3,1,wx3,wy3,7);
+    pvd.addColorStop(0,C.pvdMid);pvd.addColorStop(0.8,C.pvdDark);pvd.addColorStop(1,C.pvdEdge);
+    fs(pvd);cx.beginPath();cx.arc(wx3,wy3,7,0,6.28);cx.fill();
+    ss(C.fameGreen,1.2);cx.globalAlpha=0.3;cx.beginPath();cx.arc(wx3,wy3,7,0,6.28);cx.stroke();cx.globalAlpha=1;
+    fs(C.pvdMid);cx.beginPath();cx.arc(wx3,wy3,2,0,6.28);cx.fill();
+    fs(C.petraGold);cx.globalAlpha=0.3;cx.beginPath();cx.arc(wx3,wy3,0.8,0,6.28);cx.fill();cx.globalAlpha=1;
+  }
+
+  // === COUPLER (between cars) ===
+  if(!ca.last){fs(C.deepBg);fr(cx2+cw-6,floorY+ch*0.08,7,ch*0.06)}
+
+  // === LAST CAR GLOW ===
   if(ca.last){
     var a=0.15+0.1*Math.sin(t*2.5);
     ss('rgba(232,152,168,'+(0.3+a)+')',1.8);cx.strokeRect(cx2+2,cy+2,cw-4,ch-4);
-    var dz=cx.createLinearGradient(cx2,cy+ch-28,cx2,cy+ch);
-    dz.addColorStop(0,'transparent');dz.addColorStop(1,'rgba(232,152,168,0.1)');fs(dz);fr(cx2,cy+ch-28,cw,28);
-    fs('rgba(232,152,168,'+(0.5+a*0.3)+')');cx.font='7px system-ui';cx.textAlign='center';cx.fillText('末',cx2+cw/2,cy+ch-8);
+    fs('rgba(232,152,168,'+(0.5+a*0.3)+')');cx.font='7px system-ui';cx.textAlign='center';cx.fillText('末',cx2+cw/2,floorY+ch*0.2);
   }
 }
 
@@ -625,7 +669,7 @@ var rationFood=0,rationWater=0,eventToday=null;
 function carW(){return W/3.5}
 function carH(){return H*0.65}
 function makeCars(){cars=[];for(var i=0;i<NC;i++){var cw=carW(),ch=carH();cars.push({x:i*cw,y:H*0.2,w:cw,h:ch,last:i===NC-1})}}
-function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h-38-Math.random()*20,ci:i,d:d,got:false})}}}
+function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h*0.72-Math.random()*12,ci:i,d:d,got:false})}}}
 function makeStars(){stars=[];for(var i=0;i<200;i++){var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,C.vapourViolet,C.petraGold];stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,c:cols[Math.floor(Math.random()*cols.length)]})}}
 
 // ===== LOGBOOK UI =====
@@ -693,7 +737,7 @@ function gameOverP1(win){st='end';document.getElementById('over').classList.add(
 function collect(it){if(it.got)return;it.got=true;inv[it.d.k]++;updInv();for(var i=0;i<8;i++)pts.push({x:it.x,y:it.y,vx:(Math.random()-0.5)*2.5,vy:-2-Math.random()*2.5,life:22,ml:22,c:it.d.c,s:1.5+Math.random()*2})}
 function pickup(){for(var i=0;i<loot.length;i++){var l=loot[i];if(l.got)continue;if(Math.abs(player.x-l.x)<38&&Math.abs(player.y-l.y)<44)collect(l)}}
 function startPhase2(){phase=2;st='play';level=2;showLevelIntro=true;res.food=inv.food;res.water=inv.water;res.coal=inv.coal;res.meds=inv.med;res.wood=0;res.iron=0;res.gear=inv.gear||0;res.ammo=inv.ammo||0;crewHealth=crewCount;day=1;logPage=1;distance=0;showLogbook()}
-function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h-42;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h-38,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h-38,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
+function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h*0.72;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h*0.72,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h*0.72,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
 
 // ===== INPUT =====
 var joyX=0,joyActive=false,joyOX=0,joyOY=0,keys={};
