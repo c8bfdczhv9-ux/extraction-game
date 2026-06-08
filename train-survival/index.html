@@ -1335,7 +1335,10 @@ window.addEventListener('keydown',function(e){keys[e.keyCode]=true;if(e.keyCode=
 window.addEventListener('keyup',function(e){keys[e.keyCode]=false;});
 
 // Start
-resize();makeCars();spawnLoot();makeStars();updInv();player.x=carW()/2;requestAnimationFrame(loop);
+try{
+resize();makeCars();spawnLoot();makeStars();updInv();player.x=carW()/2;
+}catch(e){var g2=document.getElementById('g');var c2=g2.getContext('2d');c2.fillStyle='#E898A8';c2.font='12px monospace';c2.fillText('START ERR: '+e.message,10,30);}
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
