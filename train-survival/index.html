@@ -53,7 +53,6 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 <body>
 <div id="wrap">
 <canvas id="g"></canvas>
-<div id="loading"><div class="txt" id="loadtxt">VISUALS</div><div class="bar"><div id="loadbar" style="width:0%"></div></div></div>
 <button id="styletog" onclick="toggleStyle()">◈ 晶层</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
 <div id="inv"></div>
@@ -89,27 +88,68 @@ function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
 
 // ===== LEVEL DATA =====
 var LEVELS=[
-  {name:'夜行',eng:'Night Run',desc:'暗夜列车上奔跑收集物资',
-   sky:['#12061E','#1A0830','#2A1048','#4E1D73','#6B30A0','#3A2050','#1A0C28'],ground:'#180828',starBoost:1.0},
-  {name:'拂晓',eng:'First Light',desc:'熟悉营地生活·轻松开局',
-   sky:['#1A0C28','#2A1840','#4A2868','#7A5088','#B090A0','#C8B0A8','#A09088'],ground:'#2A1830',starBoost:0.25},
-  {name:'探索',eng:'Expedition',desc:'外出搜索资源·晨光熹微',
-   sky:['#1E1230','#3A2850','#6A5080','#9B7BA0','#B8A0B0','#C8B8B8','#A89890'],ground:'#302038',starBoost:0.15},
-  {name:'采集',eng:'Gathering',desc:'储备食物和水·午后暖阳',
-   sky:['#2A1A30','#5A3850','#8B6070','#C8A878','#D4B888','#C0A070','#908068'],ground:'#3A2840',starBoost:0},
-  {name:'维护',eng:'Maintenance',desc:'火车头需要更多照料·阴云',
-   sky:['#1E1428','#3A2848','#5A4070','#7A6088','#8B7898','#7A6888','#504058'],ground:'#221830',starBoost:0.05},
-  {name:'危机',eng:'Crisis',desc:'危险事件增加·风暴将至',
-   sky:['#100818','#1E1030','#3A2050','#5A3080','#7A40A0','#603878','#301840'],ground:'#1A1028',starBoost:0.1},
-  {name:'坚守',eng:'Hold Fast',desc:'资源紧缺·坚持住·尘暴',
-   sky:['#1C1420','#382838','#584050','#786058','#908070','#706858','#403830'],ground:'#2A2030',starBoost:0},
-  {name:'暴雨',eng:'Monsoon',desc:'雨季来临·难以外出',
-   sky:['#0A1020','#122038','#183050','#284868','#305878','#284868','#182838'],ground:'#101828',starBoost:0},
-  {name:'冲刺',eng:'Final Push',desc:'最后冲刺·放手一搏',
-   sky:['#12061E','#1E0C32','#2A1048','#4E1D73','#6B30A0','#3A2050','#1A0C28'],ground:'#180828',starBoost:1.5},
-  {name:'终点',eng:'Arrival',desc:'最后的5天·抵达远方',
-   sky:['#1A0C28','#3A1850','#7A4080','#C8A878','#D4B888','#E8D0A0','#B8A878'],ground:'#3A2840',starBoost:0.1}
+  {name:'暗夜',eng:'Night',sky:['#0A0418','#120820','#1E0C32','#2A1048','#1A0C28'],horizon:'#1A0C28',
+   fog:'rgba(20,10,40,0.55)',particles:'stars',particleDensity:80,starBoost:1.2,
+   ground1:'#181028',ground2:'#221838',accent:'rgba(107,48,160,0.15)',weather:null},
+  {name:'拂晓',eng:'Dawn',sky:['#181028','#2A1848','#4A3070','#8A6080','#B89098'],
+   fog:'rgba(180,140,160,0.2)',particles:'mist',particleDensity:30,starBoost:0.2,
+   horizon:'#4A3060',ground1:'#2A2040',ground2:'#382850',accent:'rgba(180,140,160,0.12)',weather:'mist'},
+  {name:'迷雾',eng:'Mist',sky:['#1A1830','#282840','#3A3858','#585878','#787898'],
+   fog:'rgba(120,130,160,0.5)',particles:'fog',particleDensity:60,starBoost:0,
+   horizon:'#3A3858',ground1:'#282840',ground2:'#383858',accent:'rgba(160,160,180,0.08)',weather:'fog'},
+  {name:'金阳',eng:'Golden',sky:['#1A1030','#3A2050','#8A5070','#C89068','#E8C878'],
+   fog:'rgba(200,160,100,0.2)',particles:'dust',particleDensity:20,starBoost:0,
+   horizon:'#6A4070',ground1:'#3A2850',ground2:'#5A3868',accent:'rgba(200,160,100,0.18)',weather:'dust'},
+  {name:'阴云',eng:'Overcast',sky:['#181828','#282838','#3A3A4A','#585868','#787888'],
+   fog:'rgba(120,120,140,0.4)',particles:'clouds',particleDensity:25,starBoost:0,
+   horizon:'#383848',ground1:'#282838',ground2:'#3A3A48',accent:'rgba(160,160,180,0.1)',weather:'overcast'},
+  {name:'雷暴',eng:'Storm',sky:['#0A0A18','#181028','#282040','#403060','#584878'],
+   fog:'rgba(40,30,60,0.5)',particles:'lightning',particleDensity:40,starBoost:0.3,
+   horizon:'#282040',ground1:'#181028',ground2:'#2A2040',accent:'rgba(120,100,160,0.1)',weather:'storm'},
+  {name:'尘暴',eng:'Dust',sky:['#1A1410','#2A2018','#483828','#685040','#887058'],
+   fog:'rgba(130,100,80,0.45)',particles:'sand',particleDensity:50,starBoost:0,
+   horizon:'#483828',ground1:'#382820',ground2:'#504030',accent:'rgba(180,140,100,0.1)',weather:'sand'},
+  {name:'暴雨',eng:'Monsoon',sky:['#080C18','#101828','#182440','#283860','#385080'],
+   fog:'rgba(40,50,80,0.4)',particles:'rain',particleDensity:120,starBoost:0,
+   horizon:'#182440',ground1:'#101828',ground2:'#202838',accent:'rgba(80,100,140,0.15)',weather:'rain'},
+  {name:'流星',eng:'Meteor',sky:['#0A0418','#120820','#1E0C32','#3A1850','#2A1048'],
+   fog:'rgba(30,15,50,0.35)',particles:'meteors',particleDensity:50,starBoost:2.0,
+   horizon:'#1E0C32',ground1:'#181028',ground2:'#281838',accent:'rgba(140,80,200,0.2)',weather:'meteor'},
+  {name:'终点',eng:'Arrival',sky:['#1A0828','#3A1850','#7A4080','#C8A870','#D4C888'],
+   fog:'rgba(200,180,140,0.25)',particles:'sparkles',particleDensity:40,starBoost:0.8,
+   horizon:'#5A3070',ground1:'#2A1840',ground2:'#4A2860',accent:'rgba(220,200,160,0.2)',weather:'sparkle'}
 ];
+
+// Weather particle pool
+var weatherParticles=[];
+function initWeather(clv){
+  weatherParticles=[];
+  var lv=LEVELS[clv-1]||LEVELS[0],n=lv.particleDensity;
+  for(var i=0;i<n;i++){
+    var p={x:Math.random()*W,y:Math.random()*H,vx:0,vy:0,life:1,maxLife:1,size:0.5+Math.random()*2};
+    if(lv.weather==='rain'){p.vy=8+Math.random()*8;p.vx=-1+Math.random()*2;p.size=0.3+Math.random()*0.5;p.color='rgba(140,170,220,0.4)'}
+    else if(lv.weather==='mist'||lv.weather==='fog'){p.vy=0.1+Math.random()*0.3;p.vx=-0.2+Math.random()*0.4;p.size=8+Math.random()*20;p.color='rgba(180,180,200,0.06)'}
+    else if(lv.weather==='dust'||lv.weather==='sand'){p.vy=0.1+Math.random()*0.2;p.vx=0.5+Math.random()*1.5;p.size=2+Math.random()*5;p.color='rgba(180,140,100,0.08)'}
+    else if(lv.weather==='storm'){p.vy=1+Math.random()*3;p.vx=-2+Math.random()*4;p.size=1+Math.random()*3;p.color='rgba(120,100,160,0.06)'}
+    else if(lv.weather==='overcast'){p.vy=0.05+Math.random()*0.15;p.vx=-0.3+Math.random()*0.6;p.size=10+Math.random()*25;p.color='rgba(140,140,160,0.05)'}
+    else if(lv.weather==='meteor'){p.x=Math.random()*W;p.y=-20-Math.random()*60;p.vy=4+Math.random()*6;p.vx=-1+Math.random()*2;p.size=0.8+Math.random()*1.5;p.color=C.bw;p.maxLife=0.3+Math.random()*0.5}
+    else if(lv.weather==='sparkle'){p.vy=0;p.vx=0;p.size=1+Math.random()*2;p.color=C.petraGold;p.maxLife=2+Math.random()*4}
+    weatherParticles.push(p);
+  }
+}
+
+function updateWeather(dt){
+  var lv=LEVELS[level-1]||LEVELS[0];
+  for(var i=0;i<weatherParticles.length;i++){
+    var p=weatherParticles[i];
+    p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;p.life-=dt;
+    if(p.life<=0||p.y>H+50||p.x<-50||p.x>W+50){
+      p.life=p.maxLife;p.x=Math.random()*W;
+      if(lv.weather==='rain'||lv.weather==='meteor')p.y=-20-Math.random()*40;
+      else p.y=Math.random()*H;
+    }
+  }
+}
 
 // ===== ITEMS =====
 function drawFood(x,y){var s=1.1;cx.save();cx.translate(x-5*s,y-7*s);fs('rgba(30,10,50,0.3)');fa(5*s,10*s,5*s);fs('rgba(160,130,90,0.3)');fr(1*s,1*s,8*s,8*s);ss(C.petraGold,1*s);cx.strokeRect(1*s,1*s,8*s,8*s);fs('rgba(180,150,110,0.5)');fr(0,0,10*s,2*s);fr(0,8*s,10*s,2*s);ss(C.petraGold,0.6*s);cx.strokeRect(0,0,10*s,2*s);cx.strokeRect(0,8*s,10*s,2*s);cx.restore()}
@@ -127,13 +167,12 @@ var ITEMS=[
   {k:'chess',n:'棋盘',c:'#8B7060',draw:drawChess},{k:'med',n:'医药',c:C.dustyCoral,draw:drawMed}
 ];
 
-// ===== PLAYER (Banksy stencil sprite) =====
-var sprPlayerW=80,sprPlayerH=100;
+// ===== PLAYER (purely procedural) =====
 function drawPlayer(px,py,t){
   var s=2.2;cx.save();cx.translate(px,py-28*s);
   // Shadow
   fs('rgba(20,5,30,0.35)');cx.beginPath();cx.ellipse(0,28*s,7*s,2*s,0,0,6.28);cx.fill();
-  // Balloon (always procedural — animated)
+  // Balloon
   var blowY=28*s-22*s,bstrTop=-30*s;
   ss(C.bg,1.2*s);cx.lineCap='round';
   cx.beginPath();cx.moveTo(5*s,blowY-7*s);cx.quadraticCurveTo(7*s+Math.sin(t*1.7)*0.6*s,blowY-16*s,6*s,bstrTop);cx.stroke();
@@ -143,28 +182,22 @@ function drawPlayer(px,py,t){
   cx.moveTo(0,2.5*s);cx.bezierCurveTo(-4.5*s,-3.5*s,-9*s,1*s,0,7*s);
   cx.bezierCurveTo(9*s,1*s,4.5*s,-3.5*s,0,2.5*s);cx.fill();
   fs(C.bw);cx.globalAlpha=0.25;cx.beginPath();cx.arc(-2*s,-1.5*s,1.8*s,0,6.28);cx.fill();cx.globalAlpha=1;cx.restore();
-  // Body — Banksy stencil sprite or procedural fallback
-  if(sprPlayer.complete&&sprPlayer.naturalWidth>0){
-    var bw=12*s,bh=20*s,bx=-bw/2,by=-4*s;
-    cx.drawImage(sprPlayer,bx,by,bw,bh);
-  }else{
-    // Procedural fallback
-    var skirtWave=Math.sin(t*4)*1*s;
-    fs(C.bw);cx.globalAlpha=0.92;cx.beginPath();
-    cx.moveTo(-5*s+skirtWave,7*s);cx.lineTo(-6.5*s+skirtWave*1.3,13*s);
-    cx.quadraticCurveTo(-7*s,15.5*s,-2.5*s,15.5*s+skirtWave*0.5);
-    cx.quadraticCurveTo(7*s,14*s,6*s+skirtWave*0.8,13*s);cx.lineTo(4.5*s+skirtWave*0.5,7*s);cx.closePath();cx.fill();cx.globalAlpha=1;
-    ss(C.vapourViolet,0.8*s);cx.globalAlpha=0.6;
-    cx.beginPath();cx.moveTo(-6*s+skirtWave*1.2,13*s);cx.quadraticCurveTo(-2.5*s,16*s+skirtWave*0.5,5.8*s+skirtWave*0.7,13*s);cx.stroke();cx.globalAlpha=1;
-    fs(C.bw);cx.globalAlpha=0.94;cx.beginPath();cx.moveTo(-3.5*s,-5*s);cx.lineTo(-4.5*s,7*s);cx.lineTo(4.5*s,7*s);cx.lineTo(3.5*s,-5*s);cx.closePath();cx.fill();cx.globalAlpha=1;
-    ss(C.bgDark,1.8*s);cx.lineCap='round';
-    cx.beginPath();cx.moveTo(-3.5*s,-2*s);cx.quadraticCurveTo(-1.5*s,-9*s,5*s,blowY-8*s);cx.stroke();
-    cx.beginPath();cx.moveTo(3.5*s,-2*s);cx.quadraticCurveTo(8*s+Math.sin(t*5)*2*s,-0.5*s,7*s+Math.sin(t*5)*2.5*s,5*s);cx.stroke();
-    fs(C.bw);cx.globalAlpha=0.96;cx.beginPath();cx.arc(0,-9*s,4.5*s,0,6.28);cx.fill();cx.globalAlpha=1;
-    fs(C.nightDeep);cx.globalAlpha=0.8;cx.beginPath();cx.arc(-1.6*s,-10*s,0.6*s,0,6.28);cx.fill();
-    cx.beginPath();cx.arc(1.6*s,-10*s,0.6*s,0,6.28);cx.fill();cx.globalAlpha=1;
-  }
-  // Legs (always procedural — animated)
+  // Body — triangle dress + rectangle torso
+  var skirtWave=Math.sin(t*4)*1*s;
+  fs(C.bw);cx.globalAlpha=0.92;cx.beginPath();
+  cx.moveTo(-5*s+skirtWave,7*s);cx.lineTo(-6.5*s+skirtWave*1.3,13*s);
+  cx.quadraticCurveTo(-7*s,15.5*s,-2.5*s,15.5*s+skirtWave*0.5);
+  cx.quadraticCurveTo(7*s,14*s,6*s+skirtWave*0.8,13*s);cx.lineTo(4.5*s+skirtWave*0.5,7*s);cx.closePath();cx.fill();cx.globalAlpha=1;
+  ss(C.vapourViolet,0.8*s);cx.globalAlpha=0.6;
+  cx.beginPath();cx.moveTo(-6*s+skirtWave*1.2,13*s);cx.quadraticCurveTo(-2.5*s,16*s+skirtWave*0.5,5.8*s+skirtWave*0.7,13*s);cx.stroke();cx.globalAlpha=1;
+  fs(C.bw);cx.globalAlpha=0.94;cx.beginPath();cx.moveTo(-3.5*s,-5*s);cx.lineTo(-4.5*s,7*s);cx.lineTo(4.5*s,7*s);cx.lineTo(3.5*s,-5*s);cx.closePath();cx.fill();cx.globalAlpha=1;
+  ss(C.bgDark,1.8*s);cx.lineCap='round';
+  cx.beginPath();cx.moveTo(-3.5*s,-2*s);cx.quadraticCurveTo(-1.5*s,-9*s,5*s,blowY-8*s);cx.stroke();
+  cx.beginPath();cx.moveTo(3.5*s,-2*s);cx.quadraticCurveTo(8*s+Math.sin(t*5)*2*s,-0.5*s,7*s+Math.sin(t*5)*2.5*s,5*s);cx.stroke();
+  fs(C.bw);cx.globalAlpha=0.96;cx.beginPath();cx.arc(0,-9*s,4.5*s,0,6.28);cx.fill();cx.globalAlpha=1;
+  fs(C.nightDeep);cx.globalAlpha=0.8;cx.beginPath();cx.arc(-1.6*s,-10*s,0.6*s,0,6.28);cx.fill();
+  cx.beginPath();cx.arc(1.6*s,-10*s,0.6*s,0,6.28);cx.fill();cx.globalAlpha=1;
+  // Legs
   var legPhase=t*6;
   ss(C.bgDark,2.5*s);cx.lineCap='round';
   cx.beginPath();cx.moveTo(-2*s,11*s);cx.lineTo(-3.5*s+Math.sin(legPhase)*5*s,24*s);cx.stroke();
@@ -246,21 +279,18 @@ function drawCar(ca,c,t){
 // ===== CAMP SCENE =====
 function drawCamp(t,clv){
   var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;
-  // Draw background image or fallback
-  var img=bgImgs[idx];
-  if(img&&img.complete&&img.naturalWidth>0&&!img._failed){
-    var iw=img.naturalWidth,ih=img.naturalHeight;
-    var scale=Math.max(W/iw,H/ih);
-    var sw=iw*scale,sh=ih*scale;
-    cx.drawImage(img,(W-sw)/2,(H-sh)/2,sw,sh);
-  }else{
-    var lv=LEVELS[idx]||LEVELS[0];
-    var sky=cx.createLinearGradient(0,0,0,H);
-    for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
-    fs(sky);fr(0,0,W,H);
-  }
+  var lv=LEVELS[idx];
+  // Sky gradient
+  var sky=cx.createLinearGradient(0,0,0,H*0.75);
+  for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
+  fs(sky);fr(0,0,W,H*0.75);
+  // Horizon strip
+  var hg=cx.createLinearGradient(0,H*0.7,0,H*0.78);
+  hg.addColorStop(0,lv.sky[lv.sky.length-1]);hg.addColorStop(0.5,lv.horizon);hg.addColorStop(1,lv.ground1);
+  fs(hg);fr(0,H*0.7,W,H*0.08);
+  // Fog
+  fs(lv.fog);fr(0,H*0.45,W,H*0.55);
   // Stars
-  var lv=LEVELS[idx]||LEVELS[0];
   if(lv.starBoost>0){
     for(var i=0;i<stars.length;i++){
       var s=stars[i];fs(s.c||C.bw);cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));
@@ -312,66 +342,53 @@ function drawCamp(t,clv){
   fs('rgba(196,168,224,0.7)');cx.font='7px system-ui';cx.textAlign='center';cx.fillText(Math.floor(distance)+' / '+goalDistance+' km',W/2,barY-6);
 }
 
-// ===== BACKGROUND IMAGES (Replicate Flux Schnell) =====
-// ===== IMAGE PRELOADER =====
-var bgBase='https://c8bfdczhv9-ux.github.io/extraction-game/train-survival/assets/';
-var bgFiles=['bg_l1_night.png','bg_l2_dawn.png','bg_l3_mist.png','bg_l4_golden.png','bg_l5_overcast.png','bg_l6_storm.png','bg_l7_dust.png','bg_l8_rain.png','bg_l9_meteor.png','bg_l10_golden.png'];
-var bgImgs=[];
-var imgsToLoad=bgFiles.length+1+6; // 10 bg + 1 player + 6 items
-var imgsLoaded=0;
-var allImgsReady=false;
-
-function imgLoaded(){imgsLoaded++;if(imgsLoaded>=imgsToLoad)allImgsReady=true;}
-
-for(var i=0;i<bgFiles.length;i++){
-  var img=new Image();img.crossOrigin='anonymous';
-  img.onload=imgLoaded;img.onerror=function(){imgLoaded();this._failed=true;};
-  img.src=bgBase+bgFiles[i];bgImgs.push(img);
-}
-
-var sprPlayer=new Image();sprPlayer.crossOrigin='anonymous';
-sprPlayer.onload=imgLoaded;sprPlayer.onerror=function(){imgLoaded();this._failed=true;};
-sprPlayer.src=bgBase+'spr_player.png';
-
-var sprImgs={};
-['food','coal','water','gun','radio','med'].forEach(function(k,i){
-  var names=['spr_food.png','spr_coal.png','spr_water.png','spr_gun.png','spr_radio.png','spr_med.png'];
-  var img=new Image();img.crossOrigin='anonymous';
-  img.onload=imgLoaded;img.onerror=function(){imgLoaded();this._failed=true;};
-  img.src=bgBase+names[i];sprImgs[k]=img;
-});
-
 // ===== ENVIRONMENT =====
 function drawSky(clv){
   var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;
-  var img=bgImgs[idx];
-  // Draw background image if loaded, else fallback to procedural
-  if(img&&img.complete&&img.naturalWidth>0&&!img._failed){
-    // Scale to fill canvas
-    var iw=img.naturalWidth,ih=img.naturalHeight;
-    var scale=Math.max(W/iw,H/ih);
-    var sw=iw*scale,sh=ih*scale;
-    var sx=(W-sw)/2,sy=(H-sh)/2;
-    cx.drawImage(img,sx,sy,sw,sh);
-  }else{
-    // Fallback procedural gradient
-    var lv=LEVELS[idx]||LEVELS[0];
-    var sky=cx.createLinearGradient(0,0,0,H);
-    for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
-    fs(sky);fr(0,0,W,H);
-  }
-  // Crystal Over veil (always)
-  var co=cx.createLinearGradient(0,0,W*0.3,H*0.4);
-  co.addColorStop(0,'rgba(180,140,220,0.04)');co.addColorStop(0.5,'rgba(200,160,230,0.02)');co.addColorStop(1,'transparent');fs(co);fr(0,0,W,H);
-  // Stars (always on top)
+  var lv=LEVELS[idx];
+  // Sky gradient
+  var sky=cx.createLinearGradient(0,0,0,H*0.75);
+  for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
+  fs(sky);fr(0,0,W,H*0.75);
+  // Horizon strip
+  var hg=cx.createLinearGradient(0,H*0.7,0,H*0.78);
+  hg.addColorStop(0,lv.sky[lv.sky.length-1]);hg.addColorStop(0.5,lv.horizon);hg.addColorStop(1,lv.ground1);
+  fs(hg);fr(0,H*0.7,W,H*0.08);
+  // Fog layer
+  fs(lv.fog);fr(0,H*0.45,W,H*0.55);
+  // Weather particles
   var t=Date.now()/1000;
-  var lv=LEVELS[idx]||LEVELS[0];
+  for(var i=0;i<weatherParticles.length;i++){
+    var p=weatherParticles[i];
+    if(lv.weather==='rain'){
+      cx.globalAlpha=0.3+0.1*Math.sin(t*30+i);
+      ss(p.color,0.5);cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p.x-p.vx*0.3,p.y+6);cx.stroke();
+    }else if(lv.weather==='storm'){
+      cx.globalAlpha=0.04;fs(p.color);cx.beginPath();cx.arc(p.x,p.y,p.size,0,6.28);cx.fill();
+    }else if(lv.weather==='meteor'){
+      cx.globalAlpha=p.life/p.maxLife*0.7;
+      var grd=cx.createLinearGradient(p.x,p.y,p.x-p.vx*3,p.y-p.vy*3);
+      grd.addColorStop(0,C.bw);grd.addColorStop(1,'transparent');ss(grd,p.size);
+      cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p.x-p.vx*8,p.y-p.vy*8);cx.stroke();
+      fs(C.bw);cx.beginPath();cx.arc(p.x,p.y,p.size*1.2,0,6.28);cx.fill();
+      cx.globalAlpha=0.1;fs(C.bw);cx.beginPath();cx.arc(p.x,p.y,p.size*3,0,6.28);cx.fill();
+    }else if(lv.weather==='sparkle'){
+      cx.globalAlpha=0.3+0.3*Math.sin(t*3+i);
+      fs(C.petraGold);cx.beginPath();cx.arc(p.x,p.y,p.size,0,6.28);cx.fill();
+    }else{
+      cx.globalAlpha=0.03;fs(p.color);cx.beginPath();cx.arc(p.x,p.y,p.size,0,6.28);cx.fill();
+    }
+  }cx.globalAlpha=1;
+  // Stars
   if(lv.starBoost>0){
     for(var i=0;i<stars.length;i++){
       var s=stars[i];fs(s.c||C.bw);cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));
       cx.beginPath();cx.arc(s.x-cam*0.02,s.y,s.r,0,6.28);cx.fill();
     }cx.globalAlpha=1;
   }
+  // Crystal Over veil
+  var co=cx.createLinearGradient(0,0,W*0.3,H*0.4);
+  co.addColorStop(0,'rgba(180,140,220,0.04)');co.addColorStop(0.5,'rgba(200,160,230,0.02)');co.addColorStop(1,'transparent');fs(co);fr(0,0,W,H);
 }
 function drawGround(clv){
   // Rails only — background handles landscape
@@ -398,8 +415,7 @@ function draw(){
   var t=Date.now()/1000;
   for(var ci=0;ci<cars.length;ci++){cars[ci].ci=ci;drawCar(cars[ci],cam,t)}
   for(var li=0;li<loot.length;li++){var l=loot[li];if(l.got)continue;var lx=l.x-cam;if(lx<-40||lx>W+40)continue;
-    var simg=sprImgs[l.d.k];if(simg&&simg.complete&&simg.naturalWidth>0){cx.drawImage(simg,lx-12,l.y-12,24,24)}
-    else{l.d.draw(lx,l.y)}
+    l.d.draw(lx,l.y)
   }
   drawPlayer(player.x-cam,player.y,t,level);
   for(var pi=0;pi<pts.length;pi++){var p=pts[pi];cx.globalAlpha=p.life/p.ml;fs(p.c);cx.beginPath();cx.moveTo(p.x-cam,p.y-p.s);cx.lineTo(p.x-cam+p.s,p.y);cx.lineTo(p.x-cam,p.y+p.s);cx.lineTo(p.x-cam-p.s,p.y);cx.closePath();cx.fill()}cx.globalAlpha=1;
@@ -481,7 +497,7 @@ function cureM(){res.meds--;eventToday=null;endDay()}
 function doChoice(take){var sub=eventToday?eventToday.subtype:'supplies';eventToday=null;if(take){if(Math.random()<0.65){if(sub==='supplies'){res.food+=3;res.water+=2;res.coal+=2}else{res.food+=2;res.water+=2;res.iron+=1}endDay()}else{res.food=Math.max(0,res.food-3);res.water=Math.max(0,res.water-2);if(Math.random()<0.3)crewHealth--;endDay()}}else{endDay()}}
 function resolveE(){if(eventToday&&eventToday.type==='mice')res.food=Math.max(0,res.food-eventToday.loss);if(eventToday&&eventToday.type==='luck'){res.food+=2;res.water+=1;res.coal+=1}if(eventToday&&eventToday.type==='bandit'&&eventToday.stolen){res.food=Math.max(0,res.food-eventToday.stolen.food);res.water=Math.max(0,res.water-eventToday.stolen.water)}eventToday=null;endDay()}
 function calcScore(){score=Math.floor(distance*0.5+res.food*10+res.water*8+res.coal*5+res.iron*15+res.wood*8+crewHealth*200+res.gear*30+res.ammo*20);return score>800?'S':score>600?'A':score>400?'B':score>200?'C':'D'}
-function endDay(){day++;if(explorerAway&&day>=explorerReturnDay){explorerAway=false;if(Math.random()<0.15){crewHealth--;explorerFound=[{name:'未归',icon:'💀',amt:0}]}else{var types=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'},{n:'子弹',icon:'🔫',k:'ammo2'},{n:'猎枪',icon:'🔫',k:'gear2'},{n:'收音机',icon:'📻',k:'comm2'},{n:'棋盘',icon:'♟️',k:'chess2'}];explorerFound=[];var fc=2+Math.floor(Math.random()*3);for(var fi=0;fi<fc;fi++){var t=types[Math.floor(Math.random()*types.length)];var amt=1+Math.floor(Math.random()*3);if(!t.k.endsWith('2'))res[t.k]=(res[t.k]||0)+amt;else if(t.k==='gear2')res.gear=(res.gear||0)+amt;else if(t.k==='ammo2')res.ammo=(res.ammo||0)+amt;explorerFound.push({name:t.n,icon:t.icon,amt:amt})}}if(crewHealth<=0){endP2(false,'探索者未归');return}}if(distance>=goalDistance){endP2(true,'提前抵达远方！');return}if(level>=2&&(day-(level-2)*daysPerLevel)>daysPerLevel){level++;if(level>10){endP2(true,'抵达远方！');return}showLevelIntro=true}logPage=1;eventToday=null;showLogPage()}
+function endDay(){day++;if(explorerAway&&day>=explorerReturnDay){explorerAway=false;if(Math.random()<0.15){crewHealth--;explorerFound=[{name:'未归',icon:'💀',amt:0}]}else{var types=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'},{n:'子弹',icon:'🔫',k:'ammo2'},{n:'猎枪',icon:'🔫',k:'gear2'},{n:'收音机',icon:'📻',k:'comm2'},{n:'棋盘',icon:'♟️',k:'chess2'}];explorerFound=[];var fc=2+Math.floor(Math.random()*3);for(var fi=0;fi<fc;fi++){var t=types[Math.floor(Math.random()*types.length)];var amt=1+Math.floor(Math.random()*3);if(!t.k.endsWith('2'))res[t.k]=(res[t.k]||0)+amt;else if(t.k==='gear2')res.gear=(res.gear||0)+amt;else if(t.k==='ammo2')res.ammo=(res.ammo||0)+amt;explorerFound.push({name:t.n,icon:t.icon,amt:amt})}}if(crewHealth<=0){endP2(false,'探索者未归');return}}if(distance>=goalDistance){endP2(true,'提前抵达远方！');return}if(level>=2&&(day-(level-2)*daysPerLevel)>daysPerLevel){level++;initWeather(level);if(level>10){endP2(true,'抵达远方！');return}showLevelIntro=true}logPage=1;eventToday=null;showLogPage()}
 function endP2(win,msg){phase=3;hideLogbook();var rating=calcScore();document.getElementById('over').classList.add('show');document.getElementById('ot').textContent=win?'✦ 抵达':'✧ 中断';document.getElementById('os').innerHTML=msg+'<br/>评分: '+rating+' ('+score+'分)<br/>距离: '+Math.floor(distance)+'km · 存活: '+crewHealth+'人';document.getElementById('ctrls').style.display='none'}
 
 // ===== PHASE 1 LOGIC =====
@@ -511,22 +527,9 @@ window.addEventListener('keydown',function(e){keys[e.keyCode]=true;if(e.keyCode=
 window.addEventListener('keyup',function(e){keys[e.keyCode]=false});
 
 // ===== START =====
-makeCars();spawnLoot();makeStars();updInv();player.x=carW()/2;
+makeCars();spawnLoot();makeStars();initWeather(1);updInv();player.x=carW()/2;
 var lt=0;
-var loadCheck,loadFallback;
-function startLoop(){
-  clearInterval(loadCheck);clearTimeout(loadFallback);
-  document.getElementById('loading').classList.add('done');
-  (function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;up(dt);draw();requestAnimationFrame(loop)})(0);
-}
-// Wait for images or timeout after 10s
-loadCheck=setInterval(function(){
-  var pct=Math.floor(imgsLoaded/imgsToLoad*100);
-  document.getElementById('loadbar').style.width=pct+'%';
-  document.getElementById('loadtxt').textContent='VISUALS '+pct+'%';
-  if(allImgsReady)startLoop();
-},200);
-loadFallback=setTimeout(function(){startLoop()},10000);
+(function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;if(st==='play'){updateWeather(dt)};up(dt);draw();requestAnimationFrame(loop)})(0);
 </script>
 </body>
 </html>
