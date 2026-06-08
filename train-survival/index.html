@@ -242,18 +242,29 @@ function drawCar(ca,c,t){
 
 // ===== CAMP SCENE =====
 function drawCamp(t,clv){
-  var lv=LEVELS[clv-1]||LEVELS[0];
-  var sky=cx.createLinearGradient(0,0,0,H);
-  for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
-  fs(sky);fr(0,0,W,H);
+  var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;
+  // Draw background image or fallback
+  var img=bgImgs[idx];
+  if(img&&img.complete&&img.naturalWidth>0&&!img._failed){
+    var iw=img.naturalWidth,ih=img.naturalHeight;
+    var scale=Math.max(W/iw,H/ih);
+    var sw=iw*scale,sh=ih*scale;
+    cx.drawImage(img,(W-sw)/2,(H-sh)/2,sw,sh);
+  }else{
+    var lv=LEVELS[idx]||LEVELS[0];
+    var sky=cx.createLinearGradient(0,0,0,H);
+    for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
+    fs(sky);fr(0,0,W,H);
+  }
   // Stars
+  var lv=LEVELS[idx]||LEVELS[0];
   if(lv.starBoost>0){
     for(var i=0;i<stars.length;i++){
       var s=stars[i];fs(s.c||C.bw);cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));
       cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.28);cx.fill();
     }cx.globalAlpha=1;
   }
-  fs(lv.ground);fr(0,H*0.72,W,H*0.28);
+  // Ground removed — background image handles it
   // Locomotive
   var lx=30,ly=H*0.28,lw=W*0.30,lh=H*0.44;
   var lg=cx.createLinearGradient(lx,ly,lx,ly+lh);
@@ -298,16 +309,41 @@ function drawCamp(t,clv){
   fs('rgba(196,168,224,0.7)');cx.font='7px system-ui';cx.textAlign='center';cx.fillText(Math.floor(distance)+' / '+goalDistance+' km',W/2,barY-6);
 }
 
+// ===== BACKGROUND IMAGES (Replicate Flux Schnell) =====
+var bgImgs=[];
+var bgBase='https://c8bfdczhv9-ux.github.io/extraction-game/train-survival/assets/';
+var bgFiles=['bg_l1_night.png','bg_l2_dawn.png','bg_l3_mist.png','bg_l4_golden.png','bg_l5_overcast.png','bg_l6_storm.png','bg_l7_dust.png','bg_l8_rain.png','bg_l9_meteor.png','bg_l10_golden.png'];
+for(var i=0;i<bgFiles.length;i++){
+  var img=new Image();img.src=bgBase+bgFiles[i];
+  img.onerror=function(){this._failed=true};
+  bgImgs.push(img);
+}
+
 // ===== ENVIRONMENT =====
 function drawSky(clv){
-  var lv=LEVELS[clv-1]||LEVELS[0];
-  var sky=cx.createLinearGradient(0,0,0,H);
-  for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
-  fs(sky);fr(0,0,W,H);
-  // Crystal Over veil
+  var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;
+  var img=bgImgs[idx];
+  // Draw background image if loaded, else fallback to procedural
+  if(img&&img.complete&&img.naturalWidth>0&&!img._failed){
+    // Scale to fill canvas
+    var iw=img.naturalWidth,ih=img.naturalHeight;
+    var scale=Math.max(W/iw,H/ih);
+    var sw=iw*scale,sh=ih*scale;
+    var sx=(W-sw)/2,sy=(H-sh)/2;
+    cx.drawImage(img,sx,sy,sw,sh);
+  }else{
+    // Fallback procedural gradient
+    var lv=LEVELS[idx]||LEVELS[0];
+    var sky=cx.createLinearGradient(0,0,0,H);
+    for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
+    fs(sky);fr(0,0,W,H);
+  }
+  // Crystal Over veil (always)
   var co=cx.createLinearGradient(0,0,W*0.3,H*0.4);
   co.addColorStop(0,'rgba(180,140,220,0.04)');co.addColorStop(0.5,'rgba(200,160,230,0.02)');co.addColorStop(1,'transparent');fs(co);fr(0,0,W,H);
+  // Stars (always on top)
   var t=Date.now()/1000;
+  var lv=LEVELS[idx]||LEVELS[0];
   if(lv.starBoost>0){
     for(var i=0;i<stars.length;i++){
       var s=stars[i];fs(s.c||C.bw);cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));
@@ -316,8 +352,7 @@ function drawSky(clv){
   }
 }
 function drawGround(clv){
-  var lv=LEVELS[clv-1]||LEVELS[0];
-  fs(lv.ground);fr(0,H*0.78,W,H*0.22);
+  // Rails only — background handles landscape
   for(var rx=-(cam%36);rx<W;rx+=36){
     fs(C.deepBg);fr(rx,H*0.78+2,5,8);fs('rgba(192,160,96,0.1)');fr(rx-8,H*0.78+6,21,1.8);
   }
