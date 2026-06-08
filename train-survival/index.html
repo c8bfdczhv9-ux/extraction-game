@@ -108,6 +108,9 @@ canvas::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;backg
 // SETUP
 // ===================================================================
 var g=document.getElementById('g'), cx=g.getContext('2d');
+// VISIBLE TEST — if canvas working, this fills it bright magenta
+cx.fillStyle='#FF00FF';cx.fillRect(0,0,100,100);
+cx.fillStyle='#FFF';cx.font='14px monospace';cx.fillText('TEST OK W='+g.width+' H='+g.height,10,20);
 var W,H;
 function resize(){W=Math.min(window.innerWidth-12,500);H=Math.min(window.innerHeight*0.54,600);g.width=W;g.height=H;}
 
