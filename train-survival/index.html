@@ -10,6 +10,11 @@ html,body{width:100%;height:100%;background:#12061E;overflow:hidden;font-family:
 #wrap{position:relative;width:100vw;height:100vh;max-width:500px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
 canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-height:56vh;border:1px solid rgba(107,48,160,0.25)}
 #styletog{position:absolute;top:9px;right:14px;z-index:12;background:rgba(18,6,30,0.85);border:1px solid rgba(232,152,168,0.25);border-radius:3px;color:#E898A8;font-size:9px;padding:4px 10px;letter-spacing:1.5px;cursor:pointer;font-weight:300}
+#loading{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;background:#12061E;transition:opacity 0.5s}
+#loading.done{opacity:0;pointer-events:none}
+#loading .bar{width:140px;height:2px;background:rgba(107,48,160,0.2);border-radius:1px;overflow:hidden;margin-top:12px}
+#loading .bar div{height:100%;background:linear-gradient(90deg,#6B20A0,#B496D2);transition:width 0.3s;border-radius:1px}
+#loading .txt{color:#B496D2;font-size:9px;letter-spacing:2px;font-weight:300}
 #hud{position:absolute;top:10px;left:12px;right:60px;display:flex;justify-content:space-between;pointer-events:none;z-index:10}
 .hb{background:rgba(18,6,30,0.9);border:1px solid rgba(107,48,160,0.2);border-radius:3px;padding:5px 12px;font-size:11px;color:#B496D2;letter-spacing:1.8px;font-weight:300}
 #inv{position:absolute;bottom:84px;left:10px;right:10px;display:flex;gap:5px;justify-content:center;pointer-events:none;z-index:10;flex-wrap:wrap}
@@ -48,6 +53,7 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 <body>
 <div id="wrap">
 <canvas id="g"></canvas>
+<div id="loading"><div class="txt" id="loadtxt">VISUALS</div><div class="bar"><div id="loadbar" style="width:0%"></div></div></div>
 <button id="styletog" onclick="toggleStyle()">◈ 晶层</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
 <div id="inv"></div>
@@ -307,20 +313,32 @@ function drawCamp(t,clv){
 }
 
 // ===== BACKGROUND IMAGES (Replicate Flux Schnell) =====
-var bgImgs=[];
+// ===== IMAGE PRELOADER =====
 var bgBase='https://c8bfdczhv9-ux.github.io/extraction-game/train-survival/assets/';
 var bgFiles=['bg_l1_night.png','bg_l2_dawn.png','bg_l3_mist.png','bg_l4_golden.png','bg_l5_overcast.png','bg_l6_storm.png','bg_l7_dust.png','bg_l8_rain.png','bg_l9_meteor.png','bg_l10_golden.png'];
+var bgImgs=[];
+var imgsToLoad=bgFiles.length+1+6; // 10 bg + 1 player + 6 items
+var imgsLoaded=0;
+var allImgsReady=false;
+
+function imgLoaded(){imgsLoaded++;if(imgsLoaded>=imgsToLoad)allImgsReady=true;}
+
 for(var i=0;i<bgFiles.length;i++){
-  var img=new Image();img.src=bgBase+bgFiles[i];
-  img.onerror=function(){this._failed=true};
-  bgImgs.push(img);
+  var img=new Image();img.crossOrigin='anonymous';
+  img.onload=imgLoaded;img.onerror=function(){imgLoaded();this._failed=true;};
+  img.src=bgBase+bgFiles[i];bgImgs.push(img);
 }
-// Sprite images
-var sprPlayer=new Image();sprPlayer.src=bgBase+'spr_player.png';
+
+var sprPlayer=new Image();sprPlayer.crossOrigin='anonymous';
+sprPlayer.onload=imgLoaded;sprPlayer.onerror=function(){imgLoaded();this._failed=true;};
+sprPlayer.src=bgBase+'spr_player.png';
+
 var sprImgs={};
 ['food','coal','water','gun','radio','med'].forEach(function(k,i){
   var names=['spr_food.png','spr_coal.png','spr_water.png','spr_gun.png','spr_radio.png','spr_med.png'];
-  var img=new Image();img.src=bgBase+names[i];sprImgs[k]=img;
+  var img=new Image();img.crossOrigin='anonymous';
+  img.onload=imgLoaded;img.onerror=function(){imgLoaded();this._failed=true;};
+  img.src=bgBase+names[i];sprImgs[k]=img;
 });
 
 // ===== ENVIRONMENT =====
@@ -495,7 +513,20 @@ window.addEventListener('keyup',function(e){keys[e.keyCode]=false});
 // ===== START =====
 makeCars();spawnLoot();makeStars();updInv();player.x=carW()/2;
 var lt=0;
-(function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;up(dt);draw();requestAnimationFrame(loop)})(0);
+var loadCheck,loadFallback;
+function startLoop(){
+  clearInterval(loadCheck);clearTimeout(loadFallback);
+  document.getElementById('loading').classList.add('done');
+  (function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;up(dt);draw();requestAnimationFrame(loop)})(0);
+}
+// Wait for images or timeout after 10s
+loadCheck=setInterval(function(){
+  var pct=Math.floor(imgsLoaded/imgsToLoad*100);
+  document.getElementById('loadbar').style.width=pct+'%';
+  document.getElementById('loadtxt').textContent='VISUALS '+pct+'%';
+  if(allImgsReady)startLoop();
+},200);
+loadFallback=setTimeout(function(){startLoop()},10000);
 </script>
 </body>
 </html>
