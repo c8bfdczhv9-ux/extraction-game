@@ -431,12 +431,10 @@ function drawCar(ca,c,t){
 // ===== CAMP SCENE =====
 function drawCamp(t,clv){
   var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;
-  var lv=LEVELS[idx];
-  // Sky gradient with chalk grain
-  var sky=cx.createLinearGradient(0,0,0,H*0.75);
-  for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
-  fs(sky);fr(0,0,W,H*0.75);
-  grainSky();
+  // Use same baked sky
+  var skyTop=['#0A0418','#0E0620','#120820','#100618','#0C0418'];
+  var skyBot=['#1E0C32','#2A1048','#1A0C28','#251038','#201030'];
+  drawBake(bakeGrad('sky_'+W+'_'+H,W,H*0.75,skyTop,skyBot,0.012),0,0);
   // Horizon strip
   var hg=cx.createLinearGradient(0,H*0.7,0,H*0.78);
   hg.addColorStop(0,lv.sky[lv.sky.length-1]);hg.addColorStop(0.5,lv.horizon);hg.addColorStop(1,lv.ground1);
@@ -544,8 +542,15 @@ function drawGround(clv){
   }
 }
 function drawSmoke(){
-  var t=Date.now()/300,scx=cars[0].x-cam+cars[0].w*0.1;
-  for(var si=0;si<5;si++){var sy=55+si*15+Math.sin(t*1.7+si)*7,sr=7+si*3;fs(C.bw);cx.globalAlpha=0.04+0.02*Math.sin(t*2+si);cx.beginPath();cx.arc(scx-Math.sin(t+si)*5,sy,sr,0,6.28);cx.fill()}cx.globalAlpha=1;
+  var scx=cars[0].x-cam+cars[0].w*0.1;
+  for(var si=0;si<5;si++){
+    var sy=55+si*15+Math.sin(Date.now()/300*1.7+si)*7,sr=7+si*3;
+    for(var di=0;di<8;di++){
+      var da=hash(si,di,'smoke')*6.28,dd=hash(di,si,'smoke2')*sr;
+      cx.fillStyle='rgba(200,180,220,'+(0.04+0.02*Math.sin(Date.now()/600*2+si))+')';
+      cx.beginPath();cx.arc(scx+Math.cos(da)*dd,sy+Math.sin(da)*dd,0.8+hash(di+8,si,'smoke3')*1.5,0,6.28);cx.fill();
+    }
+  }
 }
 function drawVignette(){
   var vig=cx.createRadialGradient(W/2,H*0.4,W*0.15,W/2,H*0.4,W*0.85);
