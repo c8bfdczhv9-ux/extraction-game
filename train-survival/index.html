@@ -287,106 +287,104 @@ var ITEMS=[
   {k:'ammo',n:'子弹',c:C.petraGold,draw:drawAmmo},{k:'comm',n:'电台',c:'#9B8B70',draw:drawRadio},
   {k:'chess',n:'棋盘',c:'#8B7060',draw:drawChess},{k:'med',n:'医药',c:C.dustyCoral,draw:drawMed}
 ];
-// ===== PLAYER — Banksy stencil girl (purple outline + white fill) =====
+// ===== PLAYER — Banksy stencil girl (organic silhouette) =====
 function drawPlayer(px,py,t){
-  var s=2.4;cx.save();cx.translate(px,py-30*s);
-  var sway=Math.sin(t*1.2)*0.5*s;
-  var outline='#5A3890',fill='#F5F0F8';
+  var s=2.5;cx.save();cx.translate(px,py-30*s);
+  var ol='#5A3890',fl='#F5F0F8',olw=1.4*s;
+  var wind=Math.sin(t*1.2)*0.3*s;
 
-  // Shadow on ground
-  fs('rgba(10,3,20,0.18)');cx.beginPath();cx.ellipse(0,30*s,7*s,1.5*s,0,0,6.28);cx.fill();
+  // Shadow
+  fs('rgba(10,3,20,0.15)');cx.beginPath();cx.ellipse(0,30*s,5*s,1.2*s,0,0,6.28);cx.fill();
 
-  // === BALLOON STRING ===
-  cx.strokeStyle='rgba(160,140,200,0.45)';cx.lineWidth=0.5*s;cx.lineCap='round';cx.setLineDash([2.5*s,1.5*s]);
-  cx.beginPath();cx.moveTo(3.5*s,-2*s);
-  cx.quadraticCurveTo(5*s+sway,8*s-22*s,4.5*s+sway,-34*s);cx.stroke();
+  // === BALLOON STRING — graceful curve ===
+  cx.strokeStyle='rgba(160,140,200,0.4)';cx.lineWidth=0.4*s;cx.lineCap='round';cx.setLineDash([2*s,1.5*s]);
+  cx.beginPath();cx.moveTo(2*s,0);
+  cx.bezierCurveTo(3.5*s+wind,-10*s,6*s+wind*0.5,-20*s,4*s+wind,-34*s);cx.stroke();
   cx.setLineDash([]);
 
-  // === HEART BALLOON — purple ===
-  cx.save();cx.translate(4.5*s+sway,-36*s);
-  var hs=s*7;
+  // === HEART ===
+  cx.save();cx.translate(4*s+wind,-35*s);
+  var hs=s*6.5;
   fs('#6B3FA0');cx.beginPath();
-  cx.moveTo(0,hs*0.35);cx.bezierCurveTo(-hs*0.9,-hs*0.6,-hs*1.6,hs*0.1,0,hs);
-  cx.bezierCurveTo(hs*1.6,hs*0.1,hs*0.9,-hs*0.6,0,hs*0.35);cx.fill();
-  fs('rgba(255,255,255,0.22)');cx.beginPath();cx.arc(-hs*0.25,-hs*0.05,hs*0.2,0,6.28);cx.fill();
+  cx.moveTo(0,hs*0.3);cx.bezierCurveTo(-hs*0.85,-hs*0.55,-hs*1.5,hs*0.1,0,hs*0.95);
+  cx.bezierCurveTo(hs*1.5,hs*0.1,hs*0.85,-hs*0.55,0,hs*0.3);cx.fill();
+  fs('rgba(255,255,255,0.25)');cx.beginPath();cx.arc(-hs*0.28,-hs*0.08,hs*0.18,0,6.28);cx.fill();
   cx.restore();
 
-  // === BODY — white fill, purple outline (Banksy stencil style) ===
-  var wave=Math.sin(t*2.8)*0.5*s;
+  // === SILHOUETTE — hand-drawn organic curves ===
+  // Banksy's girl: slight lean right, windswept hair, flowing dress
 
-  function stencilShape(fn){
-    fn();
-    fs(fill);cx.fill();
-    ss(outline,1.2*s);cx.stroke();
-  }
-
-  // Dress
-  stencilShape(function(){
+  // Dress — bell shape, catches wind on right side
+  function drawDress(){
     cx.beginPath();
-    cx.moveTo(-5*s+wave,5*s);
-    cx.lineTo(-7.5*s+wave*1.3,12*s);
-    cx.quadraticCurveTo(-8*s,16.5*s,-2*s,17*s+wave*0.4);
-    cx.quadraticCurveTo(7*s,15*s,6.5*s+wave*0.5,12*s);
-    cx.lineTo(5*s+wave*0.3,5*s);
+    cx.moveTo(-4*s,4*s);                          // waist left
+    cx.bezierCurveTo(-6*s,7*s,-6*s,12*s,-5.5*s,15*s); // left hip curve
+    cx.quadraticCurveTo(-4*s,20*s,1*s,22*s);       // left hem → center
+    cx.quadraticCurveTo(7*s,19*s,7*s,14*s);        // right hem (wind lifts)
+    cx.lineTo(4.5*s,4*s);                          // waist right
     cx.closePath();
-  });
+  }
+  drawDress();fs(fl);cx.fill();ss(ol,olw);cx.stroke();
 
-  // Torso
-  stencilShape(function(){
-    cx.beginPath();
-    cx.moveTo(-3.5*s,-6*s);cx.lineTo(-5.5*s,5*s);cx.lineTo(5.5*s,5*s);cx.lineTo(3.5*s,-6*s);cx.closePath();
-  });
+  // Torso — slight forward lean
+  cx.beginPath();
+  cx.moveTo(-3*s,-7*s);cx.lineTo(-4.5*s,4*s);cx.lineTo(5*s,4*s);cx.lineTo(3*s,-7*s);cx.closePath();
+  fs(fl);cx.fill();ss(ol,olw);cx.stroke();
 
-  // Arms — purple outline only (no fill needed, thin)
-  var armRaise=Math.sin(t*2.5)*0.4*s;
-  ss(outline,2*s);cx.lineCap='round';
-  cx.beginPath();cx.moveTo(-3.5*s,-1*s);
-  cx.quadraticCurveTo(-8*s+armRaise,-8*s,-6*s+armRaise*0.8,-12*s);cx.stroke();
-  cx.beginPath();cx.moveTo(3.5*s,-1*s);
-  cx.quadraticCurveTo(7*s+wave,3*s,5*s+wave,8*s);cx.stroke();
+  // === ARMS ===
+  var armReach=Math.sin(t*2)*0.3*s;
+  // Left arm reaching up — thinner at hand
+  ss(ol,olw*0.9);cx.lineCap='round';
+  cx.beginPath();cx.moveTo(-3*s,-3*s);
+  cx.bezierCurveTo(-7*s+armReach,-9*s,-5*s-armReach,-15*s,-3*s+armReach,-18*s);cx.stroke();
+  // Right arm hanging down — gentle
+  cx.beginPath();cx.moveTo(3.5*s,-3*s);
+  cx.bezierCurveTo(6*s+wind,2*s,5*s+wind,8*s,4*s+wind,12*s);cx.stroke();
 
-  // Head — white circle, purple outline
-  stencilShape(function(){
-    cx.beginPath();cx.arc(0,-11*s,5*s,0,6.28);
-  });
+  // === HEAD — oval, tilted right ===
+  cx.save();cx.translate(1*s,-10.5*s);cx.rotate(0.15);
+  cx.beginPath();cx.ellipse(0,0,4.5*s,5.2*s,0,0,6.28);
+  fs(fl);cx.fill();ss(ol,olw);cx.stroke();
+  cx.restore();
 
-  // Hair
-  stencilShape(function(){
-    cx.beginPath();
-    cx.arc(1*s,-10*s,5.3*s,Math.PI*0.3,Math.PI*1.4);
-  });
-  stencilShape(function(){
-    cx.beginPath();cx.moveTo(4*s,-13*s);
-    cx.quadraticCurveTo(8*s,-14*s,9*s,-10*s);
-    cx.quadraticCurveTo(7*s,-11*s,3*s,-10*s);cx.closePath();
-  });
+  // === HAIR — dramatic windswept ===
+  cx.beginPath();
+  cx.arc(1.8*s,-11*s,5.5*s,Math.PI*1.6,Math.PI*2.3); // sweep left-to-right
+  cx.quadraticCurveTo(9*s,-13*s,10*s,-9.5*s);          // flyaway tip
+  cx.quadraticCurveTo(7*s,-8.5*s,3*s,-6*s);            // return
+  cx.closePath();
+  fs(fl);cx.fill();ss(ol,olw*0.7);cx.stroke();
 
-  // === LEGS — brush-stroke ending (NOT rounded) ===
-  var lp=t*5;
-  ss(outline,2.6*s);cx.lineCap='butt';
+  // Hair wisps — thin strokes
+  ss(ol,0.7*s);cx.lineCap='round';
+  for(var hi=0;hi<3;hi++){
+    cx.beginPath();cx.moveTo(2+hi,s,-11*s-hi);
+    cx.quadraticCurveTo(6*s+hi*2,-13*s-hi,8+hi,s,-9*s-hi);cx.stroke();
+  }
+
+  // === LEGS — varying stroke, jagged end ===
+  var lp=t*4.5;
+  ss(ol,olw*0.85);cx.lineCap='butt';
   // Left leg
-  var lx1=-2.5*s,lx2=-3.5*s+Math.sin(lp)*4.5*s;
-  cx.beginPath();cx.moveTo(lx1,15*s);cx.lineTo(lx2,26*s);cx.stroke();
-  // Brush end: jagged finish
-  ss(outline,2.2*s);cx.lineCap='butt';
-  for(var be=0;be<4;be++){
-    var bx=lx2-1.5+be*1.2,by=26*s-(be%2)*1.5;
-    cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+0.8,by+1.5+Math.random()*2);cx.stroke();
-  }
+  var llx=-1.5*s,llx2=-2*s+Math.sin(lp)*4*s;
+  cx.beginPath();cx.moveTo(llx,18*s);cx.lineTo(llx2,27*s);cx.stroke();
   // Right leg
-  var rx1=2.5*s,rx2=3.5*s+Math.sin(lp+Math.PI)*4.5*s;
-  cx.beginPath();cx.moveTo(rx1,15*s);cx.lineTo(rx2,26*s);cx.stroke();
-  ss(outline,2.2*s);
-  for(var be=0;be<4;be++){
-    var bx=rx2-1.5+be*1.2,by=26*s-(be%2)*1.5;
-    cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+0.8,by+1.5+Math.random()*2);cx.stroke();
-  }
+  var rlx=2*s,rlx2=3*s+Math.sin(lp+Math.PI)*4*s;
+  cx.beginPath();cx.moveTo(rlx,18*s);cx.lineTo(rlx2,27*s);cx.stroke();
+  // Uneven brush ends
+  ss(ol,olw*0.6);
+  [llx2,rlx2].forEach(function(ex){
+    for(var be=0;be<4;be++){
+      var bx=ex-1.5+be*1.2,by=27*s-(be%2)*1;
+      cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+0.5+Math.random()*1.5,by+1+Math.random()*2);cx.stroke();
+    }
+  });
 
-  // === OVERSPRAY — purple stencil texture ===
-  for(var i=0;i<25;i++){
-    var ox=(Math.random()-0.5)*15*s,oy=(Math.random()-0.5)*20*s;
-    cx.fillStyle='rgba(90,56,144,'+(0.015+Math.random()*0.035)+')';
-    cx.beginPath();cx.arc(ox,oy,0.3+Math.random()*1.0,0,6.28);cx.fill();
+  // === STENCIL TEXTURE — light overspray ===
+  for(var i=0;i<30;i++){
+    var ox=(Math.random()-0.5)*14*s,oy=(Math.random()-0.5)*22*s;
+    cx.fillStyle='rgba(90,56,144,'+(0.012+Math.random()*0.03)+')';
+    cx.beginPath();cx.arc(ox,oy,0.2+Math.random()*0.8,0,6.28);cx.fill();
   }
 
   cx.restore();
