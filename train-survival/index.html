@@ -390,148 +390,97 @@ function drawPlayer(px,py,t){
   cx.restore();
 }
 
-// ===== TRAIN CAR — 3D perspective corridor =====
+// ===== TRAIN CAR — exterior 3/4 perspective (绿皮火车) =====
 function drawCar(ca,c,t){
   var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h;
-  // Perspective: back wall is narrower
-  var inset=cw*0.18; // each side
-  var bw=cw-inset*2,bx=cx2+inset; // back wall
-  var bh=ch*0.5,by=cy+ch*0.06; // back wall height + top
+  // Perspective: slightly above, looking at side
+  var roofH=ch*0.12, bodyH=ch*0.42, underH=ch*0.08, wheelH=ch*0.12;
+  var bodyTop=cy+roofH, bodyBot=bodyTop+bodyH;
+  var depth=cw*0.12; // 3D depth offset
 
-  // === CEILING (trapezoid — narrower at back) ===
-  fs('#1E1830');cx.beginPath();
-  cx.moveTo(cx2,cy);cx.lineTo(cx2+cw,cy);
-  cx.lineTo(bx+bw,by);cx.lineTo(bx,by);cx.closePath();cx.fill();
-
-  // === LEFT WALL (visible side, perspective) ===
-  var lwg=cx.createLinearGradient(cx2,0,bx,0);
-  lwg.addColorStop(0,'#1A3028');lwg.addColorStop(1,'#1A3A28');
-  fs(lwg);cx.beginPath();
-  cx.moveTo(cx2,cy);cx.lineTo(bx,by);
-  cx.lineTo(bx,by+bh);cx.lineTo(cx2,cy+ch*0.75);cx.closePath();cx.fill();
-
-  // === RIGHT WALL ===
-  var rwg=cx.createLinearGradient(bx+bw,0,cx2+cw,0);
-  rwg.addColorStop(0,'#1A3A28');rwg.addColorStop(1,'#1A3028');
-  fs(rwg);cx.beginPath();
-  cx.moveTo(bx+bw,by);cx.lineTo(cx2+cw,cy);
-  cx.lineTo(cx2+cw,cy+ch*0.75);cx.lineTo(bx+bw,by+bh);cx.closePath();cx.fill();
-
-  // === BACK WALL ===
-  var wg=cx.createLinearGradient(bx,by,bx,by+bh);
-  wg.addColorStop(0,'#1A3A28');wg.addColorStop(0.5,'#2A5A3E');wg.addColorStop(1,'#1A3A28');
-  fs(wg);fr(bx,by,bw,bh);
-  grain(bx,by,bw,bh,60,'40,90,60');
-
-  // Back wall panel lines
-  ss('rgba(20,50,30,0.2)',0.3);
-  for(var pi=0;pi<6;pi++){
-    cx.beginPath();cx.moveTo(bx+bw*(pi/6),by);cx.lineTo(bx+bw*(pi/6),by+bh);cx.stroke();
+  // === ROOF — white/light grey, curved top ===
+  var roofGrad=cx.createLinearGradient(cx2,cy,cx2,cy+roofH);
+  roofGrad.addColorStop(0,'#C8C0B8');roofGrad.addColorStop(0.5,'#D8D0C8');roofGrad.addColorStop(1,'#B0A898');
+  fs(roofGrad);
+  cx.beginPath();
+  cx.moveTo(cx2,cy+roofH); // bottom-left
+  cx.lineTo(cx2+cw,cy+roofH); // bottom-right
+  cx.lineTo(cx2+cw-depth,cy); // top-right (closer)
+  cx.quadraticCurveTo(cx2+cw/2,cy-roofH*0.3,cx2+depth,cy); // curved top
+  cx.closePath();cx.fill();
+  // Roof vents
+  fs('#A09888');
+  for(var ri=0;ri<4;ri++){
+    var rvx=cx2+cw*0.12+ri*cw*0.24;
+    fr(rvx-depth*0.3,cy+roofH*0.15,6,roofH*0.4);
   }
 
-  // === FLOOR (trapezoid) ===
-  var fl=cx.createLinearGradient(cx2,cy+ch*0.7,cx2,cy+ch);
-  fl.addColorStop(0,'#1E1828');fl.addColorStop(1,'#181028');
-  fs(fl);cx.beginPath();
-  cx.moveTo(cx2,cy+ch*0.75);cx.lineTo(cx2+cw,cy+ch*0.75);
-  cx.lineTo(bx+bw,by+bh);cx.lineTo(bx,by+bh);cx.closePath();cx.fill();
-  grain(cx2,cy+ch*0.72,cw,ch*0.28,60,'40,35,50');
+  // === BODY — deep green with yellow stripe ===
+  var bodyGrad=cx.createLinearGradient(cx2,bodyTop,cx2,bodyBot);
+  bodyGrad.addColorStop(0,'#1A3A28');bodyGrad.addColorStop(0.3,'#244A34');bodyGrad.addColorStop(0.6,'#2A5A3E');bodyGrad.addColorStop(1,'#1A3A28');
+  fs(bodyGrad);fr(cx2,bodyTop,cw,bodyH);
+  grain(cx2,bodyTop,cw,bodyH,100,'30,70,45');
 
-  // Floor converging lines
-  ss('rgba(30,20,40,0.2)',0.3);
-  for(var fi=0;fi<5;fi++){
-    var t=fi/4;
-    cx.beginPath();cx.moveTo(cx2,cy+ch*(0.75+t*0.06));cx.lineTo(cx2+cw,cy+ch*(0.75+t*0.06));cx.stroke();
+  // === YELLOW COACHLINE (signature green train stripe) ===
+  var stripeY=bodyTop+bodyH*0.72;
+  fs('#D4B830');fr(cx2-depth*0.2,stripeY,cw+depth*0.4,2.5);
+  // Upper thin line
+  fs('#C0A828');fr(cx2-depth*0.15,stripeY-3,cw+depth*0.3,0.8);
+
+  // === WINDOWS ===
+  var ww=cw*0.14,wh=bodyH*0.45,wy=bodyTop+bodyH*0.1,wg=(cw-ww*5)/6;
+  for(var wi=0;wi<5;wi++){
+    var wx=cx2+wg+wi*(ww+wg);
+    // Outer frame (white)
+    fs('#D8D0C8');fr(wx-1.5,wy-1.5,ww+3,wh+3);
+    // Glass
+    var glass=cx.createLinearGradient(wx,wy,wx,wy+wh);
+    glass.addColorStop(0,'#1A2A38');glass.addColorStop(0.5,'#2A3A48');glass.addColorStop(1,'#1A2A38');
+    fs(glass);fr(wx,wy,ww,wh);
+    // Curtain hint
+    fs('rgba(220,210,200,0.15)');fr(wx+1,wy+1,ww-1,wh*0.5);
+    // Reflection
+    fs('rgba(255,255,255,0.06)');fr(wx,wy,ww*0.7,wh);
+    // Inner frame
+    ss('rgba(60,50,40,0.4)',0.8);cx.strokeRect(wx,wy,ww,wh);
   }
 
-  // === WINDOWS on side walls ===
-  // Left wall window
-  var wwx=bw*0.35,wwh=bh*0.3,wwy=by+bh*0.15;
-  fs('#2A2228');cx.beginPath();
-  cx.moveTo(bx-wwx-2,wwy-2);cx.lineTo(bx-3,wwy-2);
-  cx.lineTo(bx-3,wwy+wwh+2);cx.lineTo(bx-wwx-2,wwy+wwh+2);cx.closePath();cx.fill();
-  // Glass
-  fs('#0A0A18');cx.beginPath();
-  cx.moveTo(bx-wwx,wwy);cx.lineTo(bx-1,wwy);
-  cx.lineTo(bx-1,wwy+wwh);cx.lineTo(bx-wwx,wwy+wwh);cx.closePath();cx.fill();
-  // Star through window
-  fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(bx-wwx*0.5,wwy+wwh*0.3,0.4,0,6.28);cx.fill();cx.globalAlpha=1;
-  // Frame
-  ss('rgba(100,140,110,0.2)',0.8);
-  cx.beginPath();cx.moveTo(bx-wwx,wwy);cx.lineTo(bx-1,wwy);cx.lineTo(bx-1,wwy+wwh);cx.lineTo(bx-wwx,wwy+wwh);cx.closePath();cx.stroke();
+  // === CAR NUMBER (like YZ 335902) ===
+  fs('#D4B830');cx.globalAlpha=0.5;cx.font='6px system-ui';cx.textAlign='center';
+  cx.fillText('YZ '+ca.ci,cx2+cw/2,stripeY-5);cx.globalAlpha=1;
 
-  // Right wall window (mirror)
-  var rwx=bx+bw+1,rww=wwx;
-  fs('#2A2228');cx.beginPath();
-  cx.moveTo(rwx,wwy-2);cx.lineTo(rwx+rww,wwy-2);
-  cx.lineTo(rwx+rww,wwy+wwh+2);cx.lineTo(rwx,wwy+wwh+2);cx.closePath();cx.fill();
-  fs('#0A0A18');cx.beginPath();
-  cx.moveTo(rwx+1,wwy);cx.lineTo(rwx+rww-1,wwy);
-  cx.lineTo(rwx+rww-1,wwy+wwh);cx.lineTo(rwx+1,wwy+wwh);cx.closePath();cx.fill();
-  fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(rwx+rww*0.5,wwy+wwh*0.3,0.4,0,6.28);cx.fill();cx.globalAlpha=1;
-  ss('rgba(100,140,110,0.2)',0.8);
-  cx.beginPath();cx.moveTo(rwx+1,wwy);cx.lineTo(rwx+rww-1,wwy);cx.lineTo(rwx+rww-1,wwy+wwh);cx.lineTo(rwx+1,wwy+wwh);cx.closePath();cx.stroke();
+  // === UNDERCARRIAGE ===
+  fs('#0E0E12');fr(cx2,bodyBot,cw,underH);
+  // Frame detail
+  fs('#1A1A20');fr(cx2+depth*0.1,bodyBot-1,cw-depth*0.2,2);
 
-  // === SEATS along left wall ===
-  var seatDeep=bh*0.15,seatTop=by+bh*0.5;
-  fs('#46885A');cx.beginPath();
-  cx.moveTo(bx-seatDeep,seatTop);cx.lineTo(bx-2,seatTop);
-  cx.lineTo(bx-2,seatTop+bh*0.2);cx.lineTo(bx-seatDeep,seatTop+bh*0.2);cx.closePath();cx.fill();
-  // Seat back
-  fs('#58A070');cx.beginPath();
-  cx.moveTo(bx-2,seatTop-bh*0.08);cx.lineTo(bx+2,seatTop-bh*0.08);
-  cx.lineTo(bx+2,seatTop+bh*0.2);cx.lineTo(bx-2,seatTop+bh*0.2);cx.closePath();cx.fill();
-
-  // === SEATS along right wall ===
-  fs('#46885A');cx.beginPath();
-  cx.moveTo(bx+bw+2,seatTop);cx.lineTo(bx+bw+seatDeep,seatTop);
-  cx.lineTo(bx+bw+seatDeep,seatTop+bh*0.2);cx.lineTo(bx+bw+2,seatTop+bh*0.2);cx.closePath();cx.fill();
-  fs('#58A070');cx.beginPath();
-  cx.moveTo(bx+bw-2,seatTop-bh*0.08);cx.lineTo(bx+bw+2,seatTop-bh*0.08);
-  cx.lineTo(bx+bw+2,seatTop+bh*0.2);cx.lineTo(bx+bw-2,seatTop+bh*0.2);cx.closePath();cx.fill();
-
-  // === CEILING LAMPS ===
-  for(var li=0;li<3;li++){
-    var lx=cx2+cw*0.2+li*cw*0.3,ly=cy+ch*0.02;
-    var lg=cx.createRadialGradient(lx,ly,0,lx,ly,ch*0.05);
-    lg.addColorStop(0,'rgba(255,220,180,0.35)');lg.addColorStop(1,'transparent');
-    fs(lg);fr(lx-ch*0.04,cy,ch*0.08,ch*0.08);
-    fs('rgba(255,220,180,0.5)');fr(lx-1,ly,2,1.2);
-  }
-
-  // === HANDRAILS (vertical, left wall) ===
-  ss('rgba(180,160,200,0.18)',1.5);cx.lineCap='round';
-  cx.beginPath();cx.moveTo(bx-seatDeep*0.5,cy+ch*0.08);cx.lineTo(bx-seatDeep*0.5,by+bh*0.65);cx.stroke();
-
-  // === CREW (in corridor) ===
-  if([0,2,4].indexOf(ca.ci)>=0&&!crewFound[ca.ci]){
-    var cx4=cx2+cw*0.5,cy4=by+bh*0.7;
-    fs('rgba(20,5,25,0.35)');cx.beginPath();cx.ellipse(cx4,cy4+ch*0.04,4,1,0,0,6.28);cx.fill();
-    ss('#4A3A50',1.5);cx.beginPath();cx.moveTo(cx4-1.5,cy4-ch*0.02);cx.lineTo(cx4-2,cy4+ch*0.04);cx.stroke();
-    cx.beginPath();cx.moveTo(cx4+1.5,cy4-ch*0.02);cx.lineTo(cx4+2,cy4+ch*0.04);cx.stroke();
-    fs('#4A3A50');fr(cx4-3.5,cy4-ch*0.06,7,ch*0.05);
-    fs('#5A4A60');cx.beginPath();cx.arc(cx4,cy4-ch*0.08,3,0,6.28);cx.fill();
+  // === WHEELS / BOGIES ===
+  var wheelTop=bodyBot+underH;
+  for(var wi=0;wi<2;wi++){
+    var wx=cx2+cw*0.22+wi*cw*0.5,wy=wheelTop+wheelH*0.45;
+    // Bogie frame
+    fs('#1A1A20');fr(wx-16,wy-wheelH*0.35,32,wheelH*0.35);
+    // Wheel well
+    fs('#080810');fr(wx-14,wheelTop,28,wheelH);
+    // Wheels
+    for(var wj=0;wj<2;wj++){
+      var wwx=wx-6+wj*12;
+      var pvd=cx.createRadialGradient(wwx,wy,1,wwx,wy,5);
+      pvd.addColorStop(0,C.pvdMid);pvd.addColorStop(0.8,C.pvdDark);pvd.addColorStop(1,C.pvdEdge);
+      fs(pvd);cx.beginPath();cx.arc(wwx,wy,5,0,6.28);cx.fill();
+      ss(C.fameGreen,1);cx.globalAlpha=0.25;cx.beginPath();cx.arc(wwx,wy,5,0,6.28);cx.stroke();cx.globalAlpha=1;
+      fs(C.pvdMid);cx.beginPath();cx.arc(wwx,wy,1.5,0,6.28);cx.fill();
+    }
   }
 
   // === LAST CAR GLOW ===
   if(ca.last){
     var a=0.15+0.1*Math.sin(t*2.5);
-    ss('rgba(107,63,160,'+(0.3+a)+')',1.5);
-    cx.beginPath();cx.moveTo(cx2,cy);cx.lineTo(cx2+cw,cy);cx.lineTo(bx+bw,by+bh);cx.lineTo(bx,by+bh);cx.closePath();cx.stroke();
-    fs('rgba(107,63,160,'+(0.5+a*0.3)+')');cx.font='6px system-ui';cx.textAlign='center';cx.fillText('末',cx2+cw/2,by+bh*0.75);
-  }
-
-  // === WHEELS (below floor edge) ===
-  var whY=by+bh+ch*0.08;
-  for(var wi=0;wi<2;wi++){
-    var wx3=cx2+cw*0.22+wi*cw*0.5,wy3=whY+2;
-    fs(C.deepBg);fr(wx3-14,wy3-6,28,16);
-    var pvd=cx.createRadialGradient(wx3,wy3,1,wx3,wy3,7);
-    pvd.addColorStop(0,C.pvdMid);pvd.addColorStop(0.8,C.pvdDark);pvd.addColorStop(1,C.pvdEdge);
-    fs(pvd);cx.beginPath();cx.arc(wx3,wy3,7,0,6.28);cx.fill();
-    ss(C.fameGreen,1.2);cx.globalAlpha=0.3;cx.beginPath();cx.arc(wx3,wy3,7,0,6.28);cx.stroke();cx.globalAlpha=1;
-    fs(C.pvdMid);cx.beginPath();cx.arc(wx3,wy3,2,0,6.28);cx.fill();
-    fs(C.petraGold);cx.globalAlpha=0.3;cx.beginPath();cx.arc(wx3,wy3,0.8,0,6.28);cx.fill();cx.globalAlpha=1;
+    ss('rgba(107,63,160,'+(0.3+a)+')',1.8);
+    cx.beginPath();cx.moveTo(cx2,bodyTop);cx.lineTo(cx2+cw,bodyTop);
+    cx.lineTo(cx2+cw-depth,cy);cx.lineTo(cx2+depth,cy);cx.closePath();cx.stroke();
+    fs('rgba(107,63,160,'+(0.5+a*0.3)+')');cx.font='7px system-ui';cx.textAlign='center';
+    cx.fillText('末',cx2+cw/2,bodyTop+bodyH*0.5);
   }
 }
 
@@ -661,7 +610,7 @@ function drawGround(clv){
   }
 }
 function drawSmoke(){
-  var t=Date.now()/300,scx=cars[0].x-cam-8;
+  var t=Date.now()/300,scx=cars[0].x-cam+cars[0].w*0.1;
   for(var si=0;si<5;si++){var sy=55+si*15+Math.sin(t*1.7+si)*7,sr=7+si*3;fs(C.bw);cx.globalAlpha=0.04+0.02*Math.sin(t*2+si);cx.beginPath();cx.arc(scx-Math.sin(t+si)*5,sy,sr,0,6.28);cx.fill()}cx.globalAlpha=1;
 }
 function drawVignette(){
@@ -704,7 +653,7 @@ var rationFood=0,rationWater=0,eventToday=null;
 function carW(){return W/3.5}
 function carH(){return H*0.65}
 function makeCars(){cars=[];for(var i=0;i<NC;i++){var cw=carW(),ch=carH();cars.push({x:i*cw,y:H*0.2,w:cw,h:ch,last:i===NC-1})}}
-function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h*0.72-Math.random()*12,ci:i,d:d,got:false})}}}
+function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h-20-Math.random()*15,ci:i,d:d,got:false})}}}
 function makeStars(){stars=[];for(var i=0;i<200;i++){var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,C.bw,C.vapourViolet,'#D4B830'];stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,c:cols[Math.floor(Math.random()*cols.length)]})}}
 
 // ===== LOGBOOK UI =====
@@ -772,7 +721,7 @@ function gameOverP1(win){st='end';document.getElementById('over').classList.add(
 function collect(it){if(it.got)return;it.got=true;inv[it.d.k]++;updInv();for(var i=0;i<8;i++)pts.push({x:it.x,y:it.y,vx:(Math.random()-0.5)*2.5,vy:-2-Math.random()*2.5,life:22,ml:22,c:it.d.c,s:1.5+Math.random()*2})}
 function pickup(){for(var i=0;i<loot.length;i++){var l=loot[i];if(l.got)continue;if(Math.abs(player.x-l.x)<38&&Math.abs(player.y-l.y)<44)collect(l)}}
 function startPhase2(){phase=2;st='play';level=2;showLevelIntro=true;res.food=inv.food;res.water=inv.water;res.coal=inv.coal;res.meds=inv.med;res.wood=0;res.iron=0;res.gear=inv.gear||0;res.ammo=inv.ammo||0;crewHealth=crewCount;day=1;logPage=1;distance=0;showLogbook()}
-function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h*0.72;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h*0.72,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h*0.72,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
+function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h-20;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h-20,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h-20,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
 
 // ===== INPUT =====
 var joyX=0,joyActive=false,joyOX=0,joyOY=0,keys={};
