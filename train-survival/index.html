@@ -307,88 +307,71 @@ var ITEMS=[
   {k:'ammo',n:'子弹',c:C.petraGold,draw:drawAmmo},{k:'comm',n:'电台',c:'#9B8B70',draw:drawRadio},
   {k:'chess',n:'棋盘',c:'#8B7060',draw:drawChess},{k:'med',n:'医药',c:C.dustyCoral,draw:drawMed}
 ];
-// ===== PLAYER — pointillist Banksy girl =====
+// ===== PLAYER — stable Banksy girl dots =====
 function drawPlayer(px,py,t){
   var s=2.5;cx.save();cx.translate(px,py-30*s);
   var wind=Math.sin(t*1.2)*0.3*s,ol='#5A3890',fl='#F5F0F8';
 
   // Shadow
-  cx.fillStyle='rgba(10,3,20,0.12)';cx.beginPath();cx.ellipse(0,30*s,5*s,1.2*s,0,0,6.28);cx.fill();
+  cx.fillStyle='rgba(10,3,20,0.1)';cx.beginPath();cx.ellipse(0,30*s,5*s,1*s,0,0,6.28);cx.fill();
 
-  // === BALLOON STRING — dotted ===
-  cx.fillStyle='rgba(160,140,200,0.3)';
-  for(var si=0;si<15;si++){
-    var st=si/14,ssx=2*s+(5*s+wind-2*s)*st,ssy=-2*s+(-34*s+2*s)*st+Math.sin(st*3)*3*s;
-    cx.beginPath();cx.arc(ssx,ssy,dsize()*0.5,0,6.28);cx.fill();
+  // === BALLOON STRING ===
+  for(var si=0;si<12;si++){var st=si/11,ssx=2*s+(5*s+wind-2*s)*st,ssy=-2*s-32*s*st+Math.sin(st*2)*2*s;
+    cx.fillStyle='rgba(160,140,200,0.3)';cx.beginPath();cx.arc(ssx,ssy,0.6,0,6.28);cx.fill();
   }
 
-  // === HEART — purple dots ===
-  cx.save();cx.translate(4*s+wind,-35*s);var hs=s*6.5;
-  cx.fillStyle='rgba(0,0,0,0)';
-  cx.beginPath();cx.moveTo(0,hs*0.3);cx.bezierCurveTo(-hs*0.85,-hs*0.55,-hs*1.5,hs*0.1,0,hs*0.95);
-  cx.bezierCurveTo(hs*1.5,hs*0.1,hs*0.85,-hs*0.55,0,hs*0.3);cx.fill();
-  var hb=cx.getImageData(0,0,hs*3,hs*2).data;cx.restore();
-  // Scatter dots in heart area
-  for(var hi=0;hi<50;hi++){
-    var hx=(Math.random()-0.5)*hs*3,hy=(Math.random()-0.5)*hs*1.5;
-    cx.fillStyle='#6B3FA0';cx.globalAlpha=0.8;
-    cx.beginPath();cx.arc(4*s+wind+hx,-35*s+hy,dsize()*0.8,0,6.28);cx.fill();
+  // === HEART ===
+  var hx=4*s+wind,hy=-35*s;var hs=s*6;
+  for(var hi=0;hi<40;hi++){var ah=hash(hi,0,'heart'),ahx=hx+(ah-0.5)*hs*3,ahy=hy+(hash(hi,1,'heart')-0.5)*hs*2;
+    cx.fillStyle='#6B3FA0';cx.globalAlpha=0.75;
+    cx.beginPath();cx.arc(ahx,ahy,0.8+hash(hi,2,'heart')*2.5,0,6.28);cx.fill();
   }cx.globalAlpha=1;
 
-  // === DRESS — white fill dots + purple outline dots ===
-  var dressPath=new Path2D();
-  dressPath.moveTo(-4*s,4*s);dressPath.bezierCurveTo(-6*s,7*s,-6*s,12*s,-5.5*s,15*s);
-  dressPath.quadraticCurveTo(-4*s,20*s,1*s,22*s);dressPath.quadraticCurveTo(7*s,19*s,7*s,14*s);
-  dressPath.lineTo(4.5*s,4*s);dressPath.closePath();
-  // Fill dots
-  for(var di=0;di<200;di++){
-    var dx=(Math.random()-0.35)*12*s,dy=Math.random()*24*s;
-    cx.fillStyle=fl;cx.globalAlpha=0.85;
-    cx.beginPath();cx.arc(dx,dy,dsize()*0.9,0,6.28);cx.fill();
+  // === DRESS ===
+  for(var di=0;di<250;di++){var dx=(hash(di,0,'dress')-0.35)*12*s,dy=hash(di,1,'dress')*24*s;
+    cx.fillStyle=fl;cx.globalAlpha=0.8;
+    cx.beginPath();cx.arc(dx,dy,0.8+hash(di,2,'dress')*2.5,0,6.28);cx.fill();
   }cx.globalAlpha=1;
-  // Outline dots
-  dotLine(-4*s,4*s,-5.5*s,15*s,[ol],2.5,0.25);
-  dotLine(-5.5*s,15*s,1*s,22*s,[ol],2.5,0.25);
-  dotLine(1*s,22*s,7*s,14*s,[ol],2.5,0.25);
-  dotLine(7*s,14*s,4.5*s,4*s,[ol],2.5,0.25);
+  // Outline
+  for(var oi=0;oi<80;oi++){
+    var ot=oi/79,ox,oy;
+    if(ot<0.25){ox=-4*s+(-5.5*s+4*s)*ot*4;oy=4*s+(15*s-4*s)*ot*4;}
+    else if(ot<0.5){var t2=(ot-0.25)*4;ox=-5.5*s+(1*s+5.5*s)*t2;oy=15*s+(22*s-15*s)*t2;}
+    else if(ot<0.75){var t3=(ot-0.5)*4;ox=1*s+(7*s-1*s)*t3;oy=22*s+(14*s-22*s)*t3;}
+    else{var t4=(ot-0.75)*4;ox=7*s+(4.5*s-7*s)*t4;oy=14*s+(4*s-14*s)*t4;}
+    cx.fillStyle=ol;cx.beginPath();cx.arc(ox+hash(oi,0,'ol')*2-1,oy+hash(oi,1,'ol')*2-1,0.8+hash(oi,2,'ol')*2,0,6.28);cx.fill();
+  }
 
   // === TORSO ===
-  for(var ti=0;ti<80;ti++){
-    var tx=(Math.random()-0.5)*9*s,ty=-6*s+Math.random()*11*s;
-    cx.fillStyle=fl;cx.globalAlpha=0.85;
-    cx.beginPath();cx.arc(tx,ty,dsize()*0.9,0,6.28);cx.fill();
+  for(var ti=0;ti<60;ti++){var tx=(hash(ti,0,'torso')-0.5)*9*s,ty=-6*s+hash(ti,1,'torso')*11*s;
+    cx.fillStyle=fl;cx.globalAlpha=0.8;
+    cx.beginPath();cx.arc(tx,ty,0.8+hash(ti,2,'torso')*2.2,0,6.28);cx.fill();
   }cx.globalAlpha=1;
-  dotLine(-3*s,-7*s,-4.5*s,4*s,[ol],2,0.2);
-  dotLine(-4.5*s,4*s,5*s,4*s,[ol],2,0.2);
-  dotLine(5*s,4*s,3*s,-7*s,[ol],2,0.2);
 
-  // === HEAD — dot circle ===
-  dotCircle(1*s,-10.5*s,5*s,[fl],0.15);
-  dotCircle(1*s,-10.5*s,5*s,[ol],0.08);
-  // Hair sweep — dots rightward
-  for(var hi=0;hi<60;hi++){
-    var hx2=1*s+Math.random()*10*s,hy2=-14*s+Math.random()*6*s;
-    cx.fillStyle=Math.random()<0.5?ol:fl;
-    cx.beginPath();cx.arc(hx2,hy2,dsize()*0.8,0,6.28);cx.fill();
+  // === HEAD ===
+  for(var hi2=0;hi2<80;hi2++){var ha=hash(hi2,0,'head')*6.28,hd=Math.sqrt(hash(hi2,1,'head'))*5*s;
+    cx.fillStyle=fl;cx.globalAlpha=0.85;
+    cx.beginPath();cx.arc(1*s+Math.cos(ha)*hd,-10.5*s+Math.sin(ha)*hd,0.7+hash(hi2,2,'head')*2,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+  // Hair
+  for(var hi3=0;hi3<50;hi3++){var hx2=1*s+hash(hi3,0,'hair')*10*s,hy2=-14*s+hash(hi3,1,'hair')*6*s;
+    cx.fillStyle=hash(hi3,2,'hair')<0.5?ol:fl;
+    cx.beginPath();cx.arc(hx2,hy2,0.6+hash(hi3,3,'hair')*2,0,6.28);cx.fill();
   }
 
-  // === ARMS — dotted lines ===
+  // === ARMS ===
   var armReach=Math.sin(t*2)*0.3*s;
-  dotLine(-3*s,-3*s,-3*s+armReach,-18*s,[ol],2.5,0.2);
-  dotLine(3.5*s,-3*s,4*s+wind,12*s,[ol],2.5,0.2);
+  for(var ai=0;ai<15;ai++){var at=ai/14;
+    cx.fillStyle=ol;cx.beginPath();
+    cx.arc(-3*s+(-3*s+armReach+3*s)*at+hash(ai,0,'arml')*2,-3*s+(-18*s+3*s)*at+hash(ai,1,'arml')*2,1.2,0,6.28);cx.fill();
+  }
 
-  // === LEGS — dotted, jagged end ===
-  var lp=t*4.5;
-  var llx2=-2*s+Math.sin(lp)*4*s,rlx2=3*s+Math.sin(lp+Math.PI)*4*s;
-  dotLine(-1.5*s,18*s,llx2,27*s,[ol],2.5,0.22);
-  dotLine(2*s,18*s,rlx2,27*s,[ol],2.5,0.22);
-  // Brush ends
-  [llx2,rlx2].forEach(function(ex){
-    for(var be=0;be<5;be++){
-      cx.fillStyle=ol;
-      cx.beginPath();cx.arc(ex-2+Math.random()*4,27*s+(Math.random()-0.5)*3,dsize()*0.6,0,6.28);cx.fill();
-    }
-  });
+  // === LEGS ===
+  var lp=t*4.5,llx2=-2*s+Math.sin(lp)*4*s,rlx2=3*s+Math.sin(lp+Math.PI)*4*s;
+  for(var li2=0;li2<15;li2++){var lt=li2/14;
+    cx.fillStyle=ol;cx.beginPath();
+    cx.arc(-1.5*s+(llx2+1.5*s)*lt+hash(li2,0,'legl')*1.5,18*s+9*s*lt+hash(li2,1,'legl')*1.5,1.2,0,6.28);cx.fill();
+  }
 
   cx.restore();
 }
