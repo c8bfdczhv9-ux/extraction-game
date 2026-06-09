@@ -9,17 +9,17 @@
 html,body{width:100%;height:100%;background:#12061E;overflow:hidden;font-family:system-ui,sans-serif;touch-action:manipulation;user-select:none;-webkit-user-select:none;position:fixed}
 #wrap{position:relative;width:100vw;height:100vh;max-width:500px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
 canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-height:56vh;border:1px solid rgba(107,48,160,0.25)}
-#styletog{position:absolute;top:9px;right:14px;z-index:12;background:rgba(18,6,30,0.85);border:1px solid rgba(232,152,168,0.25);border-radius:3px;color:#E898A8;font-size:9px;padding:4px 10px;letter-spacing:1.5px;cursor:pointer;font-weight:300}
+#styletog{position:absolute;top:9px;right:14px;z-index:12;background:rgba(18,6,30,0.85);border:1px solid rgba(232,152,168,0.25);border-radius:3px;color:#E898A8;font-size:11px;padding:6px 14px;letter-spacing:1.5px;cursor:pointer;font-weight:300}
 #loading{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;background:#12061E;transition:opacity 0.5s}
 #loading.done{opacity:0;pointer-events:none}
 #loading .bar{width:140px;height:2px;background:rgba(107,48,160,0.2);border-radius:1px;overflow:hidden;margin-top:12px}
 #loading .bar div{height:100%;background:linear-gradient(90deg,#6B20A0,#B496D2);transition:width 0.3s;border-radius:1px}
 #loading .txt{color:#B496D2;font-size:9px;letter-spacing:2px;font-weight:300}
 #hud{position:absolute;top:10px;left:12px;right:60px;display:flex;justify-content:space-between;pointer-events:none;z-index:10}
-.hb{background:transparent;border:1px solid rgba(155,139,176,0.15);border-radius:3px;padding:5px 10px;font-size:11px;color:#D4C4E8;letter-spacing:1.8px;font-weight:300}
-#ver{position:absolute;top:10px;right:60px;z-index:12;color:rgba(232,152,168,0.5);font-size:7px;letter-spacing:1px;pointer-events:none}
+.hb{background:transparent;border:1px solid rgba(155,139,176,0.15);border-radius:3px;padding:6px 14px;font-size:13px;color:#D4C4E8;letter-spacing:1.8px;font-weight:300}
+#ver{position:absolute;top:10px;right:60px;z-index:12;color:rgba(232,152,168,0.5);font-size:8px;letter-spacing:1px;pointer-events:none}
 #inv{position:absolute;bottom:84px;left:10px;right:10px;display:flex;gap:5px;justify-content:center;pointer-events:none;z-index:10;flex-wrap:wrap}
-.iv{background:rgba(18,6,30,0.95);border:1px solid rgba(155,139,176,0.35);border-radius:3px;padding:3px 8px;font-size:8.5px;color:#C8B8D8}
+.iv{background:rgba(18,6,30,0.95);border:1px solid rgba(155,139,176,0.25);border-radius:3px;padding:4px 10px;font-size:10px;color:#C8B8D8}
 #hint{position:absolute;bottom:98px;left:50%;transform:translateX(-50%);color:rgba(180,160,200,0.45);font-size:9px;letter-spacing:2.5px;pointer-events:none;z-index:5;font-weight:200}
 #joy{width:96px;height:96px;background:radial-gradient(circle at 35% 35%,rgba(42,37,53,0.4),rgba(18,6,30,0.6));border:1.5px solid rgba(107,48,160,0.18);border-radius:50%;position:relative;touch-action:none}
 #stick{width:40px;height:40px;background:radial-gradient(circle at 40% 40%,rgba(196,168,224,0.3),rgba(110,95,133,0.15));border:1px solid rgba(155,139,176,0.35);border-radius:50%;position:absolute;top:28px;left:28px;pointer-events:none}
@@ -30,24 +30,24 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 #logbook{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;z-index:30;background:#1E1A22;border-radius:6px;padding:20px 16px;border:1px solid rgba(58,48,64,0.3)}
 #logbook.show{display:flex}
 .lb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.lb-day{font-size:12px;color:#C4A8E0;letter-spacing:2px;font-weight:200}
+.lb-day{font-size:14px;color:#C4A8E0;letter-spacing:2px;font-weight:200}
 .lb-dots{display:flex;gap:7px}
-.lb-dot{width:6px;height:6px;border-radius:50%;background:rgba(155,139,176,0.12)}
+.lb-dot{width:7px;height:7px;border-radius:50%;background:rgba(155,139,176,0.12)}
 .lb-dot.active{background:#C4A8E0}
 .lb-content{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-.lb-title{font-size:11px;color:#8B7BA0;letter-spacing:3px;margin-bottom:10px;font-weight:300}
-.lb-text{font-size:10.5px;color:#9B8BB0;line-height:1.8;margin-bottom:14px;max-width:280px;font-weight:300}
-.lb-res{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
-.lb-ri{font-size:9.5px;color:#7D9B8B;background:rgba(125,155,139,0.06);border:1px solid rgba(125,155,139,0.15);border-radius:3px;padding:4px 10px;letter-spacing:1px}
+.lb-title{font-size:13px;color:#8B7BA0;letter-spacing:3px;margin-bottom:10px;font-weight:300}
+.lb-text{font-size:12px;color:#9B8BB0;line-height:1.8;margin-bottom:14px;max-width:280px;font-weight:300}
+.lb-res{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.lb-ri{font-size:11px;color:#7D9B8B;background:rgba(125,155,139,0.06);border:1px solid rgba(125,155,139,0.15);border-radius:3px;padding:5px 12px;letter-spacing:1px}
 .lb-ri.low{color:#E898A8;border-color:rgba(232,152,168,0.2)}
-.lb-btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.22);color:#B496D2;padding:11px 28px;border-radius:4px;font-size:11px;letter-spacing:2px;cursor:pointer;font-weight:300;margin:4px}
+.lb-btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.22);color:#B496D2;padding:14px 32px;border-radius:5px;font-size:13px;letter-spacing:2px;cursor:pointer;font-weight:300;margin:5px;min-width:80px}
 .lb-btn:active{background:rgba(125,155,139,0.2)}
 .lb-btn.warn{background:linear-gradient(180deg,rgba(232,152,168,0.08),rgba(180,100,120,0.03));border-color:rgba(232,152,168,0.22);color:#E898A8}
 #over{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:20;background:linear-gradient(180deg,rgba(8,2,18,0.98),rgba(18,6,32,0.96));border-radius:6px}
 #over.show{display:flex}
-.ot{font-size:16px;color:#C4A8E0;letter-spacing:4px;margin-bottom:6px;font-weight:200}
-.os{font-size:10px;color:#9B8BB0;margin-bottom:16px;font-weight:300;line-height:1.7;text-align:center}
-.btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.2);color:#B496D2;padding:10px 26px;border-radius:4px;font-size:11px;letter-spacing:2px;cursor:pointer}
+.ot{font-size:18px;color:#C4A8E0;letter-spacing:4px;margin-bottom:8px;font-weight:200}
+.os{font-size:12px;color:#9B8BB0;margin-bottom:18px;font-weight:300;line-height:1.7;text-align:center}
+.btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.2);color:#B496D2;padding:14px 32px;border-radius:5px;font-size:14px;letter-spacing:2px;cursor:pointer;min-width:100px}
 .btn:active{background:rgba(125,155,139,0.2)}
 </style>
 </head>
@@ -390,137 +390,139 @@ function drawPlayer(px,py,t){
   cx.restore();
 }
 
-// ===== TRAIN CAR — interior view =====
+// ===== TRAIN CAR — 3D perspective corridor =====
 function drawCar(ca,c,t){
   var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h;
+  // Perspective: back wall is narrower
+  var inset=cw*0.18; // each side
+  var bw=cw-inset*2,bx=cx2+inset; // back wall
+  var bh=ch*0.5,by=cy+ch*0.06; // back wall height + top
 
-  // === CEILING — deep purple ===
-  fs('#1E1830');fr(cx2,cy,cw,ch*0.08);
+  // === CEILING (trapezoid — narrower at back) ===
   fs('#1E1830');cx.beginPath();
-  cx.moveTo(cx2,cy);cx.quadraticCurveTo(cx2+cw/2,cy-ch*0.04,cx2+cw,cy);
-  cx.lineTo(cx2+cw,cy+ch*0.06);cx.quadraticCurveTo(cx2+cw/2,cy+ch*0.02,cx2,cy+ch*0.06);
-  cx.closePath();cx.fill();
-  grainConcrete(cx2,cy,cw,ch*0.08);
+  cx.moveTo(cx2,cy);cx.lineTo(cx2+cw,cy);
+  cx.lineTo(bx+bw,by);cx.lineTo(bx,by);cx.closePath();cx.fill();
 
-  // Ceiling lamps — warm glow
-  for(var li=0;li<4;li++){
-    var lx=cx2+cw*0.15+li*cw*0.23;
-    var lg=cx.createRadialGradient(lx,cy+ch*0.03,0,lx,cy+ch*0.03,ch*0.04);
-    lg.addColorStop(0,'rgba(255,220,180,0.3)');lg.addColorStop(0.5,'rgba(255,200,150,0.08)');lg.addColorStop(1,'transparent');
-    fs(lg);fr(lx-ch*0.04,cy-ch*0.02,ch*0.08,ch*0.12);
-    fs('rgba(255,220,180,0.6)');fr(lx-1.2,cy+ch*0.025,2.4,1.5);
+  // === LEFT WALL (visible side, perspective) ===
+  var lwg=cx.createLinearGradient(cx2,0,bx,0);
+  lwg.addColorStop(0,'#1A3028');lwg.addColorStop(1,'#1A3A28');
+  fs(lwg);cx.beginPath();
+  cx.moveTo(cx2,cy);cx.lineTo(bx,by);
+  cx.lineTo(bx,by+bh);cx.lineTo(cx2,cy+ch*0.75);cx.closePath();cx.fill();
+
+  // === RIGHT WALL ===
+  var rwg=cx.createLinearGradient(bx+bw,0,cx2+cw,0);
+  rwg.addColorStop(0,'#1A3A28');rwg.addColorStop(1,'#1A3028');
+  fs(rwg);cx.beginPath();
+  cx.moveTo(bx+bw,by);cx.lineTo(cx2+cw,cy);
+  cx.lineTo(cx2+cw,cy+ch*0.75);cx.lineTo(bx+bw,by+bh);cx.closePath();cx.fill();
+
+  // === BACK WALL ===
+  var wg=cx.createLinearGradient(bx,by,bx,by+bh);
+  wg.addColorStop(0,'#1A3A28');wg.addColorStop(0.5,'#2A5A3E');wg.addColorStop(1,'#1A3A28');
+  fs(wg);fr(bx,by,bw,bh);
+  grain(bx,by,bw,bh,60,'40,90,60');
+
+  // Back wall panel lines
+  ss('rgba(20,50,30,0.2)',0.3);
+  for(var pi=0;pi<6;pi++){
+    cx.beginPath();cx.moveTo(bx+bw*(pi/6),by);cx.lineTo(bx+bw*(pi/6),by+bh);cx.stroke();
   }
 
-  // === BACK WALL — deep green (绿皮火车) ===
-  var backH=ch*0.62;
-  var wallTop=cy+ch*0.06;
-  var wg=cx.createLinearGradient(cx2,wallTop,cx2,wallTop+backH);
-  wg.addColorStop(0,'#1A3A28');wg.addColorStop(0.3,'#244A34');wg.addColorStop(0.6,'#2A5A3E');wg.addColorStop(1,'#1A3A28');
-  fs(wg);fr(cx2,wallTop,cw,backH);
-  // Green grain instead of wood
-  grain(cx2,wallTop,cw,backH,80,'40,90,60');
+  // === FLOOR (trapezoid) ===
+  var fl=cx.createLinearGradient(cx2,cy+ch*0.7,cx2,cy+ch);
+  fl.addColorStop(0,'#1E1828');fl.addColorStop(1,'#181028');
+  fs(fl);cx.beginPath();
+  cx.moveTo(cx2,cy+ch*0.75);cx.lineTo(cx2+cw,cy+ch*0.75);
+  cx.lineTo(bx+bw,by+bh);cx.lineTo(bx,by+bh);cx.closePath();cx.fill();
+  grain(cx2,cy+ch*0.72,cw,ch*0.28,60,'40,35,50');
 
-  // Vertical panel lines
-  ss('rgba(20,50,30,0.15)',0.4);
-  for(var pi=0;pi<8;pi++){
-    cx.beginPath();cx.moveTo(cx2+cw*(pi/8),wallTop);cx.lineTo(cx2+cw*(pi/8),wallTop+backH);cx.stroke();
+  // Floor converging lines
+  ss('rgba(30,20,40,0.2)',0.3);
+  for(var fi=0;fi<5;fi++){
+    var t=fi/4;
+    cx.beginPath();cx.moveTo(cx2,cy+ch*(0.75+t*0.06));cx.lineTo(cx2+cw,cy+ch*(0.75+t*0.06));cx.stroke();
   }
 
-  // Horizontal rail
-  ss('rgba(100,140,110,0.3)',2.5);cx.lineCap='butt';
-  cx.beginPath();cx.moveTo(cx2+4,wallTop+backH*0.58);cx.lineTo(cx2+cw-4,wallTop+backH*0.58);cx.stroke();
+  // === WINDOWS on side walls ===
+  // Left wall window
+  var wwx=bw*0.35,wwh=bh*0.3,wwy=by+bh*0.15;
+  fs('#2A2228');cx.beginPath();
+  cx.moveTo(bx-wwx-2,wwy-2);cx.lineTo(bx-3,wwy-2);
+  cx.lineTo(bx-3,wwy+wwh+2);cx.lineTo(bx-wwx-2,wwy+wwh+2);cx.closePath();cx.fill();
+  // Glass
+  fs('#0A0A18');cx.beginPath();
+  cx.moveTo(bx-wwx,wwy);cx.lineTo(bx-1,wwy);
+  cx.lineTo(bx-1,wwy+wwh);cx.lineTo(bx-wwx,wwy+wwh);cx.closePath();cx.fill();
+  // Star through window
+  fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(bx-wwx*0.5,wwy+wwh*0.3,0.4,0,6.28);cx.fill();cx.globalAlpha=1;
+  // Frame
+  ss('rgba(100,140,110,0.2)',0.8);
+  cx.beginPath();cx.moveTo(bx-wwx,wwy);cx.lineTo(bx-1,wwy);cx.lineTo(bx-1,wwy+wwh);cx.lineTo(bx-wwx,wwy+wwh);cx.closePath();cx.stroke();
 
-  // === WINDOWS (showing night landscape outside) ===
-  var ww2=cw*0.22,wh2=backH*0.35,wy2=wallTop+backH*0.12,wGap2=(cw-ww2*3)/4;
-  for(var wi=0;wi<3;wi++){
-    var wx2=cx2+wGap2+wi*(ww2+wGap2);
-    // Window frame — dark metal
-    fs('#2A2228');fr(wx2-1.5,wy2-1.5,ww2+3,wh2+3);
-    // Glass — night outside
-    var glass=cx.createLinearGradient(wx2,wy2,wx2,wy2+wh2);
-    glass.addColorStop(0,'#0A0A18');glass.addColorStop(0.4,'#121028');glass.addColorStop(1,'#080818');
-    fs(glass);fr(wx2,wy2,ww2,wh2);
-    // Stars through window
-    for(var si=0;si<5;si++){
-      fs(C.bw);cx.globalAlpha=0.15+Math.sin(t*2+wi*3+si)*0.08;
-      cx.beginPath();cx.arc(wx2+3+si*ww2*0.2,wy2+3+Math.sin(wi+si)*wh2*0.4,0.4,0,6.28);cx.fill();
-    }
-    // Distant mountain silhouette through window
-    fs('rgba(20,15,40,0.6)');cx.beginPath();
-    cx.moveTo(wx2,wy2+wh2);cx.lineTo(wx2+ww2*0.2,wy2+wh2*0.5);
-    cx.lineTo(wx2+ww2*0.5,wy2+wh2*0.65);cx.lineTo(wx2+ww2*0.8,wy2+wh2*0.4);
-    cx.lineTo(wx2+ww2,wy2+wh2);cx.closePath();cx.fill();
-    // Window glow
-    var wing=cx.createRadialGradient(wx2+ww2/2,wy2+wh2*0.3,0,wx2+ww2/2,wy2+wh2*0.3,ww2*0.4);
-    wing.addColorStop(0,'rgba(255,200,150,0.05)');wing.addColorStop(1,'transparent');
-    fs(wing);fr(wx2,wy2,ww2,wh2);
-    cx.globalAlpha=1;
-    // Window frame inner
-    ss('rgba(60,50,45,0.5)',1.2);cx.strokeRect(wx2,wy2,ww2,wh2);
+  // Right wall window (mirror)
+  var rwx=bx+bw+1,rww=wwx;
+  fs('#2A2228');cx.beginPath();
+  cx.moveTo(rwx,wwy-2);cx.lineTo(rwx+rww,wwy-2);
+  cx.lineTo(rwx+rww,wwy+wwh+2);cx.lineTo(rwx,wwy+wwh+2);cx.closePath();cx.fill();
+  fs('#0A0A18');cx.beginPath();
+  cx.moveTo(rwx+1,wwy);cx.lineTo(rwx+rww-1,wwy);
+  cx.lineTo(rwx+rww-1,wwy+wwh);cx.lineTo(rwx+1,wwy+wwh);cx.closePath();cx.fill();
+  fs(C.bw);cx.globalAlpha=0.2;cx.beginPath();cx.arc(rwx+rww*0.5,wwy+wwh*0.3,0.4,0,6.28);cx.fill();cx.globalAlpha=1;
+  ss('rgba(100,140,110,0.2)',0.8);
+  cx.beginPath();cx.moveTo(rwx+1,wwy);cx.lineTo(rwx+rww-1,wwy);cx.lineTo(rwx+rww-1,wwy+wwh);cx.lineTo(rwx+1,wwy+wwh);cx.closePath();cx.stroke();
+
+  // === SEATS along left wall ===
+  var seatDeep=bh*0.15,seatTop=by+bh*0.5;
+  fs('#46885A');cx.beginPath();
+  cx.moveTo(bx-seatDeep,seatTop);cx.lineTo(bx-2,seatTop);
+  cx.lineTo(bx-2,seatTop+bh*0.2);cx.lineTo(bx-seatDeep,seatTop+bh*0.2);cx.closePath();cx.fill();
+  // Seat back
+  fs('#58A070');cx.beginPath();
+  cx.moveTo(bx-2,seatTop-bh*0.08);cx.lineTo(bx+2,seatTop-bh*0.08);
+  cx.lineTo(bx+2,seatTop+bh*0.2);cx.lineTo(bx-2,seatTop+bh*0.2);cx.closePath();cx.fill();
+
+  // === SEATS along right wall ===
+  fs('#46885A');cx.beginPath();
+  cx.moveTo(bx+bw+2,seatTop);cx.lineTo(bx+bw+seatDeep,seatTop);
+  cx.lineTo(bx+bw+seatDeep,seatTop+bh*0.2);cx.lineTo(bx+bw+2,seatTop+bh*0.2);cx.closePath();cx.fill();
+  fs('#58A070');cx.beginPath();
+  cx.moveTo(bx+bw-2,seatTop-bh*0.08);cx.lineTo(bx+bw+2,seatTop-bh*0.08);
+  cx.lineTo(bx+bw+2,seatTop+bh*0.2);cx.lineTo(bx+bw-2,seatTop+bh*0.2);cx.closePath();cx.fill();
+
+  // === CEILING LAMPS ===
+  for(var li=0;li<3;li++){
+    var lx=cx2+cw*0.2+li*cw*0.3,ly=cy+ch*0.02;
+    var lg=cx.createRadialGradient(lx,ly,0,lx,ly,ch*0.05);
+    lg.addColorStop(0,'rgba(255,220,180,0.35)');lg.addColorStop(1,'transparent');
+    fs(lg);fr(lx-ch*0.04,cy,ch*0.08,ch*0.08);
+    fs('rgba(255,220,180,0.5)');fr(lx-1,ly,2,1.2);
   }
 
-  // === SEATS — lighter green ===
-  var seatY=wallTop+backH*0.62;
-  for(var si=0;si<3;si++){
-    var sx2=cx2+wGap2+si*(ww2+wGap2);
-    var sb=cx.createLinearGradient(sx2,seatY,sx2+ww2,seatY);
-    sb.addColorStop(0,'#46885A');sb.addColorStop(0.5,'#58A070');sb.addColorStop(1,'#46885A');
-    fs(sb);fr(sx2,seatY-wh2*0.28,ww2,wh2*0.28);
-    fs('#58A070');fr(sx2+2,seatY,ww2-4,ch*0.04);
-    fs('rgba(200,240,210,0.12)');fr(sx2+3,seatY,ww2-6,1);
-  }
+  // === HANDRAILS (vertical, left wall) ===
+  ss('rgba(180,160,200,0.18)',1.5);cx.lineCap='round';
+  cx.beginPath();cx.moveTo(bx-seatDeep*0.5,cy+ch*0.08);cx.lineTo(bx-seatDeep*0.5,by+bh*0.65);cx.stroke();
 
-  // === FLOOR — deep purple-grey ===
-  var floorY=wallTop+backH;
-  var fl=cx.createLinearGradient(cx2,floorY,cx2,floorY+ch*0.32);
-  fl.addColorStop(0,'#1E1828');fl.addColorStop(0.3,'#282038');fl.addColorStop(1,'#181028');
-  fs(fl);fr(cx2,floorY,cw,ch*0.32);
-  grainConcrete(cx2,floorY,cw,ch*0.32);
-
-  // Floor plank lines
-  ss('rgba(20,15,10,0.2)',0.4);
-  for(var fi=0;fi<6;fi++){
-    cx.beginPath();cx.moveTo(cx2,floorY+fi*ch*0.053);cx.lineTo(cx2+cw,floorY+fi*ch*0.053);cx.stroke();
-  }
-
-  // Warm light pool on floor from ceiling lamps
-  for(var li=0;li<4;li++){
-    var lx2=cx2+cw*0.15+li*cw*0.23;
-    var fg=cx.createRadialGradient(lx2,floorY+ch*0.08,0,lx2,floorY+ch*0.08,ch*0.1);
-    fg.addColorStop(0,'rgba(255,200,150,0.06)');fg.addColorStop(1,'transparent');
-    fs(fg);fr(lx2-ch*0.06,floorY,ch*0.12,ch*0.15);
-  }
-
-  // === LUGGAGE RACK ===
-  fs('rgba(30,24,48,0.5)');fr(cx2+4,wallTop+ch*0.01,cw-8,ch*0.015);
-  ss('rgba(60,50,80,0.3)',1.2);
-  for(var bi=0;bi<6;bi++){
-    var bx=cx2+8+bi*(cw-16)/5;
-    cx.beginPath();cx.moveTo(bx,wallTop+ch*0.025);cx.lineTo(bx,wallTop-backH*0.02);cx.stroke();
-  }
-
-  // === HANDRAILS ===
-  for(var hi=0;hi<3;hi++){
-    var hx=cx2+cw*0.2+hi*cw*0.3;
-    ss('rgba(180,160,200,0.2)',1.8);cx.lineCap='round';
-    cx.beginPath();cx.moveTo(hx,wallTop+ch*0.015);cx.lineTo(hx,floorY+ch*0.1);cx.stroke();
-    // Pole mount points
-    fs('rgba(180,160,140,0.2)');cx.beginPath();cx.arc(hx,wallTop+ch*0.015,1.5,0,6.28);cx.fill();
-    cx.beginPath();cx.arc(hx,floorY+ch*0.1,1.5,0,6.28);cx.fill();
-  }
-
-  // === CREW (waiting to be rescued in cars 1,3,5) ===
+  // === CREW (in corridor) ===
   if([0,2,4].indexOf(ca.ci)>=0&&!crewFound[ca.ci]){
-    var cx4=cx2+cw*0.4,cy4=floorY+ch*0.06;
-    fs('rgba(20,5,25,0.3)');cx.beginPath();cx.ellipse(cx4,cy4+ch*0.06,5,1.3,0,0,6.28);cx.fill();
-    ss('#4A3A50',1.8);cx.beginPath();cx.moveTo(cx4-2,cy4-ch*0.02);cx.lineTo(cx4-3,cy4+ch*0.06);cx.stroke();
-    cx.beginPath();cx.moveTo(cx4+2,cy4-ch*0.02);cx.lineTo(cx4+3,cy4+ch*0.06);cx.stroke();
-    fs('#4A3A50');fr(cx4-4,cy4-ch*0.08,8,ch*0.06);
-    fs('#5A4A60');cx.beginPath();cx.arc(cx4,cy4-ch*0.1,3.5,0,6.28);cx.fill();
+    var cx4=cx2+cw*0.5,cy4=by+bh*0.7;
+    fs('rgba(20,5,25,0.35)');cx.beginPath();cx.ellipse(cx4,cy4+ch*0.04,4,1,0,0,6.28);cx.fill();
+    ss('#4A3A50',1.5);cx.beginPath();cx.moveTo(cx4-1.5,cy4-ch*0.02);cx.lineTo(cx4-2,cy4+ch*0.04);cx.stroke();
+    cx.beginPath();cx.moveTo(cx4+1.5,cy4-ch*0.02);cx.lineTo(cx4+2,cy4+ch*0.04);cx.stroke();
+    fs('#4A3A50');fr(cx4-3.5,cy4-ch*0.06,7,ch*0.05);
+    fs('#5A4A60');cx.beginPath();cx.arc(cx4,cy4-ch*0.08,3,0,6.28);cx.fill();
   }
 
-  // === WHEELS (still visible below) ===
-  var whY=floorY+ch*0.3;
+  // === LAST CAR GLOW ===
+  if(ca.last){
+    var a=0.15+0.1*Math.sin(t*2.5);
+    ss('rgba(107,63,160,'+(0.3+a)+')',1.5);
+    cx.beginPath();cx.moveTo(cx2,cy);cx.lineTo(cx2+cw,cy);cx.lineTo(bx+bw,by+bh);cx.lineTo(bx,by+bh);cx.closePath();cx.stroke();
+    fs('rgba(107,63,160,'+(0.5+a*0.3)+')');cx.font='6px system-ui';cx.textAlign='center';cx.fillText('末',cx2+cw/2,by+bh*0.75);
+  }
+
+  // === WHEELS (below floor edge) ===
+  var whY=by+bh+ch*0.08;
   for(var wi=0;wi<2;wi++){
     var wx3=cx2+cw*0.22+wi*cw*0.5,wy3=whY+2;
     fs(C.deepBg);fr(wx3-14,wy3-6,28,16);
@@ -530,16 +532,6 @@ function drawCar(ca,c,t){
     ss(C.fameGreen,1.2);cx.globalAlpha=0.3;cx.beginPath();cx.arc(wx3,wy3,7,0,6.28);cx.stroke();cx.globalAlpha=1;
     fs(C.pvdMid);cx.beginPath();cx.arc(wx3,wy3,2,0,6.28);cx.fill();
     fs(C.petraGold);cx.globalAlpha=0.3;cx.beginPath();cx.arc(wx3,wy3,0.8,0,6.28);cx.fill();cx.globalAlpha=1;
-  }
-
-  // === COUPLER (between cars) ===
-  if(!ca.last){fs(C.deepBg);fr(cx2+cw-6,floorY+ch*0.08,7,ch*0.06)}
-
-  // === LAST CAR GLOW ===
-  if(ca.last){
-    var a=0.15+0.1*Math.sin(t*2.5);
-    ss('rgba(232,152,168,'+(0.3+a)+')',1.8);cx.strokeRect(cx2+2,cy+2,cw-4,ch-4);
-    fs('rgba(232,152,168,'+(0.5+a*0.3)+')');cx.font='7px system-ui';cx.textAlign='center';cx.fillText('末',cx2+cw/2,floorY+ch*0.2);
   }
 }
 
@@ -729,8 +721,8 @@ function showLogPage(){
     var avail=crewHealth-(explorerAway?1:0);if(rationFood===0&&rationWater===0){rationFood=avail;rationWater=avail}
     html+='<div class=\"lb-text\">调配今日配给（'+avail+'人）</div>';
     html+='<div class=\"lb-res\"><span class=\"lb-ri'+(res.food<rationFood?' low':'')+'\">🍞 库存 '+res.food+'</span><span class=\"lb-ri'+(res.water<rationWater?' low':'')+'\">💧 库存 '+res.water+'</span></div>';
-    html+='<div style=\"display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0\"><button class=\"lb-btn\" style=\"padding:10px 20px;font-size:20px;min-width:48px\" onclick=\"rationFood=Math.max(0,rationFood-1);showLogPage()\">−1</button><span style=\"color:#C4A8E0;font-size:22px;min-width:80px;text-align:center\">🍞 ×'+rationFood+'</span><button class=\"lb-btn\" style=\"padding:10px 20px;font-size:20px;min-width:48px\" onclick=\"rationFood=Math.min(res.food,rationFood+1);showLogPage()\">+1</button></div>';
-    html+='<div style=\"display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0\"><button class=\"lb-btn\" style=\"padding:10px 20px;font-size:20px;min-width:48px\" onclick=\"rationWater=Math.max(0,rationWater-1);showLogPage()\">−1</button><span style=\"color:#C4A8E0;font-size:22px;min-width:80px;text-align:center\">💧 ×'+rationWater+'</span><button class=\"lb-btn\" style=\"padding:10px 20px;font-size:20px;min-width:48px\" onclick=\"rationWater=Math.min(res.water,rationWater+1);showLogPage()\">+1</button></div>';
+    html+='<div style=\"display:flex;align-items:center;justify-content:center;gap:18px;margin:12px 0\"><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationFood=Math.max(0,rationFood-1);showLogPage()\">−1</button><span style=\"color:#C4A8E0;font-size:24px;min-width:80px;text-align:center\">🍞 ×'+rationFood+'</span><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationFood=Math.min(res.food,rationFood+1);showLogPage()\">+1</button></div>';
+        html+='<div style=\"display:flex;align-items:center;justify-content:center;gap:18px;margin:12px 0\"><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationWater=Math.max(0,rationWater-1);showLogPage()\">−1</button><span style=\"color:#C4A8E0;font-size:24px;min-width:80px;text-align:center\">💧 ×'+rationWater+'</span><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationWater=Math.min(res.water,rationWater+1);showLogPage()\">+1</button></div>';
     html+='<button class=\"lb-btn warn\" onclick=\"skipRation()\">跳过 · 不给吃喝</button>';
     if(res.food<rationFood||res.water<rationWater)html+='<div class=\"lb-text\" style=\"color:#E898A8\">库存不足！</div>';
     html+='<button class=\"lb-btn\" onclick=\"doConsume()\">确认配给</button>';
