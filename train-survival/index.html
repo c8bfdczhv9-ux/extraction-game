@@ -327,36 +327,36 @@ function drawPlayer(px,py,t){
     cx.beginPath();cx.arc(ahx,ahy,0.8+hash(hi,2,'heart')*2.5,0,6.28);cx.fill();
   }cx.globalAlpha=1;
 
-  // === DRESS ===
-  for(var di=0;di<250;di++){var dx=(hash(di,0,'dress')-0.35)*12*s,dy=hash(di,1,'dress')*24*s;
-    cx.fillStyle=fl;cx.globalAlpha=0.8;
+  // === DRESS — white dots, dense ===
+  for(var di=0;di<400;di++){var dx=(hash(di,0,'dress')-0.35)*12*s,dy=hash(di,1,'dress')*24*s;
+    cx.fillStyle=fl;cx.globalAlpha=0.88;
     cx.beginPath();cx.arc(dx,dy,0.8+hash(di,2,'dress')*2.5,0,6.28);cx.fill();
   }cx.globalAlpha=1;
-  // Outline
-  for(var oi=0;oi<80;oi++){
-    var ot=oi/79,ox,oy;
+  // Purple outline dots along dress edge
+  for(var oi=0;oi<120;oi++){
+    var ot=oi/119,ox,oy;
     if(ot<0.25){ox=-4*s+(-5.5*s+4*s)*ot*4;oy=4*s+(15*s-4*s)*ot*4;}
     else if(ot<0.5){var t2=(ot-0.25)*4;ox=-5.5*s+(1*s+5.5*s)*t2;oy=15*s+(22*s-15*s)*t2;}
     else if(ot<0.75){var t3=(ot-0.5)*4;ox=1*s+(7*s-1*s)*t3;oy=22*s+(14*s-22*s)*t3;}
     else{var t4=(ot-0.75)*4;ox=7*s+(4.5*s-7*s)*t4;oy=14*s+(4*s-14*s)*t4;}
-    cx.fillStyle=ol;cx.beginPath();cx.arc(ox+hash(oi,0,'ol')*2-1,oy+hash(oi,1,'ol')*2-1,0.8+hash(oi,2,'ol')*2,0,6.28);cx.fill();
+    cx.fillStyle=ol;cx.beginPath();cx.arc(ox+hash(oi,0,'ol')*3-1.5,oy+hash(oi,1,'ol')*3-1.5,0.8+hash(oi,2,'ol')*2.5,0,6.28);cx.fill();
   }
 
   // === TORSO ===
-  for(var ti=0;ti<60;ti++){var tx=(hash(ti,0,'torso')-0.5)*9*s,ty=-6*s+hash(ti,1,'torso')*11*s;
-    cx.fillStyle=fl;cx.globalAlpha=0.8;
+  for(var ti=0;ti<120;ti++){var tx=(hash(ti,0,'torso')-0.5)*9*s,ty=-6*s+hash(ti,1,'torso')*11*s;
+    cx.fillStyle=fl;cx.globalAlpha=0.88;
     cx.beginPath();cx.arc(tx,ty,0.8+hash(ti,2,'torso')*2.2,0,6.28);cx.fill();
   }cx.globalAlpha=1;
 
-  // === HEAD ===
-  for(var hi2=0;hi2<80;hi2++){var ha=hash(hi2,0,'head')*6.28,hd=Math.sqrt(hash(hi2,1,'head'))*5*s;
-    cx.fillStyle=fl;cx.globalAlpha=0.85;
-    cx.beginPath();cx.arc(1*s+Math.cos(ha)*hd,-10.5*s+Math.sin(ha)*hd,0.7+hash(hi2,2,'head')*2,0,6.28);cx.fill();
+  // === HEAD — white dots circle ===
+  for(var hi2=0;hi2<150;hi2++){var ha=hash(hi2,0,'head')*6.28,hd=Math.sqrt(hash(hi2,1,'head'))*5.5*s;
+    cx.fillStyle=fl;cx.globalAlpha=0.9;
+    cx.beginPath();cx.arc(1*s+Math.cos(ha)*hd,-10.5*s+Math.sin(ha)*hd,0.8+hash(hi2,2,'head')*2.5,0,6.28);cx.fill();
   }cx.globalAlpha=1;
-  // Hair
-  for(var hi3=0;hi3<50;hi3++){var hx2=1*s+hash(hi3,0,'hair')*10*s,hy2=-14*s+hash(hi3,1,'hair')*6*s;
-    cx.fillStyle=hash(hi3,2,'hair')<0.5?ol:fl;
-    cx.beginPath();cx.arc(hx2,hy2,0.6+hash(hi3,3,'hair')*2,0,6.28);cx.fill();
+  // Hair — purple+white sweep
+  for(var hi3=0;hi3<80;hi3++){var hx2=1*s+hash(hi3,0,'hair')*10*s,hy2=-14*s+hash(hi3,1,'hair')*6*s;
+    cx.fillStyle=hash(hi3,2,'hair')<0.4?ol:fl;
+    cx.beginPath();cx.arc(hx2,hy2,0.6+hash(hi3,3,'hair')*2.5,0,6.28);cx.fill();
   }
 
   // === ARMS ===
@@ -376,55 +376,111 @@ function drawPlayer(px,py,t){
   cx.restore();
 }
 
-// ===== TRAIN CAR — baked stable dots =====
+// ===== TRAIN CAR — dense dot interior corridor =====
 function drawCar(ca,c,t){
   var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h;
-  var roofH=ch*0.12,bodyH=ch*0.42,underH=ch*0.08,wheelH=ch*0.14;
-  var bodyTop=cy+roofH,bodyBot=bodyTop+bodyH,depth=cw*0.1;
-  var greenCols=['#1A3A28','#244A34','#2A5A3E','#1E3E2A','#225036','#1C3C2E','#265438','#183828'];
+  // Perspective: far wall narrower
+  var inset=cw*0.16, bw=cw-inset*2, bx=cx2+inset;
+  var bh=ch*0.5, by=cy+ch*0.06;
+  var ck=Math.floor(cw)+'x'+Math.floor(ch);
+  var green=['#1A3A28','#244A34','#2A5A3E','#1E3E2A','#225036'],dgreen=['#0E1E14','#122418','#0C1A10'];
+  var lgreen=['#46885A','#58A070','#4A9060','#509868'],purple=['#1E1830','#241E38','#1A1428'];
+  var floorCol=['#1E1828','#241E30','#181028','#201830'];
 
-  // Roof silhouette (flat fill for shape, dots on top)
-  cx.fillStyle='rgba(0,0,0,0.4)';cx.beginPath();
-  cx.moveTo(cx2,cy+roofH);cx.lineTo(cx2+cw,cy+roofH);
-  cx.lineTo(cx2+cw-depth,cy);cx.quadraticCurveTo(cx2+cw/2,cy-roofH*0.3,cx2+depth,cy);cx.closePath();cx.fill();
+  // === CEILING (trapezoid) ===
+  cx.fillStyle='#0E0A18';cx.beginPath();
+  cx.moveTo(cx2,cy);cx.lineTo(cx2+cw,cy);
+  cx.lineTo(bx+bw,by);cx.lineTo(bx,by);cx.closePath();cx.fill();
+  drawBake(bakeRect('ceil_'+ck,cw,ch*0.06,purple,0.06),cx2,cy-2);
 
-  // Car sections — bake once per car size, draw at position
-  var ck=Math.floor(cw)+'_'+Math.floor(roofH)+'_'+Math.floor(bodyH);
-  drawBake(bakeRect('roof_'+ck,cw,roofH,['#C8C0B8','#D8D0C8','#B0A898','#C0B8B0','#D0C8C0'],0.03),cx2,cy);
-  drawBake(bakeRect('body_'+ck,cw,bodyH,greenCols,0.04),cx2,bodyTop);
-  drawBake(bakeRect('under_'+ck,cw,underH,['#0E0E12','#1A1A20','#101014','#18181C'],0.04),cx2,bodyBot);
+  // === LEFT WALL ===
+  cx.fillStyle='#0C1410';cx.beginPath();
+  cx.moveTo(cx2,cy);cx.lineTo(bx,by);cx.lineTo(bx,by+bh);cx.lineTo(cx2,cy+ch*0.72);cx.closePath();cx.fill();
+  drawBake(bakeRect('lwall_'+ck,cw*0.18,ch*0.7,dgreen,0.08),cx2,cy);
 
-  // Coachline — stable dotted line
-  var stripeY=bodyTop+bodyH*0.72;
-  var clk='stripe_'+Math.floor(cw);
-  drawBake(bakeRect(clk,cw,3,['#D4B830','#C0A828','#E0C040','#D0B430'],0.15),cx2-depth*0.2,stripeY);
+  // === RIGHT WALL ===
+  cx.fillStyle='#0C1410';cx.beginPath();
+  cx.moveTo(bx+bw,by);cx.lineTo(cx2+cw,cy);cx.lineTo(cx2+cw,cy+ch*0.72);cx.lineTo(bx+bw,by+bh);cx.closePath();cx.fill();
+  drawBake(bakeRect('rwall_'+ck,cw*0.18,ch*0.7,dgreen,0.08),bx+bw,cy);
 
-  // Windows
-  var ww=cw*0.14,wh=bodyH*0.42,wy=bodyTop+bodyH*0.12,wg=(cw-ww*5)/6;
-  for(var wi=0;wi<5;wi++){
-    var wx=cx2+wg+wi*(ww+wg);
-    drawBake(bakeRect('wfr_'+Math.floor(ww)+'_'+Math.floor(wh),ww+4,wh+4,['#D8D0C8','#E0D8D0','#D0C8C0'],0.05),wx-2,wy-2);
-    drawBake(bakeRect('wgl_'+Math.floor(ww)+'_'+Math.floor(wh),ww,wh,['#1A2A38','#2A3A48','#1A2A38','#203040'],0.03),wx,wy);
+  // === BACK WALL (green, dense dots) ===
+  cx.fillStyle='#0E1E14';cx.fillRect(bx,by,bw,bh);
+  drawBake(bakeRect('back_'+Math.floor(bw)+'_'+Math.floor(bh),bw,bh,green,0.10),bx,by);
+  // Panel lines
+  for(var pi=1;pi<5;pi++){
+    var px=bx+bw*(pi/5);
+    cx.fillStyle='rgba(0,0,0,0.3)';cx.fillRect(px-0.5,by,1,bh);
   }
 
-  // Wheels
-  var wheelTop=bodyBot+underH;
+  // === FLOOR (trapezoid, converging) ===
+  cx.fillStyle='#100C18';cx.beginPath();
+  cx.moveTo(cx2,cy+ch*0.72);cx.lineTo(cx2+cw,cy+ch*0.72);
+  cx.lineTo(bx+bw,by+bh);cx.lineTo(bx,by+bh);cx.closePath();cx.fill();
+  drawBake(bakeRect('floor_'+ck,cw,ch*0.25,floorCol,0.06),cx2,cy+ch*0.72);
+
+  // === AISLE (center strip, lighter) ===
+  cx.fillStyle='#14101C';cx.fillRect(cx2+cw*0.35,cy+ch*0.72,cw*0.3,ch*0.25);
+
+  // === SEATS (lighter green, along walls) ===
+  var seatW=cw*0.12, seatH=bh*0.2, seatY=by+bh*0.5;
+  // Left seats
+  cx.fillStyle='#305038';cx.fillRect(bx-seatW,seatY,seatW,seatH);
+  drawBake(bakeRect('lseat_'+Math.floor(seatW)+'_'+Math.floor(seatH),seatW,seatH,lgreen,0.14),bx-seatW,seatY);
+  // Right seats
+  cx.fillStyle='#305038';cx.fillRect(bx+bw,seatY,seatW,seatH);
+  drawBake(bakeRect('rseat_'+Math.floor(seatW)+'_'+Math.floor(seatH),seatW,seatH,lgreen,0.14),bx+bw,seatY);
+  // Seat backs
+  cx.fillStyle='#3A6048';cx.fillRect(bx-2,seatY-seatH*0.3,seatW+2,seatH*0.3);
+  cx.fillStyle='#3A6048';cx.fillRect(bx+bw-seatW,seatY-seatH*0.3,seatW+2,seatH*0.3);
+
+  // === WINDOWS (side walls) ===
+  var ww2=cw*0.12, wh2=bh*0.28, wy2=by+bh*0.15;
   for(var wi=0;wi<2;wi++){
-    var wx=cx2+cw*0.22+wi*cw*0.5,wy=wheelTop+wheelH*0.45;
-    drawBake(bakeRect('whl_'+wi+'_'+Math.floor(wheelH),28,wheelH,['#080810','#0A0A12','#06060C'],0.03),wx-14,wheelTop);
-    for(var wj=0;wj<2;wj++){
-      var wwx=wx-6+wj*12;
-      // Static wheel dots — fixed relative to wheel center
-      var wk='wcirc_5_0.12';
-      var wxDots=bakeRect(wk,10,10,['#2A2535','#3A3040','#1A1622','#302838'],0.12);
-      drawBake(wxDots,wwx-5,wy-5);
-    }
+    // Left window
+    var wlx=bx-ww2-2;
+    cx.fillStyle='#0A0A18';cx.fillRect(wlx,wy2,ww2,wh2);
+    drawBake(bakeRect('lwin_'+Math.floor(ww2)+'_'+Math.floor(wh2),ww2,wh2,['#0A0A18','#121028','#080818'],0.06),wlx,wy2);
+    cx.fillStyle='rgba(50,40,35,0.5)';cx.strokeRect(wlx,wy2,ww2,wh2);
+    // Right window
+    var rlx=bx+bw+2;
+    cx.fillStyle='#0A0A18';cx.fillRect(rlx,wy2,ww2,wh2);
+    drawBake(bakeRect('rwin_'+Math.floor(ww2)+'_'+Math.floor(wh2),ww2,wh2,['#0A0A18','#121028','#080818'],0.06),rlx,wy2);
+    cx.fillStyle='rgba(50,40,35,0.5)';cx.strokeRect(rlx,wy2,ww2,wh2);
+    wy2+=wh2+bh*0.08;
   }
 
+  // === HANDRAILS ===
+  for(var hi=0;hi<2;hi++){
+    var hx=bx+bw*(0.3+hi*0.4);
+    cx.strokeStyle='rgba(180,160,200,0.15)';cx.lineWidth=1.5;
+    cx.beginPath();cx.moveTo(hx,by);cx.lineTo(hx,by+bh);cx.stroke();
+  }
+
+  // === LUGGAGE RACK ===
+  cx.fillStyle='rgba(30,24,48,0.6)';cx.fillRect(bx,by-3,bw,3);
+
+  // === WHEELS ===
+  var wy3=by+bh+ch*0.04;
+  for(var wi=0;wi<2;wi++){
+    var wx3=cx2+cw*0.22+wi*cw*0.5;
+    drawBake(bakeRect('wh_'+wi+'_'+ck,24,14,['#0A0A12','#12121A','#080810'],0.08),wx3-12,wy3);
+    var pvd=bakeRect('pvd_'+ck,14,14,['#2A2535','#3A3040','#1A1622'],0.15);
+    drawBake(pvd,wx3-7,wy3-7);
+    cx.fillStyle=C.pvdMid;cx.beginPath();cx.arc(wx3,wy3+7,2,0,6.28);cx.fill();
+  }
+
+  // === CREW ===
+  if([0,2,4].indexOf(ca.ci)>=0&&!crewFound[ca.ci]){
+    var cx4=cx2+cw*0.5,cy4=by+bh*0.7;
+    cx.fillStyle='rgba(20,5,25,0.4)';cx.beginPath();cx.ellipse(cx4,cy4+ch*0.02,4,1,0,0,6.28);cx.fill();
+    cx.fillStyle='#4A3A50';cx.beginPath();cx.arc(cx4,cy4-2,3,0,6.28);cx.fill();
+  }
+
+  // Last car glow
   if(ca.last){
     var a=0.15+0.1*Math.sin(t*2.5);
     cx.fillStyle='rgba(107,63,160,'+(0.5+a*0.3)+')';cx.font='7px system-ui';cx.textAlign='center';
-    cx.fillText('末',cx2+cw/2,bodyTop+bodyH*0.5);
+    cx.fillText('末',cx2+cw/2,by+bh*0.5);
   }
 }
 
@@ -594,7 +650,7 @@ var rationFood=0,rationWater=0,eventToday=null;
 function carW(){return W/3.5}
 function carH(){return H*0.65}
 function makeCars(){cars=[];for(var i=0;i<NC;i++){var cw=carW(),ch=carH();cars.push({x:i*cw,y:H*0.2,w:cw,h:ch,last:i===NC-1})}}
-function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h-20-Math.random()*15,ci:i,d:d,got:false})}}}
+function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h*0.65-Math.random()*12,ci:i,d:d,got:false})}}}
 function makeStars(){stars=[];for(var i=0;i<200;i++){var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,C.bw,C.vapourViolet,'#D4B830'];stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,c:cols[Math.floor(Math.random()*cols.length)]})}}
 
 // ===== LOGBOOK UI =====
@@ -662,7 +718,7 @@ function gameOverP1(win){st='end';document.getElementById('over').classList.add(
 function collect(it){if(it.got)return;it.got=true;inv[it.d.k]++;updInv();for(var i=0;i<8;i++)pts.push({x:it.x,y:it.y,vx:(Math.random()-0.5)*2.5,vy:-2-Math.random()*2.5,life:22,ml:22,c:it.d.c,s:1.5+Math.random()*2})}
 function pickup(){for(var i=0;i<loot.length;i++){var l=loot[i];if(l.got)continue;if(Math.abs(player.x-l.x)<38&&Math.abs(player.y-l.y)<44)collect(l)}}
 function startPhase2(){phase=2;st='play';level=2;showLevelIntro=true;res.food=inv.food;res.water=inv.water;res.coal=inv.coal;res.meds=inv.med;res.wood=0;res.iron=0;res.gear=inv.gear||0;res.ammo=inv.ammo||0;crewHealth=crewCount;day=1;logPage=1;distance=0;showLogbook()}
-function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h-20;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h-20,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h-20,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
+function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h*0.65;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h*0.65,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h*0.65,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
 
 // ===== INPUT =====
 var joyX=0,joyActive=false,joyOX=0,joyOY=0,keys={};
