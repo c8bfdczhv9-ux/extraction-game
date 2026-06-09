@@ -287,85 +287,106 @@ var ITEMS=[
   {k:'ammo',n:'子弹',c:C.petraGold,draw:drawAmmo},{k:'comm',n:'电台',c:'#9B8B70',draw:drawRadio},
   {k:'chess',n:'棋盘',c:'#8B7060',draw:drawChess},{k:'med',n:'医药',c:C.dustyCoral,draw:drawMed}
 ];
-// ===== PLAYER — Banksy stencil girl (black silhouette + red heart) =====
+// ===== PLAYER — Banksy stencil girl (purple outline + white fill) =====
 function drawPlayer(px,py,t){
   var s=2.4;cx.save();cx.translate(px,py-30*s);
   var sway=Math.sin(t*1.2)*0.5*s;
+  var outline='#5A3890',fill='#F5F0F8';
 
-  // Shadow on ground — soft oval
-  fs('rgba(0,0,0,0.18)');cx.beginPath();cx.ellipse(0,30*s,7*s,1.5*s,0,0,6.28);cx.fill();
+  // Shadow on ground
+  fs('rgba(10,3,20,0.18)');cx.beginPath();cx.ellipse(0,30*s,7*s,1.5*s,0,0,6.28);cx.fill();
 
-  // === BALLOON STRING — thin, wavy, grey ===
-  cx.strokeStyle='rgba(140,130,120,0.5)';cx.lineWidth=0.6*s;cx.lineCap='round';cx.setLineDash([2*s,1.5*s]);
-  cx.beginPath();cx.moveTo(4.5*s,-2*s);
-  cx.quadraticCurveTo(6*s+sway,10*s-22*s,5.5*s+sway,-34*s);cx.stroke();
+  // === BALLOON STRING ===
+  cx.strokeStyle='rgba(160,140,200,0.45)';cx.lineWidth=0.5*s;cx.lineCap='round';cx.setLineDash([2.5*s,1.5*s]);
+  cx.beginPath();cx.moveTo(3.5*s,-2*s);
+  cx.quadraticCurveTo(5*s+sway,8*s-22*s,4.5*s+sway,-34*s);cx.stroke();
   cx.setLineDash([]);
 
-  // === HEART BALLOON — bright Banksy red ===
-  cx.save();cx.translate(5.5*s+sway,-36*s);
+  // === HEART BALLOON — purple ===
+  cx.save();cx.translate(4.5*s+sway,-36*s);
   var hs=s*7;
-  fs('#D4282C');cx.beginPath();
+  fs('#6B3FA0');cx.beginPath();
   cx.moveTo(0,hs*0.35);cx.bezierCurveTo(-hs*0.9,-hs*0.6,-hs*1.6,hs*0.1,0,hs);
   cx.bezierCurveTo(hs*1.6,hs*0.1,hs*0.9,-hs*0.6,0,hs*0.35);cx.fill();
-  // Balloon highlight
-  fs('rgba(255,255,255,0.18)');cx.beginPath();cx.arc(-hs*0.25,-hs*0.05,hs*0.2,0,6.28);cx.fill();
+  fs('rgba(255,255,255,0.22)');cx.beginPath();cx.arc(-hs*0.25,-hs*0.05,hs*0.2,0,6.28);cx.fill();
   cx.restore();
 
-  // === BODY — pure black stencil silhouette ===
-  var sc='#1A1518';
-  var wave=Math.sin(t*2.8)*0.6*s;
+  // === BODY — white fill, purple outline (Banksy stencil style) ===
+  var wave=Math.sin(t*2.8)*0.5*s;
 
-  // Dress — A-line with slight flutter
-  fs(sc);cx.beginPath();
-  cx.moveTo(-5*s+wave,5*s);
-  cx.lineTo(-7.5*s+wave*1.3,12*s);
-  cx.quadraticCurveTo(-8*s,16.5*s,-2*s,17*s+wave*0.4);
-  cx.quadraticCurveTo(7*s,15*s,6.5*s+wave*0.5,12*s);
-  cx.lineTo(5*s+wave*0.3,5*s);
-  cx.closePath();cx.fill();
+  function stencilShape(fn){
+    fn();
+    fs(fill);cx.fill();
+    ss(outline,1.2*s);cx.stroke();
+  }
 
-  // Torso — fitted bodice
-  fs(sc);cx.beginPath();
-  cx.moveTo(-3.5*s,-6*s);cx.lineTo(-5.5*s,5*s);cx.lineTo(5.5*s,5*s);cx.lineTo(3.5*s,-6*s);cx.closePath();cx.fill();
+  // Dress
+  stencilShape(function(){
+    cx.beginPath();
+    cx.moveTo(-5*s+wave,5*s);
+    cx.lineTo(-7.5*s+wave*1.3,12*s);
+    cx.quadraticCurveTo(-8*s,16.5*s,-2*s,17*s+wave*0.4);
+    cx.quadraticCurveTo(7*s,15*s,6.5*s+wave*0.5,12*s);
+    cx.lineTo(5*s+wave*0.3,5*s);
+    cx.closePath();
+  });
 
-  // Collar — subtle notch
-  fs('#1A1518');cx.beginPath();
-  cx.moveTo(-2*s,-6*s);cx.lineTo(0,-4*s);cx.lineTo(2*s,-6*s);cx.closePath();cx.fill();
+  // Torso
+  stencilShape(function(){
+    cx.beginPath();
+    cx.moveTo(-3.5*s,-6*s);cx.lineTo(-5.5*s,5*s);cx.lineTo(5.5*s,5*s);cx.lineTo(3.5*s,-6*s);cx.closePath();
+  });
 
-  // === ARMS — left arm reaching up toward balloon ===
+  // Arms — purple outline only (no fill needed, thin)
   var armRaise=Math.sin(t*2.5)*0.4*s;
-  cx.strokeStyle=sc;cx.lineWidth=2.6*s;cx.lineCap='round';
-  // Left arm — reaching up
+  ss(outline,2*s);cx.lineCap='round';
   cx.beginPath();cx.moveTo(-3.5*s,-1*s);
   cx.quadraticCurveTo(-8*s+armRaise,-8*s,-6*s+armRaise*0.8,-12*s);cx.stroke();
-  // Right arm — at side
   cx.beginPath();cx.moveTo(3.5*s,-1*s);
   cx.quadraticCurveTo(7*s+wave,3*s,5*s+wave,8*s);cx.stroke();
 
-  // === HEAD ===
-  fs(sc);cx.beginPath();cx.arc(0,-11*s,5*s,0,6.28);cx.fill();
+  // Head — white circle, purple outline
+  stencilShape(function(){
+    cx.beginPath();cx.arc(0,-11*s,5*s,0,6.28);
+  });
 
-  // Hair — windswept, short, to the right
-  fs('#1A1518');cx.beginPath();
-  cx.arc(1*s,-10*s,5.3*s,Math.PI*0.3,Math.PI*1.4);cx.fill();
-  // Hair sweep to the right
-  cx.beginPath();cx.moveTo(4*s,-13*s);
-  cx.quadraticCurveTo(8*s,-14*s,9*s,-10*s);
-  cx.quadraticCurveTo(7*s,-11*s,3*s,-10*s);cx.closePath();cx.fill();
+  // Hair
+  stencilShape(function(){
+    cx.beginPath();
+    cx.arc(1*s,-10*s,5.3*s,Math.PI*0.3,Math.PI*1.4);
+  });
+  stencilShape(function(){
+    cx.beginPath();cx.moveTo(4*s,-13*s);
+    cx.quadraticCurveTo(8*s,-14*s,9*s,-10*s);
+    cx.quadraticCurveTo(7*s,-11*s,3*s,-10*s);cx.closePath();
+  });
 
-  // === LEGS — simple stride ===
+  // === LEGS — brush-stroke ending (NOT rounded) ===
   var lp=t*5;
-  cx.strokeStyle=sc;cx.lineWidth=2.8*s;cx.lineCap='round';
-  cx.beginPath();cx.moveTo(-2.5*s,15*s);
-  cx.lineTo(-3.5*s+Math.sin(lp)*4.5*s,26*s);cx.stroke();
-  cx.beginPath();cx.moveTo(2.5*s,15*s);
-  cx.lineTo(3.5*s+Math.sin(lp+Math.PI)*4.5*s,26*s);cx.stroke();
+  ss(outline,2.6*s);cx.lineCap='butt';
+  // Left leg
+  var lx1=-2.5*s,lx2=-3.5*s+Math.sin(lp)*4.5*s;
+  cx.beginPath();cx.moveTo(lx1,15*s);cx.lineTo(lx2,26*s);cx.stroke();
+  // Brush end: jagged finish
+  ss(outline,2.2*s);cx.lineCap='butt';
+  for(var be=0;be<4;be++){
+    var bx=lx2-1.5+be*1.2,by=26*s-(be%2)*1.5;
+    cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+0.8,by+1.5+Math.random()*2);cx.stroke();
+  }
+  // Right leg
+  var rx1=2.5*s,rx2=3.5*s+Math.sin(lp+Math.PI)*4.5*s;
+  cx.beginPath();cx.moveTo(rx1,15*s);cx.lineTo(rx2,26*s);cx.stroke();
+  ss(outline,2.2*s);
+  for(var be=0;be<4;be++){
+    var bx=rx2-1.5+be*1.2,by=26*s-(be%2)*1.5;
+    cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+0.8,by+1.5+Math.random()*2);cx.stroke();
+  }
 
-  // === OVERSPRAY — stencil texture (subtle) ===
-  for(var i=0;i<30;i++){
-    var ox=(Math.random()-0.5)*16*s,oy=(Math.random()-0.5)*20*s;
-    cx.fillStyle='rgba(26,21,24,'+(0.02+Math.random()*0.04)+')';
-    cx.beginPath();cx.arc(ox,oy,0.4+Math.random()*1.2,0,6.28);cx.fill();
+  // === OVERSPRAY — purple stencil texture ===
+  for(var i=0;i<25;i++){
+    var ox=(Math.random()-0.5)*15*s,oy=(Math.random()-0.5)*20*s;
+    cx.fillStyle='rgba(90,56,144,'+(0.015+Math.random()*0.035)+')';
+    cx.beginPath();cx.arc(ox,oy,0.3+Math.random()*1.0,0,6.28);cx.fill();
   }
 
   cx.restore();
@@ -375,10 +396,9 @@ function drawPlayer(px,py,t){
 function drawCar(ca,c,t){
   var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h;
 
-  // === CEILING (curved top of carriage) ===
-  fs('#3A3448');fr(cx2,cy,cw,ch*0.08);
-  // Ceiling arch with concrete grain
-  fs('#3A3448');cx.beginPath();
+  // === CEILING — deep purple ===
+  fs('#1E1830');fr(cx2,cy,cw,ch*0.08);
+  fs('#1E1830');cx.beginPath();
   cx.moveTo(cx2,cy);cx.quadraticCurveTo(cx2+cw/2,cy-ch*0.04,cx2+cw,cy);
   cx.lineTo(cx2+cw,cy+ch*0.06);cx.quadraticCurveTo(cx2+cw/2,cy+ch*0.02,cx2,cy+ch*0.06);
   cx.closePath();cx.fill();
@@ -393,24 +413,23 @@ function drawCar(ca,c,t){
     fs('rgba(255,220,180,0.6)');fr(lx-1.2,cy+ch*0.025,2.4,1.5);
   }
 
-  // === BACK WALL (far wall with wood paneling) ===
+  // === BACK WALL — deep green (绿皮火车) ===
   var backH=ch*0.62;
   var wallTop=cy+ch*0.06;
-  // Wood base
-  var woodg=cx.createLinearGradient(cx2,wallTop,cx2,wallTop+backH);
-  woodg.addColorStop(0,'#5A4A40');woodg.addColorStop(0.15,'#6B5A50');woodg.addColorStop(0.5,'#7A6858');
-  woodg.addColorStop(0.85,'#6B5A50');woodg.addColorStop(1,'#4A3A32');
-  fs(woodg);fr(cx2,wallTop,cw,backH);
-  grainWood(cx2,wallTop,cw,backH);
+  var wg=cx.createLinearGradient(cx2,wallTop,cx2,wallTop+backH);
+  wg.addColorStop(0,'#1A3A28');wg.addColorStop(0.3,'#244A34');wg.addColorStop(0.6,'#2A5A3E');wg.addColorStop(1,'#1A3A28');
+  fs(wg);fr(cx2,wallTop,cw,backH);
+  // Green grain instead of wood
+  grain(cx2,wallTop,cw,backH,80,'40,90,60');
 
-  // Vertical wood panel lines
-  ss('rgba(40,30,22,0.15)',0.4);
+  // Vertical panel lines
+  ss('rgba(20,50,30,0.15)',0.4);
   for(var pi=0;pi<8;pi++){
     cx.beginPath();cx.moveTo(cx2+cw*(pi/8),wallTop);cx.lineTo(cx2+cw*(pi/8),wallTop+backH);cx.stroke();
   }
 
-  // Horizontal rail (dado rail at window bottom)
-  ss('rgba(60,45,35,0.6)',2.5);cx.lineCap='butt';
+  // Horizontal rail
+  ss('rgba(100,140,110,0.3)',2.5);cx.lineCap='butt';
   cx.beginPath();cx.moveTo(cx2+4,wallTop+backH*0.58);cx.lineTo(cx2+cw-4,wallTop+backH*0.58);cx.stroke();
 
   // === WINDOWS (showing night landscape outside) ===
@@ -442,24 +461,21 @@ function drawCar(ca,c,t){
     ss('rgba(60,50,45,0.5)',1.2);cx.strokeRect(wx2,wy2,ww2,wh2);
   }
 
-  // === GREEN BENCH SEATS (below windows, along wall) ===
+  // === SEATS — lighter green ===
   var seatY=wallTop+backH*0.62;
   for(var si=0;si<3;si++){
     var sx2=cx2+wGap2+si*(ww2+wGap2);
-    // Seat back (against wall)
     var sb=cx.createLinearGradient(sx2,seatY,sx2+ww2,seatY);
-    sb.addColorStop(0,'#2A5A42');sb.addColorStop(0.5,'#3A7D5A');sb.addColorStop(1,'#2A5A42');
+    sb.addColorStop(0,'#46885A');sb.addColorStop(0.5,'#58A070');sb.addColorStop(1,'#46885A');
     fs(sb);fr(sx2,seatY-wh2*0.28,ww2,wh2*0.28);
-    // Seat cushion
-    fs('#3A7D5A');fr(sx2+2,seatY,ww2-4,ch*0.04);
-    // Seat highlight
-    fs('rgba(180,220,190,0.12)');fr(sx2+3,seatY,ww2-6,1);
+    fs('#58A070');fr(sx2+2,seatY,ww2-4,ch*0.04);
+    fs('rgba(200,240,210,0.12)');fr(sx2+3,seatY,ww2-6,1);
   }
 
-  // === FLOOR ===
+  // === FLOOR — deep purple-grey ===
   var floorY=wallTop+backH;
   var fl=cx.createLinearGradient(cx2,floorY,cx2,floorY+ch*0.32);
-  fl.addColorStop(0,'#3A3028');fl.addColorStop(0.3,'#4A3A30');fl.addColorStop(1,'#2A2018');
+  fl.addColorStop(0,'#1E1828');fl.addColorStop(0.3,'#282038');fl.addColorStop(1,'#181028');
   fs(fl);fr(cx2,floorY,cw,ch*0.32);
   grainConcrete(cx2,floorY,cw,ch*0.32);
 
@@ -477,19 +493,18 @@ function drawCar(ca,c,t){
     fs(fg);fr(lx2-ch*0.06,floorY,ch*0.12,ch*0.15);
   }
 
-  // === LUGGAGE RACK (above windows) ===
-  fs('rgba(60,50,42,0.5)');fr(cx2+4,wallTop+ch*0.01,cw-8,ch*0.015);
-  // Rack support brackets
-  ss('rgba(50,40,35,0.4)',1.2);
+  // === LUGGAGE RACK ===
+  fs('rgba(30,24,48,0.5)');fr(cx2+4,wallTop+ch*0.01,cw-8,ch*0.015);
+  ss('rgba(60,50,80,0.3)',1.2);
   for(var bi=0;bi<6;bi++){
     var bx=cx2+8+bi*(cw-16)/5;
     cx.beginPath();cx.moveTo(bx,wallTop+ch*0.025);cx.lineTo(bx,wallTop-backH*0.02);cx.stroke();
   }
 
-  // === HANDRAILS (vertical poles) ===
+  // === HANDRAILS ===
   for(var hi=0;hi<3;hi++){
     var hx=cx2+cw*0.2+hi*cw*0.3;
-    ss('rgba(180,160,140,0.25)',1.8);cx.lineCap='round';
+    ss('rgba(180,160,200,0.2)',1.8);cx.lineCap='round';
     cx.beginPath();cx.moveTo(hx,wallTop+ch*0.015);cx.lineTo(hx,floorY+ch*0.1);cx.stroke();
     // Pole mount points
     fs('rgba(180,160,140,0.2)');cx.beginPath();cx.arc(hx,wallTop+ch*0.015,1.5,0,6.28);cx.fill();
@@ -700,7 +715,7 @@ function carW(){return W/3.5}
 function carH(){return H*0.65}
 function makeCars(){cars=[];for(var i=0;i<NC;i++){var cw=carW(),ch=carH();cars.push({x:i*cw,y:H*0.2,w:cw,h:ch,last:i===NC-1})}}
 function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h*0.72-Math.random()*12,ci:i,d:d,got:false})}}}
-function makeStars(){stars=[];for(var i=0;i<200;i++){var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,C.vapourViolet,C.petraGold];stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,c:cols[Math.floor(Math.random()*cols.length)]})}}
+function makeStars(){stars=[];for(var i=0;i<200;i++){var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,C.bw,C.vapourViolet,'#D4B830'];stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,c:cols[Math.floor(Math.random()*cols.length)]})}}
 
 // ===== LOGBOOK UI =====
 var lb=document.getElementById('logbook'),lbDay=document.getElementById('lb-day');
