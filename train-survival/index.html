@@ -56,7 +56,7 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 <canvas id="g"></canvas>
 <button id="styletog" onclick="toggleStyle()">◈ 晶层</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
-<div id="ver">v30</div>
+<div id="ver">v31</div>
 <div id="inv"></div>
 <div id="hint">拖动摇杆 · 点击拾取</div>
 <div id="warn"></div>
@@ -454,7 +454,7 @@ function drawCar(ca,c,t){
   fs(woodg);fr(cx2,wallTop,cw,backH);
   // Wood grain texture overlay
   var wd=texWood(Math.ceil(cw/2),Math.ceil(backH/2));
-  cx.globalAlpha=0.35;cx.drawImage(wd,0,0,cw,backH);cx.globalAlpha=1;
+  cx.globalAlpha=0.5;cx.drawImage(wd,0,0,cw,backH);cx.globalAlpha=1;
 
   // Vertical wood panel lines
   ss('rgba(40,30,22,0.15)',0.4);
@@ -516,7 +516,7 @@ function drawCar(ca,c,t){
   fs(fl);fr(cx2,floorY,cw,ch*0.32);
   // Floor concrete grain
   var fc=texConcrete(Math.ceil(cw/2),Math.ceil(ch*0.32/2));
-  cx.globalAlpha=0.25;cx.drawImage(fc,0,0,cw,ch*0.32);cx.globalAlpha=1;
+  cx.globalAlpha=0.4;cx.drawImage(fc,0,0,cw,ch*0.32);cx.globalAlpha=1;
 
   // Floor plank lines
   ss('rgba(20,15,10,0.2)',0.4);
@@ -594,7 +594,7 @@ function drawCamp(t,clv){
   for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
   fs(sky);fr(0,0,W,H*0.75);
   var ck2=texChalk(Math.ceil(W/2),Math.ceil(H*0.75/2),0x201838);
-  cx.globalAlpha=0.22;cx.drawImage(ck2,0,0,W,H*0.75);cx.globalAlpha=1;
+  cx.globalAlpha=0.4;cx.drawImage(ck2,0,0,W,H*0.75);cx.globalAlpha=1;
   // Horizon strip
   var hg=cx.createLinearGradient(0,H*0.7,0,H*0.78);
   hg.addColorStop(0,lv.sky[lv.sky.length-1]);hg.addColorStop(0.5,lv.horizon);hg.addColorStop(1,lv.ground1);
@@ -661,14 +661,14 @@ function drawSky(clv){
   var sky=cx.createLinearGradient(0,0,0,H*0.75);
   for(var i=0;i<lv.sky.length;i++)sky.addColorStop(i/(lv.sky.length-1),lv.sky[i]);
   fs(sky);fr(0,0,W,H*0.75);
-  // Overlay chalk grain: generate small chalk texture and drawImage
-  var ck=texChalk(Math.ceil(W/2),Math.ceil(H*0.75/2),0x181030);
-  cx.globalAlpha=0.25;cx.drawImage(ck,0,0,W,H*0.75);cx.globalAlpha=1;
+  // Chalk grain overlay — higher alpha for mobile visibility
+  var ck=texChalk(Math.ceil(W),Math.ceil(H*0.75),0x302050);
+  cx.globalAlpha=0.45;cx.drawImage(ck,0,0,W,H*0.75);cx.globalAlpha=1;
   // Horizon glow strip with grain
   var hg=cx.createLinearGradient(0,H*0.7,0,H*0.78);
   hg.addColorStop(0,lv.sky[lv.sky.length-1]);hg.addColorStop(0.5,lv.horizon);hg.addColorStop(1,lv.ground1);
   fs(hg);fr(0,H*0.7,W,H*0.08);
-  cx.globalAlpha=0.15;cx.drawImage(ck,0,H*0.65,W,H*0.15);cx.globalAlpha=1;
+  cx.globalAlpha=0.35;cx.drawImage(ck,0,H*0.65,W,H*0.15);cx.globalAlpha=1;
   // Fog — textured
   fs(lv.fog);fr(0,H*0.45,W,H*0.55);
   // Weather particles & stars same as before
@@ -710,7 +710,7 @@ function drawGround(clv){
   fs(C.groundBase);fr(0,H*0.78,W,H*0.22);
   // Ground grain — chalk pastel
   var gck=texChalk(Math.ceil(W/3),Math.ceil(H*0.22/2),0x201828);
-  cx.globalAlpha=0.3;cx.drawImage(gck,0,H*0.78,W,H*0.22);cx.globalAlpha=1;
+  cx.globalAlpha=0.5;cx.drawImage(gck,0,H*0.78,W,H*0.22);cx.globalAlpha=1;
   // Rails
   for(var rx=-(cam%36);rx<W;rx+=36){
     fs(C.deepBg);fr(rx,H*0.78+2,5,8);fs('rgba(192,160,96,0.1)');fr(rx-8,H*0.78+6,21,1.8);
