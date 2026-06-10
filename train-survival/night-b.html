@@ -51,7 +51,7 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 <canvas id="g"></canvas>
 <button id="styletog" onclick="toggleStyle()">◈ 层叠</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
-<div id="ver">v43 · B引擎</div>
+<div id="ver">v43p · B引擎</div>
 <div id="inv"></div>
 <div id="hint">拖动摇杆 · 点击拾取</div>
 <div id="warn"></div>
@@ -86,23 +86,25 @@ function fs(c){cx.fillStyle=c}
 function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
 // Pick random from array
 function pk(a){return a[Math.floor(Math.random()*a.length)]}
-// Draw layered strokes over a rect area
+// Draw layered strokes over a rect area (Perlin-gated, no Math.random jitter)
 function strokeLayer(x,y,w,h,colors,passes,step,alpha,vert){
   for(var p=0;p<passes;p++){
     var s=step*(p+1)+p*2, a2=alpha*(0.6+p*0.2);
     if(vert){
       for(var lx=x;lx<x+w;lx+=s){
         var nv=pn(lx*0.03+p*5,y*0.05)*0.5+0.5;
-        if(Math.random()>0.3+nv*0.45)continue;
+        var gate=pn(lx*0.07+p*7,y*0.07+10)*0.5+0.5;
+        if(gate>0.35+nv*0.4)continue;
         cx.fillStyle=pk(colors);cx.globalAlpha=a2;
-        fr(lx,y+Math.random()*h*0.2,1+Math.random()*2.5,h*0.6+Math.random()*h*0.3);
+        fr(lx,y+pn(lx,0.1)*h*0.2,1+pn(lx+p,0.2)*2.5,h*0.6+pn(lx,0.3)*h*0.3);
       }
     }else{
       for(var ly=y;ly<y+h;ly+=s){
         var nv=pn(ly*0.02+p*3,0.5)*0.5+0.5;
-        if(Math.random()>0.28+nv*0.4)continue;
+        var gate=pn(ly*0.06+p*7,0.5+10)*0.5+0.5;
+        if(gate>0.3+nv*0.4)continue;
         cx.fillStyle=pk(colors);cx.globalAlpha=a2;
-        fr(x+Math.random()*w*0.15,ly,w*0.7+Math.random()*w*0.3,0.5+Math.random()*1);
+        fr(x+pn(0,ly)*w*0.15,ly,w*0.7+pn(1,ly)*w*0.3,0.5+pn(2,ly)*1);
       }
     }
   }cx.globalAlpha=1;
@@ -232,14 +234,14 @@ function drawPlayer(px,py,t){
   // Balloon string — dashed stroke
   for(var si=0;si<12;si++){var st=si/11,ssx=2*s+(5*s+wind-2*s)*st,ssy=-2*s-32*s*st+Math.sin(st*2)*2*s;
     cx.fillStyle='rgba(160,140,200,0.3)';cx.beginPath();cx.arc(ssx,ssy,0.6,0,6.28);cx.fill()}
-  // Heart — vertical strokes in heart area
+  // Heart — Perlin-gated dots
   var hx=4*s+wind,hy=-35*s;
-  cx.save();cx.translate(hx,hy);
-  for(var hi=0;hi<30;hi++){
-    var hdx=(pn(hi*0.1,0)-0.5)*14, hdy=(pn(0,hi*0.1)-0.5)*10;
+  for(var hi=0;hi<40;hi++){
+    var hdx=(pn(hi*0.15,0)-0.5)*14, hdy=(pn(0,hi*0.15)-0.5)*10;
+    var gate=pn(hi*0.3,5)*0.5+0.5;if(gate<0.3)continue;
     cx.fillStyle='#6B3FA0';cx.globalAlpha=0.55;
-    fr(hdx,hdy,0.8+Math.random()*2.5,0.8+Math.random()*2.5);
-  }cx.globalAlpha=1;cx.restore();
+    fr(hx+hdx,hy+hdy,1+pn(hi,6)*2.5,1+pn(hi,7)*2.5);
+  }cx.globalAlpha=1;
   // Dress — white vertical strokes
   strokeLayer(-6*s,0,12*s,24*s,[fl,fl,fl,'#EAE2F0'],3,2,0.7,true);
   // Purple outline along dress edge
@@ -249,20 +251,22 @@ function drawPlayer(px,py,t){
     else if(ot<0.7){var t2=(ot-0.35)*3;ox=-4*s+8*s*t2;oy=18*s-4*s*t2}
     else{var t3=(ot-0.7)*3;ox=4*s-1.5*s*t3;oy=14*s-10*s*t3}
     cx.fillStyle=ol;cx.globalAlpha=0.5;
-    fr(ox+pn(oi*0.1,0)*3,oy+pn(0,oi*0.1)*3,0.8+Math.random()*1.5,1.5+Math.random()*3);
+    fr(ox+pn(oi*0.1,0)*3,oy+pn(0,oi*0.1)*3,0.8+pn(oi,2)*1.5,1.5+pn(oi,3)*3);
   }cx.globalAlpha=1;
   // Torso — white strokes
   strokeLayer(-4*s,-6*s,8*s,11*s,[fl,fl,'#EAE2F0'],2,2,0.6,true);
-  // Head — white strokes in circle
+  // Head — Perlin-gated dots in circle
   for(var hi=0;hi<80;hi++){
-    var ha=Math.random()*6.28,hd=Math.sqrt(Math.random())*5.5*s;
+    var ha=pn(hi*0.1,0)*6.28,hd=Math.sqrt(pn(hi*0.1,1))*5.5*s;
+    var gate=pn(hi*0.2,5)*0.5+0.5;if(gate<0.25)continue;
     cx.fillStyle=fl;cx.globalAlpha=0.65;
-    fr(1*s+Math.cos(ha)*hd,(-10.5*s+Math.sin(ha)*hd),1+Math.random()*2,1+Math.random()*2);
+    fr(1*s+Math.cos(ha)*hd,(-10.5*s+Math.sin(ha)*hd),1+pn(hi,3)*2,1+pn(hi,4)*2);
   }cx.globalAlpha=1;
-  // Hair — purple+white horizontal strokes
+  // Hair — purple+white, Perlin-gated
   for(var hi=0;hi<40;hi++){
-    cx.fillStyle=Math.random()<0.4?ol:fl;cx.globalAlpha=0.5;
-    fr(1*s+Math.random()*10*s,-14*s+Math.random()*6*s,1+Math.random()*3,0.6+Math.random()*1.5);
+    var gate=pn(hi*0.2,7)*0.5+0.5;if(gate<0.28)continue;
+    cx.fillStyle=pn(hi,8)<0.4?ol:fl;cx.globalAlpha=0.5;
+    fr(1*s+pn(hi,0)*10*s,-14*s+pn(hi,1)*6*s,1+pn(hi,2)*3,0.6+pn(hi,3)*1.5);
   }cx.globalAlpha=1;
   // Arms — purple strokes
   var armReach=Math.sin(t*2)*0.3*s;
@@ -302,7 +306,7 @@ function drawCar(ca,c,t){
   strokeLayer(bx+bw,cy,cw*0.18,ch*0.7,dgreen,2,3,0.45,true);
   // Back wall
   cx.fillStyle='#0E1E14';cx.fillRect(bx,by,bw,bh);
-  strokeLayer(bx,by,bw,bh,green,3,2.5,0.5,false);
+  strokeLayer(bx,by,bw,bh,green,4,2.5,0.5,false);
   for(var pi=1;pi<5;pi++){var px=bx+bw*(pi/5);cx.fillStyle='rgba(0,0,0,0.3)';cx.fillRect(px-0.5,by,1,bh)}
   // Floor
   cx.fillStyle='#100C18';cx.beginPath();
@@ -366,6 +370,7 @@ function drawCamp(t,clv){
   strokeLayer(0,0,W,H*0.75,['#0A0418','#0E0620','#120820','#100618'],1,3,0.25,false);
   strokeLayer(0,0,W,H*0.75,['#120820','#1E0C32','#2A1048'],1,5,0.3,false);
   strokeLayer(0,0,W,H*0.65,['#1E0C32','#2A1048','#3A1850'],1,7,0.2,false);
+  strokeLayer(0,0,W,H*0.6,['#2A1048','#3A1850','#1E0C32'],1,9,0.12,false);
   // Fog
   fs(lv.fog);fr(0,H*0.45,W,H*0.55);
   // Stars
@@ -422,6 +427,7 @@ function drawSky(clv){
   strokeLayer(0,0,W,H*0.75,['#0A0418','#0E0620','#120820'],1,3,0.22,false);
   strokeLayer(0,0,W,H*0.75,lv.sky.slice(0,3),1,5,0.28,false);
   strokeLayer(0,0,W,H*0.7,lv.sky.slice(1,4),1,7,0.2,false);
+  strokeLayer(0,0,W,H*0.65,lv.sky.slice(2,5),1,9,0.14,false);
   if(lv.starBoost>0){
     var t=Date.now()/1000;
     for(var i=0;i<stars.length;i++){var s=stars[i];cx.fillStyle=s.c||C.bw;cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));cx.beginPath();cx.arc(s.x-cam*0.02,s.y,s.r,0,6.28);cx.fill()}cx.globalAlpha=1;
