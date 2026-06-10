@@ -80,6 +80,12 @@ function pn(x,y){
   var l=(d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y);
   return g+(h-g)*u+(k-g)*v+(g+l-h-k)*u*v;
 }
+// Stroke helpers
+function fr(x,y,w,h){cx.fillRect(x,y,w,h)}
+function fs(c){cx.fillStyle=c}
+function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
+// Pick random from array
+function pk(a){return a[Math.floor(Math.random()*a.length)]}
 // K: 枯笔飞白
 function dry(x,y,w,h,colors,count,alpha){for(var i=0;i<count;i++){var sx=x+pn(i*0.1,0)*w,sy=y+pn(i*0.1,1)*h,len=3+pn(i*0.2,2)*18,angle=pn(i*0.3,3)*6.28;if(pn(sx*0.04,sy*0.04)*0.5+0.5<0.25)continue;cx.strokeStyle=pk(colors);cx.globalAlpha=alpha*(0.2+pn(i,4)*0.4);cx.lineWidth=0.3+pn(i,5)*1.8;cx.beginPath();cx.moveTo(sx,sy);for(var j=0;j<8;j++){var t=j/8,fade=1-t*t;if(fade<0.1)break;cx.lineTo(sx+Math.cos(angle)*len*t+pn(i+j,6)*2,sy+Math.sin(angle)*len*t*0.5+pn(i+j,7)*1.5)}cx.stroke()}cx.globalAlpha=1}
 function drawFood(x,y){var s=1.15;cx.save();cx.translate(x-5*s,y-7*s);dry(1*s,2*s,8*s,7*s,["#B89060","#8B6840"],40,0.25);fs("#D4B830");fr(0,0,10*s,2*s);cx.restore()}
