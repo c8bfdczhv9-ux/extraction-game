@@ -80,6 +80,12 @@ function pn(x,y){
   var l=(d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y);
   return g+(h-g)*u+(k-g)*v+(g+l-h-k)*u*v;
 }
+// Stroke helpers
+function fr(x,y,w,h){cx.fillRect(x,y,w,h)}
+function fs(c){cx.fillStyle=c}
+function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
+// Pick random from array
+function pk(a){return a[Math.floor(Math.random()*a.length)]}
 // ===== PIXEL NOISE ENGINE =====
 function pix(x,y,w,h,colors,passes){for(var p=0;p<passes;p++){for(var i=0;i<w*h*0.25;i++){var px=x+pn(i*0.1,p)*w,py=y+pn(i*0.1,p+5)*h;if(pn(px*0.05,py*0.05)*0.5+0.5<0.3)continue;cx.fillStyle=pk(colors);cx.globalAlpha=0.25+pn(i,2)*0.5;fr(px,py,0.5+pn(i,3)*2,0.5+pn(i,4)*2)}}cx.globalAlpha=1}
 function pixBlock(x,y,w,h,color,alpha){cx.fillStyle=color;cx.globalAlpha=alpha;for(var py=y;py<y+h;py+=2){for(var px=x;px<x+w;px+=2){if(pn(px*0.1,py*0.1)>0.5)continue;fr(px,py,2,2)}}cx.globalAlpha=1}
