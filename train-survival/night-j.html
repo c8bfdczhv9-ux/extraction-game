@@ -80,6 +80,12 @@ function pn(x,y){
   var l=(d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y);
   return g+(h-g)*u+(k-g)*v+(g+l-h-k)*u*v;
 }
+// Stroke helpers
+function fr(x,y,w,h){cx.fillRect(x,y,w,h)}
+function fs(c){cx.fillStyle=c}
+function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
+// Pick random from array
+function pk(a){return a[Math.floor(Math.random()*a.length)]}
 // ===== KNIFE + BRUSH + SCREEN ENGINES =====
 
 // J: 刮刀厚涂
