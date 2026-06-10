@@ -51,7 +51,7 @@ canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-he
 <canvas id="g"></canvas>
 <button id="styletog" onclick="toggleStyle()">◈ 网格</button>
 <div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
-<div id="ver">v44 · M引擎</div>
+<div id="ver">v44p · M引擎</div>
 <div id="inv"></div>
 <div id="hint">拖动摇杆 · 点击拾取</div>
 <div id="warn"></div>
@@ -227,7 +227,7 @@ function drawPlayer(px,py,t){
     if(ot<0.35){ox=-4*s+(-4*s)*ot*3;oy=4*s+18*s*ot*3}
     else if(ot<0.7){var t2=(ot-0.35)*3;ox=-4*s+8*s*t2;oy=18*s-4*s*t2}
     else{var t3=(ot-0.7)*3;ox=4*s-1.5*s*t3;oy=14*s-10*s*t3}
-    cx.fillStyle=ol;cx.globalAlpha=0.4;cx.beginPath();cx.arc(ox,oy,1+Math.random()*1.5,0,6.28);cx.fill()}cx.globalAlpha=1;
+    cx.fillStyle=ol;cx.globalAlpha=0.4;cx.beginPath();cx.arc(ox,oy,1+pn(oi,5)*1.5,0,6.28);cx.fill()}cx.globalAlpha=1;
   // Torso
   gs(-4*s,-6*s,8*s,12*s,[fl,fl,'#EAE2F0'],2,0.2,0.06);
   // Head — circle grid
@@ -314,6 +314,7 @@ function drawCamp(t,clv){
   gs(0,0,W,H*0.5,PURP,5,0.2,0.015);
   gs(0,0,W,H*0.55,['#120820','#1E0C32','#2A1048'],4,0.22,0.02);
   gs(0,0,W,H*0.6,['#1E0C32','#2A1048','#3A1850'],3.5,0.2,0.025);
+  gs(0,0,W,H*0.62,['#2A1048','#3A1850','#1E0C32'],3,0.18,0.03);
   // Fog
   fs(lv.fog);fr(0,H*0.45,W,H*0.55);
   // Stars
@@ -367,6 +368,7 @@ function drawSky(clv){
   gs(0,0,W,H*0.72,PURP,5,0.18,0.015);
   gs(0,0,W,H*0.72,lv.sky.slice(0,3),4,0.22,0.02);
   gs(0,0,W,H*0.68,lv.sky.slice(1,4),3,0.2,0.028);
+  gs(0,0,W,H*0.64,lv.sky.slice(2,5),2.5,0.18,0.035);
   // Stars
   if(lv.starBoost>0){var t=Date.now()/1000;for(var i=0;i<stars.length;i++){var s=stars[i];cx.fillStyle=s.c||C.bw;cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));cx.beginPath();cx.arc(s.x-cam*0.02,s.y,s.r,0,6.28);cx.fill()}cx.globalAlpha=1}
   // Weather particles
