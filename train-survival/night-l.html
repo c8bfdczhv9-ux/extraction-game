@@ -80,6 +80,12 @@ function pn(x,y){
   var l=(d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y);
   return g+(h-g)*u+(k-g)*v+(g+l-h-k)*u*v;
 }
+// Stroke helpers
+function fr(x,y,w,h){cx.fillRect(x,y,w,h)}
+function fs(c){cx.fillStyle=c}
+function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
+// Pick random from array
+function pk(a){return a[Math.floor(Math.random()*a.length)]}
 // ===== SCREEN PRINT ENGINE =====
 function scrn(x,y,w,h,color,alpha,ox,oy){cx.fillStyle=color;cx.globalAlpha=alpha;fr(x+(ox||0),y+(oy||0),w,h);cx.globalAlpha=1}
 function drawFood(x,y){var s=1.15;cx.save();cx.translate(x-5*s,y-7*s);scrn(1*s,2*s,8*s,7*s,"rgba(184,144,96,0.25)",1,1,0);scrn(1*s,2*s,8*s,7*s,"rgba(139,104,64,0.15)",1,-1,1);fs("#D4B830");fr(0,0,10*s,2*s);cx.restore()}
