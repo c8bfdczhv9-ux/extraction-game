@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>NIGHT TRAIN</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:#12061E;overflow:hidden;font-family:system-ui,sans-serif;touch-action:manipulation;user-select:none;-webkit-user-select:none;position:fixed}
+#wrap{position:relative;width:100vw;height:100vh;max-width:500px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{display:block;background:#12061E;border-radius:6px;max-width:100vw;max-height:56vh;border:1px solid rgba(107,48,160,0.25)}
+#styletog{position:absolute;top:9px;right:14px;z-index:12;background:rgba(18,6,30,0.85);border:1px solid rgba(232,152,168,0.25);border-radius:3px;color:#E898A8;font-size:12px;padding:7px 16px;letter-spacing:1.5px;cursor:pointer;font-weight:300}
+#hud{position:absolute;top:10px;left:12px;right:60px;display:flex;justify-content:space-between;pointer-events:none;z-index:10}
+.hb{background:transparent;border:1px solid rgba(155,139,176,0.15);border-radius:3px;padding:7px 16px;font-size:14px;color:#D4C4E8;letter-spacing:1.8px;font-weight:300}
+#ver{position:absolute;top:10px;right:60px;z-index:12;color:rgba(232,152,168,0.5);font-size:8px;letter-spacing:1px;pointer-events:none}
+#inv{position:absolute;bottom:84px;left:10px;right:10px;display:flex;gap:5px;justify-content:center;pointer-events:none;z-index:10;flex-wrap:wrap}
+.iv{background:rgba(18,6,30,0.95);border:1px solid rgba(155,139,176,0.25);border-radius:3px;padding:5px 11px;font-size:11px;color:#C8B8D8}
+#hint{position:absolute;bottom:98px;left:50%;transform:translateX(-50%);color:rgba(180,160,200,0.45);font-size:10px;letter-spacing:2.5px;pointer-events:none;z-index:5;font-weight:200}
+#joy{width:100px;height:100px;background:radial-gradient(circle at 35% 35%,rgba(42,37,53,0.4),rgba(18,6,30,0.6));border:1.5px solid rgba(107,48,160,0.18);border-radius:50%;position:relative;touch-action:none}
+#stick{width:42px;height:42px;background:radial-gradient(circle at 40% 40%,rgba(196,168,224,0.3),rgba(110,95,133,0.15));border:1px solid rgba(155,139,176,0.35);border-radius:50%;position:absolute;top:29px;left:29px;pointer-events:none}
+#pick{width:68px;height:68px;background:linear-gradient(135deg,rgba(155,184,168,0.12),rgba(90,110,100,0.06));border:1.5px solid rgba(125,155,139,0.25);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:rgba(155,184,168,0.6);margin-bottom:18px;touch-action:none}
+#pick:active{background:rgba(125,155,139,0.22)}
+#ctrls{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;z-index:10}
+#logbook{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;z-index:30;background:#1E1A22;border-radius:6px;padding:20px 16px;border:1px solid rgba(58,48,64,0.3)}
+#logbook.show{display:flex}
+.lb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.lb-day{font-size:16px;color:#C4A8E0;letter-spacing:2px;font-weight:200}
+.lb-dots{display:flex;gap:9px}
+.lb-dot{width:10px;height:10px;border-radius:50%;background:rgba(155,139,176,0.12)}
+.lb-dot.active{background:#C4A8E0}
+.lb-content{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.lb-title{font-size:15px;color:#8B7BA0;letter-spacing:3px;margin-bottom:10px;font-weight:300}
+.lb-text{font-size:14px;color:#9B8BB0;line-height:1.8;margin-bottom:14px;max-width:300px;font-weight:300}
+.lb-res{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.lb-ri{font-size:13px;color:#7D9B8B;background:rgba(125,155,139,0.06);border:1px solid rgba(125,155,139,0.15);border-radius:3px;padding:6px 14px;letter-spacing:1px}
+.lb-ri.low{color:#E898A8;border-color:rgba(232,152,168,0.2)}
+.lb-btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.22);color:#B496D2;padding:16px 36px;border-radius:5px;font-size:15px;letter-spacing:2px;cursor:pointer;font-weight:300;margin:6px;min-width:90px}
+.lb-btn:active{background:rgba(125,155,139,0.2)}
+.lb-btn.warn{background:linear-gradient(180deg,rgba(232,152,168,0.08),rgba(180,100,120,0.03));border-color:rgba(232,152,168,0.22);color:#E898A8}
+#over{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:20;background:linear-gradient(180deg,rgba(8,2,18,0.98),rgba(18,6,32,0.96));border-radius:6px}
+#over.show{display:flex}
+.ot{font-size:20px;color:#C4A8E0;letter-spacing:4px;margin-bottom:8px;font-weight:200}
+.os{font-size:13px;color:#9B8BB0;margin-bottom:18px;font-weight:300;line-height:1.7;text-align:center}
+.btn{background:linear-gradient(180deg,rgba(125,155,139,0.1),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.2);color:#B496D2;padding:16px 36px;border-radius:5px;font-size:16px;letter-spacing:2px;cursor:pointer;min-width:110px}
+.btn:active{background:rgba(125,155,139,0.2)}
+#warn{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);color:#E898A8;font-size:14px;letter-spacing:2px;pointer-events:none;z-index:5;opacity:0;text-align:center;font-weight:300}
+</style>
+</head>
+<body>
+<div id="wrap">
+<canvas id="g"></canvas>
+<button id="styletog" onclick="toggleStyle()">◈ 喷漆</button>
+<div id="hud"><span class="hb" id="tm">60s</span><span class="hb" id="lv">第1关</span></div>
+<div id="ver">v44 · H引擎</div>
+<div id="inv"></div>
+<div id="hint">拖动摇杆 · 点击拾取</div>
+<div id="warn"></div>
+<div id="ctrls"><div id="joy"><div id="stick"></div></div><div id="pick">◈</div></div>
+<div id="logbook"><div class="lb-header"><span class="lb-day" id="lb-day"></span><div class="lb-dots" id="lb-dots"></div></div><div class="lb-content" id="lb-content"></div><div class="lb-nav" id="lb-nav"></div></div>
+<div id="over"><div class="ot" id="ot"></div><div class="os" id="os"></div><button class="btn" onclick="rst()">重返</button></div>
+</div>
+<script>// ===== SETUP =====
+var g=document.getElementById('g'), cx=g.getContext('2d');
+var W,H;
+function resize(){W=Math.min(window.innerWidth-12,500);H=Math.min(window.innerHeight*0.54,600);g.width=W;g.height=H}
+resize();
+
+// ===== PERLIN NOISE =====
+var perm=[151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+for(var i=0;i<256;i++)perm[256+i]=perm[i];
+function pn(x,y){var X=Math.floor(x)&255,Y=Math.floor(y)&255;x-=Math.floor(x);y-=Math.floor(y);var u=x*x*x*(x*(x*6-15)+10),v=y*y*y*(y*(y*6-15)+10);var a=perm[perm[X]+Y],b=perm[perm[X+1]+Y],c=perm[perm[X]+Y+1],d=perm[perm[X+1]+Y+1];return((a&1?-1:1)*x*(1-x)+(a&2?-1:1)*y*(1-y))+(((b&1?-1:1)*(x-1)*(2-x)+(b&2?-1:1)*y*(1-y))-((a&1?-1:1)*x*(1-x)+(a&2?-1:1)*y*(1-y)))*u+(((c&1?-1:1)*x*(1-x)+(c&2?-1:1)*(y-1)*(2-y))-((a&1?-1:1)*x*(1-x)+(a&2?-1:1)*y*(1-y)))*v+(((a&1?-1:1)*x*(1-x)+(a&2?-1:1)*y*(1-y))+((d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y))-((b&1?-1:1)*(x-1)*(2-x)+(b&2?-1:1)*y*(1-y))-((c&1?-1:1)*x*(1-x)+(c&2?-1:1)*(y-1)*(2-y)))*u*v;}
+function pk(a){return a[Math.floor(pn(Date.now()%997+1,0)*a.length)]}
+function fr(x,y,w,h){cx.fillRect(x,y,w,h)}
+function fs(c){cx.fillStyle=c}
+function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
+function spray(x,y,w,h,colors,count,radius,alpha){for(var i=0;i<count;i++){var a2=pn(i*0.1,0)*6.28,d=Math.pow(pn(i*0.1,1),0.5)*radius;var sx=x+pn(i,2)*w+Math.cos(a2)*d*0.5,sy=y+pn(i,3)*h+Math.sin(a2)*d*0.5;if(sx<x||sx>x+w||sy<y||sy>y+h)continue;cx.fillStyle=pk(colors);cx.globalAlpha=alpha*(0.15+pn(i,4)*0.4);cx.beginPath();cx.arc(sx,sy,0.3+pn(i,5)*2,0,6.28);cx.fill()}cx.globalAlpha=1}
+function drawFood(x,y){var s=1.15;cx.save();cx.translate(x-5*s,y-7*s);spray(1*s,2*s,8*s,7*s,["#B89060","#D4B080","#8B6840"],60,6,0.3);fs("#D4B830");fr(0,0,10*s,2*s);cx.restore()}function drawCoal(x,y){var s=1.25;cx.save();cx.translate(x-5*s,y-6*s);spray(0,0,10*s,10*s,["#3A3048","#2A2038"],60,6,0.3);cx.restore()}function drawWater(x,y){var s=1.15;cx.save();cx.translate(x-5*s,y-7*s);spray(0,0,10*s,10*s,["#588090","#88B8C8","#385868"],60,6,0.3);fs("#4A6070");fr(3*s,-1.5*s,4*s,3*s);cx.restore()}function drawGun(x,y){var s=1.25;cx.save();cx.translate(x-6*s,y-5*s);spray(2*s,1*s,8*s,3*s,["#706888","#9080A8"],50,5,0.3);spray(1*s,3.5*s,5*s,5*s,["#605878"],40,4,0.25);fs("#302840");fr(10*s,1.5*s,2*s,2*s);cx.restore()}function drawRadio(x,y){var s=1.15;cx.save();cx.translate(x-7*s,y-6*s);spray(1*s,1*s,12*s,9*s,["#8B7860","#B8A088"],70,6,0.3);fs("#2A2A1A");fr(8*s,2.5*s,4*s,4*s);cx.restore()}function drawMed(x,y){var s=1.25;cx.save();cx.translate(x-5*s,y-5*s);spray(0,1*s,10*s,9*s,["#C87078","#E898A8"],60,6,0.35);fs("rgba(255,255,255,0.8)");fr(4*s,3*s,2*s,5*s);fr(2*s,5*s,6*s,1.5*s);cx.restore()}function drawAmmo(x,y){var s=1.15;cx.save();cx.translate(x-4*s,y-5*s);spray(0,1*s,8*s,6*s,["#B89050","#C0A060"],40,5,0.3);for(var bi=0;bi<3;bi++){fs("#D4B870");fr(1.5*s+bi*2*s,2*s,1*s,4*s)}cx.restore()}function drawChess(x,y){var s=1.15;cx.save();cx.translate(x-5*s,y-6*s);spray(0,0,10*s,8*s,["#8B7060","#B89880"],50,5,0.3);fs("#2A1A18");cx.beginPath();cx.arc(2.5*s,1.5*s,1*s,0,6.28);cx.fill();cx.restore()}var ITEMS=[{k:"food",n:"补给",c:"#D4B830",draw:drawFood},{k:"coal",n:"煤炭",c:"#5a4a60",draw:drawCoal},{k:"water",n:"净水",c:"#7D9B8B",draw:drawWater},{k:"gear",n:"猎枪",c:"#9B8BB0",draw:drawGun},{k:"ammo",n:"子弹",c:"#D4B830",draw:drawAmmo},{k:"comm",n:"电台",c:"#9B8B70",draw:drawRadio},{k:"chess",n:"棋盘",c:"#8B7060",draw:drawChess},{k:"med",n:"医药",c:"#E898A8",draw:drawMed}];
+function drawPlayer(px,py,t){var s=2.5;cx.save();cx.translate(px,py-30*s);var wind=Math.sin(t*1.2)*0.3*s;cx.fillStyle="rgba(10,3,20,0.05)";cx.beginPath();cx.ellipse(0,30*s,5*s,1*s,0,0,6.28);cx.fill();var hx=4*s+wind,hy=-35*s;for(var hi=0;hi<25;hi++){cx.fillStyle="#6B3FA0";cx.globalAlpha=0.4;cx.beginPath();cx.arc(hx+(pn(hi,0)-0.5)*10,hy+(pn(hi,1)-0.5)*7,0.5+pn(hi,2)*2,0,6.28);cx.fill()}cx.globalAlpha=1;spray(-6*s,0,12*s,22*s,["#F5F0F8","#5A3890"],100,10,0.35);spray(-4*s,-6*s,8*s,11*s,["#F5F0F8"],60,6,0.3);spray(0,-16*s,6*s,6*s,["#5A3890","#F5F0F8"],50,5,0.3);cx.restore()}
+function drawCar(ca,c,t){var cx2=ca.x-c,cy=ca.y,cw=ca.w,ch=ca.h;var inset=cw*0.16,bw=cw-inset*2,bx=cx2+inset;var bh=ch*0.5,by=cy+ch*0.06;cx.fillStyle="#0A0418";cx.fillRect(cx2-4,cy-4,cw+8,ch+8);spray(cx2,cy-2,cw,ch*0.06,["#1E1830","#241E38"],60,4,0.25);cx.fillStyle="#0C0A10";cx.beginPath();cx.moveTo(cx2,cy);cx.lineTo(bx,by);cx.lineTo(bx,by+bh);cx.lineTo(cx2,cy+ch*0.72);cx.closePath();cx.fill();spray(cx2,cy,cw*0.18,ch*0.7,["#0E1E14","#122418"],80,5,0.3);cx.fillStyle="#0C0A10";cx.beginPath();cx.moveTo(bx+bw,by);cx.lineTo(cx2+cw,cy);cx.lineTo(cx2+cw,cy+ch*0.72);cx.lineTo(bx+bw,by+bh);cx.closePath();cx.fill();spray(bx+bw,cy,cw*0.18,ch*0.7,["#0E1E14","#122418"],80,5,0.3);cx.fillStyle="#0E1E14";cx.fillRect(bx,by,bw,bh);spray(bx,by,bw,bh,["#1A3A28","#2A5A3E","#1E3E2A"],150,6,0.35);for(var pi=1;pi<5;pi++){cx.fillStyle="rgba(0,0,0,0.3)";cx.fillRect(bx+bw*(pi/5)-0.5,by,1,bh)}spray(cx2,cy+ch*0.72,cw,ch*0.25,["#1E1828","#181028"],80,5,0.2);cx.fillStyle="#14101C";cx.fillRect(cx2+cw*0.35,cy+ch*0.72,cw*0.3,ch*0.25);var seatW=cw*0.12,seatH=bh*0.2,seatY=by+bh*0.5;cx.fillStyle="#305038";cx.fillRect(bx-seatW,seatY,seatW,seatH);spray(bx-seatW,seatY,seatW,seatH,["#46885A","#58A070"],40,4,0.35);cx.fillStyle="#305038";cx.fillRect(bx+bw,seatY,seatW,seatH);spray(bx+bw,seatY,seatW,seatH,["#46885A","#58A070"],40,4,0.35);var ww2=cw*0.12,wh2=bh*0.28,wy2=by+bh*0.15;for(var wi=0;wi<2;wi++){var wlx=bx-ww2-2,rlx=bx+bw+2;cx.fillStyle="#0A0A18";cx.fillRect(wlx,wy2,ww2,wh2);cx.fillRect(rlx,wy2,ww2,wh2);cx.strokeStyle="rgba(50,40,35,0.5)";cx.lineWidth=0.5;cx.strokeRect(wlx,wy2,ww2,wh2);cx.strokeRect(rlx,wy2,ww2,wh2);wy2+=wh2+bh*0.08}for(var hi=0;hi<2;hi++){cx.strokeStyle="rgba(180,160,200,0.1)";cx.lineWidth=1.5;cx.beginPath();cx.moveTo(bx+bw*(0.3+hi*0.4),by);cx.lineTo(bx+bw*(0.3+hi*0.4),by+bh);cx.stroke()}var wy3=by+bh+ch*0.04;for(var wi=0;wi<2;wi++){var wx3=cx2+cw*0.22+wi*cw*0.5;spray(wx3-10,wy3,20,12,["#2A2535","#3A3040","#1A1622"],50,5,0.3);cx.fillStyle="#2A2535";cx.beginPath();cx.arc(wx3,wy3+6,1.5,0,6.28);cx.fill()}if([0,2,4].indexOf(ca.ci)>=0&&!crewFound[ca.ci]){cx.fillStyle="rgba(20,5,25,0.4)";cx.beginPath();cx.ellipse(cx2+cw*0.5,by+bh*0.7+ch*0.02,4,1,0,0,6.28);cx.fill()}if(ca.last){cx.fillStyle="rgba(107,63,160,0.4)";cx.font="7px system-ui";cx.textAlign="center";cx.fillText("末",cx2+cw/2,by+bh*0.5)}}
+function drawCamp(t,clv){var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;var lv=LEVELS[idx];cx.fillStyle="#0A0418";cx.fillRect(0,0,W,H);spray(0,0,W,H*0.75,["#0A0418","#120820","#1E0C32"],400,30,0.2);spray(0,0,W,H*0.65,["#1E0C32","#2A1048"],200,20,0.15);fs(lv.fog);fr(0,H*0.45,W,H*0.55);if(lv.starBoost>0){for(var i=0;i<stars.length;i++){var s=stars[i];fs(s.c||"#F0EBF5");cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.28);cx.fill()}cx.globalAlpha=1}var lx=30,ly=H*0.28,lw=Math.floor(W*0.30),lh=Math.floor(H*0.44);spray(lx,ly,lw,lh,["#1E3E2A","#2A5A3E","#1A3A28"],200,12,0.35);var cx3=lx+lw+12,cy3=ly,cw2=Math.floor(W*0.45),ch2=lh,uh=Math.floor(ch2*0.5);spray(cx3,cy3,cw2,uh,["#7D9B8B","#5C7A6C","#9BB8A8"],200,12,0.3);spray(cx3,cy3+uh,cw2,ch2-uh,["#4A6B5A","#3A5B4A"],150,10,0.25);cx.strokeStyle="#D4B830";cx.globalAlpha=0.5;cx.lineWidth=1.2;cx.beginPath();cx.moveTo(cx3+6,cy3+uh);cx.lineTo(cx3+cw2-6,cy3+uh);cx.stroke();cx.globalAlpha=1;var barW=W-40,barH=6,barX=20,barY=H*0.96;fs("rgba(20,5,30,0.6)");fr(barX-2,barY-2,barW+4,barH+4);var pct=Math.min(1,distance/goalDistance),barFill=Math.floor(barW*pct);if(barFill>0){fs("#6B30A0");cx.globalAlpha=0.7;fr(barX,barY,Math.min(barFill,barW/3),barH)}cx.globalAlpha=1;fs("rgba(196,168,224,0.7)");cx.font="7px system-ui";cx.textAlign="center";cx.fillText(Math.floor(distance)+" / "+goalDistance+" km",W/2,barY-6)}
+function drawSky(clv){var idx=clv-1;if(idx<0)idx=0;if(idx>9)idx=9;var lv=LEVELS[idx];cx.fillStyle="#0A0418";cx.fillRect(0,0,W,H);spray(0,0,W,H*0.75,["#0A0418","#120820","#1E0C32"],400,30,0.2);spray(0,0,W,H*0.65,["#1E0C32","#2A1048"],200,20,0.15);if(lv.starBoost>0){var t=Date.now()/1000;for(var i=0;i<stars.length;i++){var s=stars[i];cx.fillStyle=s.c||"#F0EBF5";cx.globalAlpha=s.a*lv.starBoost*(0.4+0.6*Math.sin(t*s.ts+s.tw));cx.beginPath();cx.arc(s.x-cam*0.02,s.y,s.r,0,6.28);cx.fill()}cx.globalAlpha=1}for(var i=0;i<weatherParticles.length;i++){var p=weatherParticles[i];if(lv.weather==="rain"){cx.globalAlpha=0.3;cx.strokeStyle=p.color;cx.lineWidth=0.5;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p.x-p.vx*0.3,p.y+6);cx.stroke()}else if(lv.weather==="meteor"){cx.globalAlpha=p.life/p.maxLife*0.7;var grd=cx.createLinearGradient(p.x,p.y,p.x-p.vx*3,p.y-p.vy*3);grd.addColorStop(0,"#F0EBF5");grd.addColorStop(1,"transparent");cx.strokeStyle=grd;cx.lineWidth=p.size;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p.x-p.vx*8,p.y-p.vy*8);cx.stroke()}}cx.globalAlpha=1}
+function drawGround(clv){spray(0,H*0.76,W,H*0.24,["#180828","#1A0820"],150,10,0.15);for(var rx=-(cam%36);rx<W;rx+=36){cx.fillStyle="rgba(58,52,72,0.2)";cx.fillRect(rx-4,H*0.78+2,10,1.5)}}
+function drawSmoke(){var scx=cars[0].x-cam+cars[0].w*0.1;for(var si=0;si<5;si++){cx.fillStyle="rgba(200,180,220,"+(0.04+0.02*Math.sin(Date.now()/600*2+si))+")";cx.beginPath();cx.arc(scx+Math.sin(si)*4,55+si*15,1+si*0.6,0,6.28);cx.fill()}}
+function drawVignette(){var vig=cx.createRadialGradient(W/2,H*0.4,W*0.15,W/2,H*0.4,W*0.85);vig.addColorStop(0,"transparent");vig.addColorStop(0.55,"rgba(20,5,30,0.06)");vig.addColorStop(1,"rgba(10,2,20,0.72)");fs(vig);fr(0,0,W,H)}
+// ===== MAIN DRAW =====
+function draw(){
+  cx.clearRect(0,0,W,H);
+  cx.fillStyle='#0A0418';cx.fillRect(0,0,W,H);
+  if(phase===2){drawCamp(Date.now()/1000,level);drawVignette();return}
+  drawSky(level);drawGround(level);drawSmoke();
+  var t=Date.now()/1000;
+  for(var ci=0;ci<cars.length;ci++){cars[ci].ci=ci;drawCar(cars[ci],cam,t)}
+  for(var li=0;li<loot.length;li++){var l=loot[li];if(l.got)continue;var lx=l.x-cam;if(lx<-40||lx>W+40)continue;l.d.draw(lx,l.y)}
+  drawPlayer(player.x-cam,player.y,t,level);
+  for(var pi=0;pi<pts.length;pi++){var p=pts[pi];cx.globalAlpha=p.life/p.ml;fs(p.c);cx.beginPath();cx.moveTo(p.x-cam,p.y-p.s);cx.lineTo(p.x-cam+p.s,p.y);cx.lineTo(p.x-cam,p.y+p.s);cx.lineTo(p.x-cam-p.s,p.y);cx.closePath();cx.fill()}cx.globalAlpha=1;
+  drawVignette();
+}
+
+// ===== GAME STATE =====
+var phase=1,styleMode='crystal';
+function toggleStyle(){styleMode=styleMode==='crystal'?'stencil':'crystal';var b=document.getElementById('styletog');b.textContent=styleMode==='crystal'?'◈ 喷漆':'◈ 模版'}
+var cars=[],player={x:0,y:0},cam=0,time=60,st='play';
+var inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};
+var loot=[],pts=[],stars=[],inLast=false,dc=0,NC=6;
+var crewFound=[false,false,false,false,false,false],crewCount=0;
+var level=1,day=1,logPage=1,daysPerLevel=5;
+var res={food:0,water:0,coal:0,wood:0,iron:0,meds:0,gear:0,ammo:0};
+var distance=0,goalDistance=1000,score=0,crewHealth=3;
+var showLevelIntro=true,explorerAway=false,explorerReturnDay=0,explorerFound=[];
+var rationFood=0,rationWater=0,eventToday=null;
+
+function carW(){return W/3.5}
+function carH(){return H*0.65}
+function makeCars(){cars=[];for(var i=0;i<NC;i++){var cw=carW(),ch=carH();cars.push({x:i*cw,y:H*0.2,w:cw,h:ch,last:i===NC-1})}}
+function spawnLoot(){loot=[];for(var i=0;i<NC;i++){var c=cars[i];var n=4+Math.floor(Math.random()*5);var biased=[ITEMS[0],ITEMS[0],ITEMS[1],ITEMS[2],ITEMS[2],ITEMS[3],ITEMS[4],ITEMS[5],ITEMS[6],ITEMS[7]];for(var j=0;j<n;j++){var d=biased[Math.floor(Math.random()*biased.length)];loot.push({x:c.x+20+Math.random()*(c.w-40),y:c.y+c.h*0.65-Math.random()*12,ci:i,d:d,got:false})}}}
+function makeStars(){stars=[];for(var i=0;i<200;i++){var cols=[C.bw,C.bw,C.bw,C.bw,C.bw,C.bw,C.vapourViolet,'#D4B830'];stars.push({x:Math.random()*W,y:Math.random()*H*0.75,r:0.4+Math.random()*1.5,a:0.15+Math.random()*0.45,tw:Math.random()*6.28,ts:1+Math.random()*3,c:cols[Math.floor(Math.random()*cols.length)]})}}
+
+// ===== LOGBOOK UI =====
+var lb=document.getElementById('logbook'),lbDay=document.getElementById('lb-day');
+var lbContent=document.getElementById('lb-content'),lbDots=document.getElementById('lb-dots');
+function showLogbook(){lb.classList.add('show');document.getElementById('ctrls').style.display='none';document.getElementById('hud').style.display='none';document.getElementById('inv').style.display='none';showLogPage()}
+function hideLogbook(){lb.classList.remove('show')}
+function showLogPage(){
+  var lv=LEVELS[level-1];lbDay.textContent=lv.name+' · '+lv.eng+' · DAY '+(day-(level-2)*daysPerLevel);
+  var dots='';for(var i=1;i<=4;i++)dots+='<div class=\"lb-dot'+(i===logPage?' active':'')+'\"></div>';lbDots.innerHTML=dots;
+  if(showLevelIntro){lbContent.innerHTML='<div class=\"lb-title\">'+lv.name+'</div><div class=\"lb-text\" style=\"font-size:14px;color:#C4A8E0;letter-spacing:4px\">'+lv.eng+'</div><div class=\"lb-text\">'+lv.desc+'</div><div class=\"lb-res\"><span class=\"lb-ri\">🍞 '+res.food+'</span><span class=\"lb-ri\">💧 '+res.water+'</span><span class=\"lb-ri\">🔥 '+res.coal+'</span><span class=\"lb-ri\">🪨 '+res.iron+'</span><span class=\"lb-ri\">💊 '+res.meds+'</span></div><button class=\"lb-btn\" onclick=\"showLevelIntro=false;showLogPage()\">开始</button>';return}
+  var pages=['配给','探索','引擎','事件'],title=pages[logPage-1],html='<div class=\"lb-title\">'+title+'</div>';
+  if(logPage===1){
+    var avail=crewHealth-(explorerAway?1:0);if(rationFood===0&&rationWater===0){rationFood=avail;rationWater=avail}
+    html+='<div class=\"lb-text\">调配今日配给（'+avail+'人）</div>';
+    html+='<div class=\"lb-res\"><span class=\"lb-ri'+(res.food<rationFood?' low':'')+'\">🍞 库存 '+res.food+'</span><span class=\"lb-ri'+(res.water<rationWater?' low':'')+'\">💧 库存 '+res.water+'</span></div>';
+    html+='<div style=\"display:flex;align-items:center;justify-content:center;gap:18px;margin:12px 0\"><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationFood=Math.max(0,rationFood-1);showLogPage()\">−1</button><span style=\"color:#C4A8E0;font-size:24px;min-width:80px;text-align:center\">🍞 ×'+rationFood+'</span><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationFood=Math.min(res.food,rationFood+1);showLogPage()\">+1</button></div>';
+    html+='<div style=\"display:flex;align-items:center;justify-content:center;gap:18px;margin:12px 0\"><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationWater=Math.max(0,rationWater-1);showLogPage()\">−1</button><span style=\"color:#C4A8E0;font-size:24px;min-width:80px;text-align:center\">💧 ×'+rationWater+'</span><button class=\"lb-btn\" style=\"padding:14px 22px;font-size:22px;min-width:56px\" onclick=\"rationWater=Math.min(res.water,rationWater+1);showLogPage()\">+1</button></div>';
+    html+='<button class=\"lb-btn warn\" onclick=\"skipRation()\">跳过 · 不给吃喝</button>';
+    if(res.food<rationFood||res.water<rationWater)html+='<div class=\"lb-text\" style=\"color:#E898A8\">库存不足！</div>';
+    html+='<button class=\"lb-btn\" onclick=\"doConsume()\">确认配给</button>';
+  }else if(logPage===2){
+    if(explorerAway){html+='<div class=\"lb-text\">🚶 有人在外探索中<br/>预计第'+explorerReturnDay+'天归来</div><button class=\"lb-btn\" onclick=\"logPage=3;showLogPage()\">继续</button>'}
+    else{html+='<div class=\"lb-text\">派一人外出搜索<br/>离开'+crewHealth+'人，将离开1~6天</div><button class=\"lb-btn\" onclick=\"startExplore()\">出发探索</button>'}
+  }else if(logPage===3){
+    html+='<div class=\"lb-text\">给火车头供给燃料</div><div class=\"lb-res\"><span class=\"lb-ri'+(res.coal<1?' low':'')+'\">🔥 煤炭 '+res.coal+'</span><span class=\"lb-ri'+(res.water<1?' low':'')+'\">💧 水 '+res.water+'</span></div><button class=\"lb-btn\" onclick=\"tendEngine(1)\">投入 1🔥 + 1💧</button><button class=\"lb-btn\" style=\"opacity:0.4;font-size:10px\" onclick=\"tendEngine(0)\">跳过</button>';
+  }else if(logPage===4){
+    if(explorerFound.length>0&&!explorerAway){
+      if(explorerFound[0].icon==='💀'){html+='<div class=\"lb-text\" style=\"color:#E898A8\">💀 探索者未能归来…</div>'}
+      else{html+='<div class=\"lb-text\">🚶 探索者归队！</div><div class=\"lb-res\">';for(var ef=0;ef<explorerFound.length;ef++){var f=explorerFound[ef];html+='<span class=\"lb-ri\">'+f.icon+' '+f.name+' +'+f.amt+'</span>'}html+='</div>'}
+      explorerFound=[];html+='<button class=\"lb-btn\" onclick=\"endDay()\">确认</button>';
+    }else if(!eventToday){html+='<div class=\"lb-text\">今日平安无事</div><button class=\"lb-btn\" onclick=\"endDay()\">结束这一天</button>'}
+    else if(eventToday.type==='breakdown'){html+='<div class=\"lb-text\">⚙️ 火车头故障！<br/>需要铁片修理</div><div class=\"lb-res\"><span class=\"lb-ri'+(res.iron<1?' low':'')+'\">🪨 铁片 '+res.iron+'</span></div><button class=\"lb-btn\" onclick=\"fixB()\">用铁片修理</button><button class=\"lb-btn warn\" onclick=\"skipE()\">没有铁片</button>'}
+    else if(eventToday.type==='mice'){var loss=eventToday.loss||2;html+='<div class=\"lb-text\">🐭 仓里进老鼠了！</div><div class=\"lb-res\"><span class=\"lb-ri low\">🍞 -'+loss+'</span></div>';if(res.meds>0)html+='<button class=\"lb-btn\" onclick=\"cureM()\">用药驱鼠 💊</button>';html+='<button class=\"lb-btn\" onclick=\"resolveE()\">知道了…</button>'}
+    else if(eventToday.type==='sick'){html+='<div class=\"lb-text\">🤒 有人生病了！</div><button class=\"lb-btn\" onclick=\"healS()\">使用医药箱</button><button class=\"lb-btn warn\" onclick=\"skipE()\">没有药</button>'}
+    else if(eventToday.type==='rain'){html+='<div class=\"lb-text\">🌧️ 今天下大雨</div><button class=\"lb-btn\" onclick=\"resolveE()\">在车里休息</button>'}
+    else if(eventToday.type==='luck'){html+='<div class=\"lb-text\">🍀 好运降临！</div><div class=\"lb-res\"><span class=\"lb-ri\">🍞 +2</span><span class=\"lb-ri\">💧 +1</span><span class=\"lb-ri\">🔥 +1</span></div><button class=\"lb-btn\" onclick=\"resolveE()\">收下</button>'}
+    else if(eventToday.type==='bandit'){var st=eventToday.stolen||{food:Math.min(res.food,2),water:Math.min(res.water,2)};eventToday.stolen=st;html+='<div class=\"lb-text\">🔫 强盗来袭！</div><div class=\"lb-res\"><span class=\"lb-ri low\">🍞 -'+st.food+'</span><span class=\"lb-ri low\">💧 -'+st.water+'</span></div>';if(res.gear>0&&res.ammo>0)html+='<button class=\"lb-btn\" onclick=\"fightB()\">开枪反击！</button>';html+='<button class=\"lb-btn warn\" onclick=\"resolveE()\">无可奈何…</button>'}
+    else if(eventToday.type==='choice'){if(eventToday.subtype==='supplies'){html+='<div class=\"lb-text\">📦 发现废弃补给箱</div><button class=\"lb-btn\" onclick=\"doChoice(true)\">打开箱子</button><button class=\"lb-btn warn\" onclick=\"doChoice(false)\">安全绕开</button>'}else{html+='<div class=\"lb-text\">🧑 路边陌生人求救</div><button class=\"lb-btn\" onclick=\"doChoice(true)\">伸出援手</button><button class=\"lb-btn warn\" onclick=\"doChoice(false)\">不理他</button>'}}
+  }
+  lbContent.innerHTML=html;
+}
+
+// ===== PHASE 2 ACTIONS =====
+function skipRation(){rationFood=0;rationWater=0;var a=crewHealth-(explorerAway?1:0);if(a>0&&Math.random()<0.3)crewHealth--;if(crewHealth<=0){endP2(false,'全员饥渴而亡');return}logPage=2;showLogPage()}
+function doConsume(){var a=crewHealth-(explorerAway?1:0),nf=rationFood||a,nw=rationWater||a,ate=Math.min(res.food,nf),dr=Math.min(res.water,nw);res.food-=ate;res.water-=dr;if(ate<a||dr<a){if(Math.random()<0.3)crewHealth--}if(crewHealth<=0){endP2(false,'配给不足');return}rationFood=0;rationWater=0;logPage=2;showLogPage()}
+function startExplore(){explorerAway=true;explorerReturnDay=day+1+Math.floor(Math.random()*6);explorerFound=[];logPage=3;showLogPage()}
+function tendEngine(n){if(n>0&&res.coal>=1&&res.water>=1){res.coal-=1;res.water-=1;distance+=22+Math.floor(Math.random()*6)}else if(n>0){if(Math.random()<0.3){crewHealth--;if(crewHealth<=0){endP2(false,'锅炉熄火');return}}distance+=8+Math.floor(Math.random()*5)}else{distance+=8+Math.floor(Math.random()*5)}logPage=4;rollEvent();showLogPage()}
+function rollEvent(){var r=Math.random(),lv=level;if(lv===2){if(r<0.15)eventToday={type:'luck'};else if(r<0.25)eventToday={type:'choice',subtype:'supplies'};else if(r<0.32)eventToday={type:'mice',loss:1};else eventToday=null;return}if(lv===3){if(r<0.1)eventToday={type:'luck'};else if(r<0.18)eventToday={type:'mice',loss:1+Math.floor(Math.random()*2)};else if(r<0.22)eventToday={type:'sick'};else eventToday=null;return}if(lv===8){if(r<0.45)eventToday={type:'rain'};else if(r<0.6)eventToday={type:'breakdown'};else if(r<0.72)eventToday={type:'bandit'};else if(r<0.82)eventToday={type:'mice',loss:2+Math.floor(Math.random()*2)};else if(r<0.9)eventToday={type:'sick'};else eventToday=null;return}if(lv===9){if(r<0.2)eventToday={type:'breakdown'};else if(r<0.35)eventToday={type:'bandit'};else if(r<0.5)eventToday={type:'mice',loss:2+Math.floor(Math.random()*3)};else if(r<0.65)eventToday={type:'sick'};else if(r<0.72)eventToday={type:'rain'};else eventToday=null;return}if(lv===10){if(r<0.25)eventToday={type:'breakdown'};else if(r<0.45)eventToday={type:'bandit'};else if(r<0.6)eventToday={type:'sick'};else if(r<0.72)eventToday={type:'mice',loss:3+Math.floor(Math.random()*3)};else if(r<0.8)eventToday={type:'rain'};else eventToday={type:'luck'};return}if(r<0.12)eventToday={type:'breakdown'};else if(r<0.22)eventToday={type:'choice',subtype:Math.random()<0.5?'supplies':'stranger'};else if(r<0.34)eventToday={type:'bandit'};else if(r<0.44)eventToday={type:'mice',loss:1+Math.floor(Math.random()*3)};else if(r<0.52)eventToday={type:'sick'};else if(r<0.6)eventToday={type:'rain'};else if(r<0.7)eventToday={type:'luck'};else eventToday=null}
+function fixB(){if(res.iron>=1){res.iron-=1;eventToday=null;endDay()}else skipE()}
+function healS(){if(res.meds>=1){res.meds-=1;eventToday=null;endDay()}else skipE()}
+function skipE(){if(eventToday&&eventToday.type==='sick'){crewHealth--;if(crewHealth<=0){endP2(false,'病重不治');return}}eventToday=null;endDay()}
+function fightB(){res.ammo--;eventToday=null;if(Math.random()<0.7){var loot2=[];if(Math.random()<0.6){res.iron+=2;loot2.push('🪨铁片×2')}if(Math.random()<0.6){res.water+=3;loot2.push('💧水×3')}if(loot2.length===0){res.food+=2;loot2.push('🍞食物×2')}explorerFound=loot2.map(function(s){var p=s.split('×');return{name:p[0].slice(2),icon:p[0].slice(0,2),amt:parseInt(p[1])}});endDay()}else{res.food=Math.max(0,res.food-2);res.water=Math.max(0,res.water-2);endDay()}}
+function cureM(){res.meds--;eventToday=null;endDay()}
+function doChoice(take){var sub=eventToday?eventToday.subtype:'supplies';eventToday=null;if(take){if(Math.random()<0.65){if(sub==='supplies'){res.food+=3;res.water+=2;res.coal+=2}else{res.food+=2;res.water+=2;res.iron+=1}endDay()}else{res.food=Math.max(0,res.food-3);res.water=Math.max(0,res.water-2);if(Math.random()<0.3)crewHealth--;if(crewHealth<=0){endP2(false,'全员覆没');return}endDay()}}else{endDay()}}
+function resolveE(){if(eventToday&&eventToday.type==='mice')res.food=Math.max(0,res.food-eventToday.loss);if(eventToday&&eventToday.type==='luck'){res.food+=2;res.water+=1;res.coal+=1}if(eventToday&&eventToday.type==='bandit'&&eventToday.stolen){res.food=Math.max(0,res.food-eventToday.stolen.food);res.water=Math.max(0,res.water-eventToday.stolen.water)}eventToday=null;endDay()}
+function calcScore(){score=Math.floor(distance*0.5+res.food*10+res.water*8+res.coal*5+res.iron*15+res.wood*8+crewHealth*200+res.gear*30+res.ammo*20);return score>800?'S':score>600?'A':score>400?'B':score>200?'C':'D'}
+function endDay(){day++;if(explorerAway&&day>=explorerReturnDay){explorerAway=false;if(Math.random()<0.15){crewHealth--;explorerFound=[{name:'未归',icon:'💀',amt:0}]}else{var types=[{n:'铁片',icon:'🪨',k:'iron'},{n:'煤炭',icon:'🔥',k:'coal'},{n:'水',icon:'💧',k:'water'},{n:'木材',icon:'🪵',k:'wood'},{n:'食物',icon:'🍞',k:'food'},{n:'子弹',icon:'🔫',k:'ammo2'},{n:'猎枪',icon:'🔫',k:'gear2'},{n:'收音机',icon:'📻',k:'comm2'},{n:'棋盘',icon:'♟️',k:'chess2'}];explorerFound=[];var fc=2+Math.floor(Math.random()*3);for(var fi=0;fi<fc;fi++){var t=types[Math.floor(Math.random()*types.length)];var amt=1+Math.floor(Math.random()*3);if(!t.k.endsWith('2'))res[t.k]=(res[t.k]||0)+amt;else if(t.k==='gear2')res.gear=(res.gear||0)+amt;else if(t.k==='ammo2')res.ammo=(res.ammo||0)+amt;explorerFound.push({name:t.n,icon:t.icon,amt:amt})}}if(crewHealth<=0){endP2(false,'探索者未归');return}}if(distance>=goalDistance){endP2(true,'提前抵达远方！');return}if(level>=2&&(day-(level-2)*daysPerLevel)>daysPerLevel){level++;initWeather(level);if(level>10){endP2(true,'抵达远方！');return}showLevelIntro=true}logPage=1;eventToday=null;showLogPage()}
+function endP2(win,msg){phase=3;hideLogbook();var rating=calcScore();document.getElementById('over').classList.add('show');document.getElementById('ot').textContent=win?'✦ 抵达':'✧ 中断';document.getElementById('os').innerHTML=msg+'<br/>评分: '+rating+' ('+score+'分)<br/>距离: '+Math.floor(distance)+'km · 存活: '+crewHealth+'人';document.getElementById('ctrls').style.display='none'}
+
+// ===== PHASE 1 LOGIC =====
+function updInv(){var h='';for(var i=0;i<ITEMS.length;i++)h+='<span class=iv>'+inv[ITEMS[i].k]+' '+ITEMS[i].n+'</span>';document.getElementById('inv').innerHTML=h}
+function rst(){phase=1;level=1;showLevelIntro=false;time=60;st='play';inv={food:0,coal:0,water:0,gear:0,ammo:0,comm:0,chess:0,med:0};inLast=false;dc=0;pts=[];loot=[];crewFound=[false,false,false,false,false,false];crewCount=0;makeCars();spawnLoot();makeStars();player.x=carW()/2;cam=0;document.getElementById('over').classList.remove('show');document.getElementById('warn').style.opacity='0';document.getElementById('hint').style.opacity='1';document.getElementById('ctrls').style.display='flex';document.getElementById('hud').style.display='flex';document.getElementById('inv').style.display='flex';hideLogbook();updInv();var lv=LEVELS[0];document.getElementById('lv').textContent=lv.name+' · '+lv.eng}
+function gameOverP1(win){st='end';document.getElementById('over').classList.add('show');if(win){startPhase2();return}document.getElementById('ot').textContent='未抵达';document.getElementById('os').textContent='未能抵达最后一节车厢';document.getElementById('ctrls').style.display='none'}
+function collect(it){if(it.got)return;it.got=true;inv[it.d.k]++;updInv();for(var i=0;i<8;i++)pts.push({x:it.x,y:it.y,vx:(Math.random()-0.5)*2.5,vy:-2-Math.random()*2.5,life:22,ml:22,c:it.d.c,s:1.5+Math.random()*2})}
+function pickup(){for(var i=0;i<loot.length;i++){var l=loot[i];if(l.got)continue;if(Math.abs(player.x-l.x)<38&&Math.abs(player.y-l.y)<44)collect(l)}}
+function startPhase2(){phase=2;st='play';level=2;showLevelIntro=true;res.food=inv.food;res.water=inv.water;res.coal=inv.coal;res.meds=inv.med;res.wood=0;res.iron=0;res.gear=inv.gear||0;res.ammo=inv.ammo||0;crewHealth=crewCount;day=1;logPage=1;distance=0;showLogbook()}
+function up(dt){if(phase===2){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}if(st!=='play'){pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});return}time-=dt;if(time<0)time=0;document.getElementById('tm').textContent=Math.ceil(time)+'s';if(time<8)document.getElementById('hint').style.opacity='0';if(time<=0){gameOverP1(false);return}var dx=joyX;if(keys[37]||keys[65])dx=-1;if(keys[39]||keys[68])dx+=1;player.x+=dx*5*60*dt;player.x=Math.max(8,Math.min(cars[NC-1].x+cars[NC-1].w-8,player.x));var ci=Math.floor(player.x/carW());if(ci>=0&&ci<NC)player.y=cars[ci].y+cars[ci].h*0.65;if([0,2,4].indexOf(ci)>=0&&!crewFound[ci]){crewFound[ci]=true;crewCount++;var c2=cars[ci];loot.push({x:c2.x+c2.w*0.3,y:c2.y+c2.h*0.65,ci:ci,d:ITEMS[0],got:false});loot.push({x:c2.x+c2.w*0.6,y:c2.y+c2.h*0.65,ci:ci,d:ITEMS[2],got:false});document.getElementById('warn').style.opacity='1';document.getElementById('warn').innerHTML='找到同伴！（'+crewCount+'/3）';setTimeout(function(){document.getElementById('warn').style.opacity='0'},1500)}cam=player.x-W/2;cam=Math.max(0,Math.min(cars[NC-1].x+cars[NC-1].w-W,cam));var inL=ci===NC-1;if(inL&&!inLast){inLast=true;dc=0;document.getElementById('warn').style.opacity='1'}if(inL&&inLast){dc+=dt;document.getElementById('warn').innerHTML='最后一节<br>停留3秒过关';if(dc>=3)gameOverP1(true)}if(!inL&&inLast){inLast=false;dc=0;document.getElementById('warn').style.opacity='0'}pts=pts.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0})}
+
+// ===== INPUT =====
+var joyX=0,joyActive=false,joyOX=0,joyOY=0,keys={};
+var joy=document.getElementById('joy'),stick=document.getElementById('stick');
+function joyMove(cx,cy){var r=joy.getBoundingClientRect();var dx=cx-r.left,dy=cy-r.top;if(!joyActive){joyOX=dx;joyOY=dy;joyActive=true}var mx=dx-joyOX,my=dy-joyOY;var d=Math.sqrt(mx*mx+my*my);if(d>30){mx=mx/d*30;my=my/d*30}stick.style.left=(28+mx)+'px';stick.style.top=(28+my)+'px';joyX=mx/30}
+function joyEnd(){joyActive=false;joyX=0;stick.style.left='28px';stick.style.top='28px'}
+joy.addEventListener('touchstart',function(e){e.preventDefault();var t=e.touches[0];joyMove(t.clientX,t.clientY)});
+joy.addEventListener('touchmove',function(e){e.preventDefault();var t=e.touches[0];joyMove(t.clientX,t.clientY)});
+joy.addEventListener('touchend',function(e){e.preventDefault();joyEnd()});
+joy.addEventListener('touchcancel',function(e){e.preventDefault();joyEnd()});
+joy.addEventListener('mousedown',function(e){e.preventDefault();joyMove(e.clientX,e.clientY)});
+window.addEventListener('mousemove',function(e){if(joyActive)joyMove(e.clientX,e.clientY)});
+window.addEventListener('mouseup',function(){if(joyActive)joyEnd()});
+document.getElementById('pick').addEventListener('touchstart',function(e){e.preventDefault();if(st==='play'&&phase===1)pickup()});
+document.getElementById('pick').addEventListener('mousedown',function(e){e.preventDefault();if(st==='play'&&phase===1)pickup()});
+window.addEventListener('keydown',function(e){keys[e.keyCode]=true;if(e.keyCode===32&&st==='play'&&phase===1){e.preventDefault();pickup()}});
+window.addEventListener('keyup',function(e){keys[e.keyCode]=false});
+
+// ===== START =====
+makeCars();spawnLoot();makeStars();initWeather(1);updInv();player.x=carW()/2;
+var lt=0;
+(function loop(ts){var dt=lt?Math.min((ts-lt)/1000,0.1):0.016;lt=ts;if(st==='play'){updateWeather(dt)};up(dt);draw();requestAnimationFrame(loop)})(0);
+</script>
+</body>
+</html>
