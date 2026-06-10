@@ -80,6 +80,12 @@ function pn(x,y){
   var l=(d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y);
   return g+(h-g)*u+(k-g)*v+(g+l-h-k)*u*v;
 }
+// Stroke helpers
+function fr(x,y,w,h){cx.fillRect(x,y,w,h)}
+function fs(c){cx.fillStyle=c}
+function ss(c,w){cx.strokeStyle=c;cx.lineWidth=w||0.8}
+// Pick random from array
+function pk(a){return a[Math.floor(Math.random()*a.length)]}
 // ===== STENCIL SPRAY ENGINE =====
 function spray(x,y,w,h,colors,count,radius,alpha){for(var i=0;i<count;i++){var a2=pn(i*0.1,0)*6.28,d=Math.pow(pn(i*0.1,1),0.5)*radius;var sx=x+pn(i,2)*w+Math.cos(a2)*d*0.5,sy=y+pn(i,3)*h+Math.sin(a2)*d*0.5;if(sx<x||sx>x+w||sy<y||sy>y+h)continue;cx.fillStyle=pk(colors);cx.globalAlpha=alpha*(0.15+pn(i,4)*0.4);cx.beginPath();cx.arc(sx,sy,0.3+pn(i,5)*2,0,6.28);cx.fill()}cx.globalAlpha=1}
 
