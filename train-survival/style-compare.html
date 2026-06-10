@@ -1,0 +1,320 @@
+<!DOCTYPE html><html lang="zh"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>风格对比 · NIGHT TRAIN</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0C0418;color:#C0B0D0;font-family:system-ui;padding:12px;display:flex;flex-direction:column;align-items:center;gap:16px}
+h2{font-size:13px;letter-spacing:3px;color:#A090C0;font-weight:300;margin-top:8px}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.card{background:#140A24;border:1px solid rgba(107,63,160,0.2);border-radius:8px;padding:8px;text-align:center}
+.card canvas{display:block;border-radius:4px;max-width:100%}
+.label{font-size:10px;color:#9B8BB0;letter-spacing:1.5px;margin-top:6px;font-weight:200}
+.pick{background:linear-gradient(180deg,rgba(125,155,139,0.12),rgba(90,110,100,0.04));border:1px solid rgba(125,155,139,0.25);color:#B496D2;padding:10px 24px;font-size:12px;letter-spacing:2px;border-radius:5px;cursor:pointer;margin-top:10px}
+.pick:active{background:rgba(125,155,139,0.22)}
+</style></head><body>
+<h2>TYLER HOBBS · 三种纹理引擎</h2>
+<div class="row" id="row"></div>
+<p style="font-size:10px;color:#706090;margin-top:8px;text-align:center;max-width:420px;line-height:1.6">
+参考 Tyler Hobbs <i>From Noise (2025)</i> — 多层叠加 · 簇群流动 · 飞溅滴痕<br>
+三个版本共用同一场景（夜空+火车+人物），仅纹理引擎不同
+</p>
+<script>
+// ===== PERLIN NOISE =====
+var perm=[151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+for(var i=0;i<256;i++)perm[256+i]=perm[i];
+function perlin2(x,y){
+  var X=Math.floor(x)&255,Y=Math.floor(y)&255;
+  x-=Math.floor(x);y-=Math.floor(y);
+  var u=x*x*x*(x*(x*6-15)+10),v=y*y*y*(y*(y*6-15)+10);
+  var a=perm[perm[X]+Y],b=perm[perm[X+1]+Y],c=perm[perm[X]+Y+1],d=perm[perm[X+1]+Y+1];
+  var g=(a&1?-1:1)*x*(1-x)+(a&2?-1:1)*y*(1-y);
+  var h=(b&1?-1:1)*(x-1)*(2-x)+(b&2?-1:1)*y*(1-y);
+  var k=(c&1?-1:1)*x*(1-x)+(c&2?-1:1)*(y-1)*(2-y);
+  var l=(d&1?-1:1)*(x-1)*(2-x)+(d&2?-1:1)*(y-1)*(2-y);
+  return g+(h-g)*u+(k-g)*v+(g+l-h-k)*u*v;
+}
+
+// ===== COLOR PALETTE =====
+var PURP=['#120820','#1E0C32','#2A1048','#3A1850','#180C28'];
+var GREEN=['#1A3A28','#244A34','#183020','#225036','#1E3E2A'];
+var WHITE=['#F5F0F8','#E8E0F0','#F0E8F8','#EAE2F0'];
+var GOLD=['#D4B830','#C8A828','#D8BC38','#C0A020'];
+var CORAL=['#E898A8','#D08090','#E8A0B0'];
+var STAR=['#F5F0F8','#E8E0F0','#D4B830','#F0E8F8','#F5F0F8','#F5F0F8','#D4B830','#C4A8E0'];
+
+// ===== ENGINE A: PERLIN CLUSTERS =====
+function drawA(cx,W,H){
+  // Sky — noise-driven cluster zones
+  cx.fillStyle='#0A0418';cx.fillRect(0,0,W,H);
+  var t=0;
+  // Multiple passes with increasing density near noise peaks
+  for(var pass=0;pass<4;pass++){
+    var n=pass===0?6000:(pass===1?4000:(pass===2?2500:1500));
+    var scale=pass===0?0.008:(pass===1?0.015:(pass===2?0.025:0.04));
+    for(var i=0;i<n;i++){
+      var px=Math.random()*W,py=Math.random()*H*0.78;
+      var nv=perlin2(px*scale,py*scale); // -1 to 1
+      var prob=0.25+nv*0.4; // 0.15-0.65 probability
+      if(Math.random()>prob)continue;
+      // Cluster around noise peaks
+      var cx2=px+nv*12,cy2=py+(perlin2(px*0.03+5,py*0.03)*8);
+      // Color: sky gradient
+      var t=cy2/(H*0.75);
+      var col=t<0.35?PURP[Math.floor(Math.random()*PURP.length)]:
+               t<0.55?GREEN[Math.floor(Math.random()*GREEN.length)]:
+               PURP[Math.floor(Math.random()*PURP.length)];
+      if(cy2<H*0.5 && Math.random()<0.08)col=STAR[Math.floor(Math.random()*STAR.length)];
+      cx.fillStyle=col;cx.globalAlpha=0.25+Math.random()*0.6;
+      // Variable mark shapes
+      var r=Math.random();
+      if(r<0.7){cx.beginPath();cx.arc(cx2,cy2,0.5+Math.random()*2.5,0,6.28);cx.fill()}
+      else if(r<0.9){var len=1+Math.random()*4;cx.fillRect(cx2,cy2,0.8+Math.random()*1.5,len)}
+      else{cx.fillRect(cx2,cy2,3+Math.random()*5,0.6+Math.random()*1.2)}
+    }
+  }cx.globalAlpha=1;
+
+  // Train — green clusters
+  var tx=40,ty=H*0.28,tw=W-80,th=H*0.44;
+  for(var pass=0;pass<3;pass++){
+    var n=pass===0?3000:(pass===1?2000:1000);
+    for(var i=0;i<n;i++){
+      var px=tx+Math.random()*tw,py=ty+Math.random()*th;
+      var nv=perlin2(px*0.04,py*0.04);
+      if(Math.random()>0.3+nv*0.35)continue;
+      var col=py<ty+th*0.15?['#4A3A3A','#3A2828','#2A1A1A'][Math.floor(Math.random()*3)]:
+               py<ty+th*0.55?GREEN[Math.floor(Math.random()*GREEN.length)]:
+               GREEN[Math.floor(Math.random()*GREEN.length)];
+      cx.fillStyle=col;cx.globalAlpha=0.3+Math.random()*0.6;
+      if(Math.random()<0.15){cx.fillRect(px+nv*3,py,0.5+Math.random()*1,2+Math.random()*5)}
+      else{cx.beginPath();cx.arc(px+nv*5,py+(perlin2(px*0.05,py*0.05))*3,0.5+Math.random()*2.5,0,6.28);cx.fill()}
+    }
+  }cx.globalAlpha=1;
+  // Coachline
+  cx.strokeStyle=GOLD[0];cx.globalAlpha=0.45;cx.lineWidth=1.2;
+  cx.beginPath();cx.moveTo(tx+6,ty+th*0.5);cx.lineTo(tx+tw-6,ty+th*0.5);cx.stroke();
+  cx.globalAlpha=0.3;cx.lineWidth=0.6;
+  cx.beginPath();cx.moveTo(tx+4,ty+th-14);cx.lineTo(tx+tw-4,ty+th-14);cx.stroke();cx.globalAlpha=1;
+  // Wheels
+  for(var wi=0;wi<4;wi++){
+    var wx=tx+tw*0.12+wi*tw*0.27,wy=ty+th+8;
+    for(var j=0;j<80;j++){
+      var a=Math.random()*6.28,d=Math.sqrt(Math.random())*7;
+      cx.fillStyle='#2A2535';cx.globalAlpha=0.4;
+      cx.beginPath();cx.arc(wx+Math.cos(a)*d,wy+Math.sin(a)*d,0.4+Math.random()*1.2,0,6.28);cx.fill();
+    }cx.globalAlpha=1;
+    cx.fillStyle='#3A3040';cx.beginPath();cx.arc(wx,wy,2,0,6.28);cx.fill();
+  }
+  // Ground
+  for(var i=0;i<800;i++){
+    var gx=Math.random()*W,gy=H*0.72+Math.random()*H*0.28;
+    cx.fillStyle='#180828';cx.globalAlpha=0.3;cx.fillRect(gx,gy,0.6+Math.random()*1.2,0.4+Math.random()*1);
+  }cx.globalAlpha=1;
+  // Figure — white+purple Banksy
+  var fx=W/2,fy=ty+th*0.65;
+  for(var i=0;i<300;i++){
+    var da=Math.random()*6.28,dd=Math.random()*14;
+    var bx=fx+Math.cos(da)*dd,by=fy+Math.sin(da)*dd*0.6-20;
+    cx.fillStyle=Math.random()<0.3?'#5A3890':'#F5F0F8';cx.globalAlpha=0.6;
+    cx.beginPath();cx.arc(bx,by,0.6+Math.random()*2,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+  // Heart balloon
+  var hx=fx+12,hy=fy-40;
+  for(var i=0;i<50;i++){
+    var ha=Math.random()*6.28,hd=Math.sqrt(Math.random())*8;
+    cx.fillStyle='#6B3FA0';cx.globalAlpha=0.6;
+    cx.beginPath();cx.arc(hx+Math.cos(ha)*hd,hy+Math.sin(ha)*hd*0.7,0.5+Math.random()*1.5,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+}
+
+// ===== ENGINE B: LAYERED STROKES =====
+function drawB(cx,W,H){
+  cx.fillStyle='#0A0418';cx.fillRect(0,0,W,H);
+  // Sky — horizontal noise strokes
+  for(var layer=0;layer<3;layer++){
+    var cols=layer===0?PURP:(layer===1?['#1A1030','#2A1848','#1E0C32']:STAR);
+    var density=layer===0?0.06:(layer===1?0.08:0.02);
+    for(var y=0;y<H*0.75;y+=3+layer*2){
+      var nv=perlin2(y*0.02,0.5)*0.5+0.5;
+      if(Math.random()>density*nv)continue;
+      var col=cols[Math.floor(Math.random()*cols.length)];
+      cx.fillStyle=col;cx.globalAlpha=0.2+layer*0.3;
+      var w=2+Math.random()*(4+layer*3);
+      var x=Math.random()*W;
+      cx.fillRect(x,y,w,0.5+Math.random()*0.8);
+    }
+  }cx.globalAlpha=1;
+  // Stars — sparse bright dots
+  for(var i=0;i<80;i++){
+    var sx=Math.random()*W,sy=Math.random()*H*0.5;
+    cx.fillStyle=STAR[Math.floor(Math.random()*STAR.length)];
+    cx.globalAlpha=0.3+Math.random()*0.5;
+    cx.beginPath();cx.arc(sx,sy,0.3+Math.random()*1.2,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+
+  // Train — vertical+horizontal stroke layers
+  var tx=40,ty=H*0.28,tw=W-80,th=H*0.44;
+  // Body
+  for(var layer=0;layer<3;layer++){
+    var step=2+layer*3;
+    for(var x=tx;x<tx+tw;x+=step){
+      var hn=perlin2(x*0.03,ty*0.05)*0.5+0.5;
+      if(Math.random()>0.4+hn*0.4)continue;
+      var col=GREEN[Math.floor(Math.random()*GREEN.length)];
+      cx.fillStyle=col;cx.globalAlpha=0.15+layer*0.3;
+      cx.fillRect(x,ty,0.8+Math.random()*2,th*0.6+Math.random()*th*0.3);
+    }
+  }cx.globalAlpha=1;
+  // Roof
+  for(var x=tx;x<tx+tw;x+=2){
+    cx.fillStyle='#4A3A3A';cx.globalAlpha=0.4;
+    cx.fillRect(x,ty-2-Math.random()*4,1.5,3+Math.random()*4);
+  }cx.globalAlpha=1;
+  // Coachline
+  cx.strokeStyle=GOLD[0];cx.globalAlpha=0.5;cx.lineWidth=1.5;
+  cx.beginPath();cx.moveTo(tx+6,ty+th*0.5);cx.lineTo(tx+tw-6,ty+th*0.5);cx.stroke();cx.globalAlpha=1;
+  // Wheels
+  for(var wi=0;wi<4;wi++){
+    var wx=tx+tw*0.12+wi*tw*0.27,wy=ty+th+8;
+    for(var a=0;a<6.28;a+=0.15){
+      cx.fillStyle='#2A2535';cx.globalAlpha=0.5;
+      cx.fillRect(wx+Math.cos(a)*6,wy+Math.sin(a)*6,1.2,1.2);
+    }cx.globalAlpha=1;
+  }
+  // Ground — horizontal strokes
+  for(var i=0;i<400;i++){
+    cx.fillStyle='#180828';cx.globalAlpha=0.3;
+    cx.fillRect(Math.random()*W,H*0.72+Math.random()*H*0.28,2+Math.random()*6,0.5+Math.random()*0.8);
+  }cx.globalAlpha=1;
+  // Figure
+  var fx=W/2,fy=ty+th*0.65;
+  for(var i=0;i<200;i++){
+    var by=fy-20-Math.random()*14;
+    cx.fillStyle=Math.random()<0.35?'#5A3890':'#F5F0F8';cx.globalAlpha=0.5;
+    cx.fillRect(fx-8+Math.random()*16,by,0.8+Math.random()*2,1.5+Math.random()*3);
+  }cx.globalAlpha=1;
+  // Heart
+  var hx=fx+12,hy=fy-40;
+  for(var a=0;a<6.28;a+=0.12){
+    cx.fillStyle='#6B3FA0';cx.globalAlpha=0.5;
+    cx.fillRect(hx+Math.cos(a)*7,hy+Math.sin(a)*5,1.2,1.2);
+  }cx.globalAlpha=1;
+}
+
+// ===== ENGINE C: SPLATTER + DRIP =====
+function drawC(cx,W,H){
+  cx.fillStyle='#0A0418';cx.fillRect(0,0,W,H);
+  // Sky — splatter bursts at random cluster centers
+  var clusters=[];
+  for(var ci=0;ci<15;ci++)clusters.push({x:Math.random()*W,y:Math.random()*H*0.75,r:20+Math.random()*60});
+  // Background noise
+  for(var i=0;i<5000;i++){
+    var px=Math.random()*W,py=Math.random()*H*0.75;
+    var col=PURP[Math.floor(Math.random()*PURP.length)];
+    cx.fillStyle=col;cx.globalAlpha=0.15;
+    cx.beginPath();cx.arc(px,py,0.4+Math.random()*1.5,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+  // Cluster splatters
+  for(var ci=0;ci<clusters.length;ci++){
+    var c=clusters[ci];
+    for(var si=0;si<200;si++){
+      var a=Math.random()*6.28,d=Math.pow(Math.random(),0.5)*c.r;
+      var sx=c.x+Math.cos(a)*d,sy=c.y+Math.sin(a)*d;
+      if(sy<0||sy>H*0.75)continue;
+      var col=Math.random()<0.15?STAR[Math.floor(Math.random()*STAR.length)]:PURP[Math.floor(Math.random()*PURP.length)];
+      cx.fillStyle=col;cx.globalAlpha=0.2+Math.random()*0.5;
+      cx.beginPath();cx.arc(sx,sy,0.4+Math.random()*2.5,0,6.28);cx.fill();
+    }
+    // Drips from cluster
+    for(var di=0;di<8;di++){
+      var dx=c.x-5+Math.random()*10;
+      cx.strokeStyle=PURP[Math.floor(Math.random()*PURP.length)];
+      cx.globalAlpha=0.15+Math.random()*0.3;cx.lineWidth=0.3+Math.random()*1;
+      cx.beginPath();cx.moveTo(dx,c.y+c.r*0.5);cx.lineTo(dx+(Math.random()-0.5)*3,c.y+c.r*0.5+15+Math.random()*25);cx.stroke();
+    }cx.globalAlpha=1;
+  }
+
+  // Train — green splatter + vertical drips
+  var tx=40,ty=H*0.28,tw=W-80,th=H*0.44;
+  // Body splatter
+  for(var pass=0;pass<2;pass++){
+    for(var i=0;i<2500;i++){
+      var px=tx+Math.random()*tw,py=ty+Math.random()*th;
+      var col=pass===0?GREEN[Math.floor(Math.random()*GREEN.length)]:['#1E3E2A','#2A5A3E'][Math.floor(Math.random()*2)];
+      cx.fillStyle=col;cx.globalAlpha=0.2+pass*0.3;
+      if(Math.random()<0.2){cx.fillRect(px,py,0.5,2+Math.random()*8)}
+      else{cx.beginPath();cx.arc(px,py,0.5+Math.random()*2.5,0,6.28);cx.fill()}
+    }
+  }cx.globalAlpha=1;
+  // Drips from coachline
+  for(var i=0;i<30;i++){
+    var dx=tx+tw*0.1+Math.random()*tw*0.8;
+    cx.strokeStyle=GREEN[Math.floor(Math.random()*GREEN.length)];
+    cx.globalAlpha=0.2+Math.random()*0.3;cx.lineWidth=0.4+Math.random()*1.2;
+    cx.beginPath();cx.moveTo(dx,ty+th*0.5);cx.lineTo(dx+(Math.random()-0.5)*2,ty+th*0.5+8+Math.random()*20);cx.stroke();
+  }cx.globalAlpha=1;
+  // Coachline
+  cx.strokeStyle=GOLD[0];cx.globalAlpha=0.5;cx.lineWidth=1.5;
+  cx.beginPath();cx.moveTo(tx+6,ty+th*0.5);cx.lineTo(tx+tw-6,ty+th*0.5);cx.stroke();cx.globalAlpha=1;
+  // Roof
+  for(var i=0;i<500;i++){
+    cx.fillStyle='#4A3A3A';cx.globalAlpha=0.3;
+    cx.beginPath();cx.arc(tx+Math.random()*tw,ty-2-Math.random()*6,0.5+Math.random()*1.5,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+  // Wheels — circular splatter
+  for(var wi=0;wi<4;wi++){
+    var wx=tx+tw*0.12+wi*tw*0.27,wy=ty+th+8;
+    for(var j=0;j<60;j++){
+      var a=Math.random()*6.28,d=Math.sqrt(Math.random())*7;
+      cx.fillStyle='#2A2535';cx.globalAlpha=0.5;
+      cx.beginPath();cx.arc(wx+Math.cos(a)*d,wy+Math.sin(a)*d,0.4+Math.random()*1,0,6.28);cx.fill();
+    }cx.globalAlpha=1;
+  }
+  // Ground — horizontal scatter + drips
+  for(var i=0;i<600;i++){
+    cx.fillStyle='#180828';cx.globalAlpha=0.25;
+    cx.fillRect(Math.random()*W,H*0.72+Math.random()*H*0.28,1+Math.random()*4,0.4+Math.random()*0.8);
+  }cx.globalAlpha=1;
+  // Figure — clustered splatter
+  var fx=W/2,fy=ty+th*0.65;
+  for(var ci=0;ci<3;ci++){
+    var c2x=fx-5+Math.random()*10,c2y=fy-20+Math.random()*5;
+    for(var si=0;si<60;si++){
+      var a=Math.random()*6.28,d=Math.pow(Math.random(),0.5)*8;
+      cx.fillStyle=Math.random()<0.35?'#5A3890':'#F5F0F8';cx.globalAlpha=0.5;
+      cx.beginPath();cx.arc(c2x+Math.cos(a)*d,c2y+Math.sin(a)*d*0.6,0.5+Math.random()*1.5,0,6.28);cx.fill();
+    }
+  }cx.globalAlpha=1;
+  // Heart
+  var hx=fx+12,hy=fy-40;
+  for(var si=0;si<40;si++){
+    var a=Math.random()*6.28,d=Math.pow(Math.random(),0.4)*7;
+    cx.fillStyle='#6B3FA0';cx.globalAlpha=0.6;
+    cx.beginPath();cx.arc(hx+Math.cos(a)*d,hy+Math.sin(a)*d*0.6,0.5+Math.random()*1.5,0,6.28);cx.fill();
+  }cx.globalAlpha=1;
+}
+
+// ===== RENDER ALL THREE =====
+var W=320,H=240;
+var engines=[
+  {name:'A · Perlin 簇群',fn:drawA,desc:'噪声流动 · 密集簇群 · 多尺寸标记'},
+  {name:'B · 层叠笔触',fn:drawB,desc:'横向笔触叠加 · 结构化 · 色粉条纹感'},
+  {name:'C · 飞溅+滴痕',fn:drawC,desc:'辐射飞溅 · 垂直滴痕 · 有机喷绘感'}
+];
+var row=document.getElementById('row');
+for(var ei=0;ei<engines.length;ei++){
+  var e=engines[ei];
+  var card=document.createElement('div');card.className='card';
+  var c=document.createElement('canvas');c.width=W;c.height=H;
+  var cx2=c.getContext('2d');
+  e.fn(cx2,W,H);
+  var label=document.createElement('div');label.className='label';
+  label.textContent=e.name;
+  var desc=document.createElement('div');desc.style.cssText='font-size:8px;color:#605080;margin-top:2px;max-width:300px';
+  desc.textContent=e.desc;
+  var btn=document.createElement('button');btn.className='pick';btn.textContent='选这个 →';
+  btn.onclick=function(en){return function(){alert('已记录偏好: '+en.name+'\n下一版将以此引擎重建完整游戏')}}(e);
+  card.appendChild(c);card.appendChild(label);card.appendChild(desc);card.appendChild(btn);
+  row.appendChild(card);
+}
+</script>
+</body></html>
