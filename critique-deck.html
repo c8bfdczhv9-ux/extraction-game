@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Critique Deck — Phase 4 Taste Engine</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #120A18;
+    color: #E8E0F0;
+    font-family: 'Georgia', 'Noto Serif SC', serif;
+    padding: 20px 16px 60px;
+    line-height: 1.6;
+  }
+  header {
+    text-align: center;
+    padding: 24px 0 32px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    color: #C4A8E0;
+  }
+  header p {
+    font-size: 13px;
+    color: #7B6B90;
+    margin-top: 8px;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .card {
+    background: #1A1422;
+    border: 1px solid #2A2038;
+    border-radius: 12px;
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+  }
+  .card-id {
+    font-size: 11px;
+    color: #5A4A70;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .card h2 {
+    font-size: 18px;
+    font-weight: normal;
+    color: #D4C8E8;
+    margin-bottom: 4px;
+  }
+  .card .subtitle {
+    font-size: 12px;
+    color: #7B6B90;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .palette {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .swatch {
+    flex: 1;
+    height: 64px;
+    border-radius: 8px;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .swatch .label {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    right: 8px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  .specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(196,168,224,0.08);
+    color: #A090B8;
+    border: 1px solid rgba(196,168,224,0.12);
+    letter-spacing: 0.02em;
+  }
+  .tag.material { background: rgba(122,200,160,0.08); color: #8AC0A8; border-color: rgba(122,200,160,0.15); }
+  .tag.craft { background: rgba(200,168,120,0.08); color: #C8A878; border-color: rgba(200,168,120,0.15); }
+  .philosophy {
+    font-size: 13px;
+    color: #A098B8;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border-left: 2px solid rgba(196,168,224,0.2);
+  }
+  .critique-prompt {
+    font-size: 11px;
+    color: #6A5A80;
+    padding: 10px 14px;
+    background: rgba(196,168,224,0.04);
+    border-radius: 8px;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+  .critique-prompt strong {
+    color: #C4A8E0;
+    font-weight: normal;
+  }
+  footer {
+    text-align: center;
+    padding: 32px 0 16px;
+    font-size: 11px;
+    color: #4A3A60;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Critique Deck</h1>
+  <p>6个设计概念。看颜色、读材质、感受意境——然后告诉我哪个击中了你，哪个让你皱眉，<strong>为什么</strong>。</p>
+</header>
+
+<!-- CARD 1: Kyoto Rain -->
+<div class="card" style="--c1:#5A7A6A;--c2:#E8E0D8;--c3:#B8735A;">
+  <div class="card-id">01 · Timeless</div>
+  <h2>Kyoto Rain</h2>
+  <div class="subtitle">岚山雨后 · Arashiyama after rain</div>
+  <div class="palette">
+    <div class="swatch" style="background:#5A7A6A"><div class="label">Sagano Green</div></div>
+    <div class="swatch" style="background:#E8E0D8"><div class="label">Moonstone Pearl</div></div>
+    <div class="swatch" style="background:#B8735A"><div class="label">Patina Copper</div></div>
+  </div>
+  <div class="specs">
+    <span class="tag material">hand-finished leather</span>
+    <span class="tag material">open-pore wood</span>
+    <span class="tag craft">hand-hammered copper</span>
+    <span class="tag craft">patina inlay</span>
+    <span class="tag">wabi-sabi</span>
+  </div>
+  <div class="philosophy">
+    不是绿色——是岚山竹林中雨后的感受。颜色来自湿度和阴影，不是亮度。每个表面都留有手工痕迹：皮革被触摸磨亮，铜随时间变暗，木纹经岁月加深。不喧哗。第二次看才懂的克制。
+  </div>
+  <div class="critique-prompt">👆 这个设计<strong>对</strong>还是<strong>错</strong>？为什么？</div>
+</div>
+
+<!-- CARD 2: Dubai Blue Depth -->
+<div class="card" style="--c1:#3070A0;--c2:#5060B0;--c3:#F5F0F0;">
+  <div class="card-id">02 · Spring · Dubai</div>
+  <h2>Desert Blue</h2>
+  <div class="subtitle">沙漠中的深海 · Ocean in the desert</div>
+  <div class="palette">
+    <div class="swatch" style="background:#3070A0"><div class="label">Adriatic Blue</div></div>
+    <div class="swatch" style="background:#5060B0"><div class="label">Muscari Blue</div></div>
+    <div class="swatch" style="background:#F5F0F0"><div class="label">Grace White</div></div>
+  </div>
+  <div class="specs">
+    <span class="tag material">Crystal Over paint</span>
+    <span class="tag material">Technical Fiber</span>
+    <span class="tag material">Black PVD Finish</span>
+    <span class="tag craft">3D Gilding</span>
+    <span class="tag">no Starlight</span>
+  </div>
+  <div class="philosophy">
+    Dubai的沙漠光 + 亚得里亚海的深蓝。Crystal Over漆面让光在车身上流动——不是反射，是折射。故意不加星空顶。减法本身就是陈述。沙漠中最奢侈的东西不是金色，是蓝色。
+  </div>
+  <div class="critique-prompt">👆 这个设计<strong>对</strong>还是<strong>错</strong>？为什么？</div>
+</div>
+
+<!-- CARD 3: Beijing Scholar -->
+<div class="card" style="--c1:#E8E0D8;--c2:#5060B0;--c3:#F5F0F0;">
+  <div class="card-id">03 · Spring · Beijing</div>
+  <h2>Scholar's Pearl</h2>
+  <div class="subtitle">文人藏家 · Collector's restraint</div>
+  <div class="palette">
+    <div class="swatch" style="background:#E8E0D8"><div class="label">Moonstone Pearl</div></div>
+    <div class="swatch" style="background:#5060B0"><div class="label">Muscari Blue</div></div>
+    <div class="swatch" style="background:#F5F0F0"><div class="label">Grace White</div></div>
+  </div>
+  <div class="specs">
+    <span class="tag material">Mother of Pearl</span>
+    <span class="tag material">Open Pore Grey Stained Ash</span>
+    <span class="tag craft">3D Gilding</span>
+    <span class="tag craft">Peony embroidery</span>
+    <span class="tag">Purple coachline</span>
+  </div>
+  <div class="philosophy">
+    月长石珍珠的温润白 + 葡萄风信子蓝的文人气息。贝壳镶嵌 + 牡丹刺绣——但不喧哗，每一处都要靠近才能发现。紫色coachline是最小面积的东方信号。给一个读线装书的人。
+  </div>
+  <div class="critique-prompt">👆 这个设计<strong>对</strong>还是<strong>错</strong>？为什么？</div>
+</div>
+
+<!-- CARD 4: London Mandarin -->
+<div class="card" style="--c1:#E87830;--c2:#F5F0F0;--c3:#40C0B8;">
+  <div class="card-id">04 · Summer · London</div>
+  <h2>Mandarin Heat</h2>
+  <div class="subtitle">橘子色的伦敦 · London in mandarin</div>
+  <div class="palette">
+    <div class="swatch" style="background:#E87830"><div class="label">Mandarin</div></div>
+    <div class="swatch" style="background:#F5F0F0"><div class="label">Grace White</div></div>
+    <div class="swatch" style="background:#40C0B8"><div class="label">Turchese</div></div>
+  </div>
+  <div class="specs">
+    <span class="tag material">Technical Fiber</span>
+    <span class="tag material">Dark Chrome</span>
+    <span class="tag craft">Synth Wave Cluster</span>
+    <span class="tag">Savile Row tailoring</span>
+    <span class="tag">&le;5% accent</span>
+  </div>
+  <div class="philosophy">
+    一个自我造就的人。Mandarin橘红外漆 + Grace White内饰，Turchese绿松石只出现在卡钳和缝线上——不超过5%可见面积。最烈的颜色用最少的面积。Savile Row逻辑：剪裁决定一切，不是布料。
+  </div>
+  <div class="critique-prompt">👆 这个设计<strong>对</strong>还是<strong>错</strong>？为什么？</div>
+</div>
+
+<!-- CARD 5: London Vapour Violet -->
+<div class="card" style="--c1:#4E1D73;--c2:#40C0B8;--c3:#E8D840;">
+  <div class="card-id">05 · Winter · London</div>
+  <h2>Vapour Drama</h2>
+  <div class="subtitle">冬日紫雾 · Winter violet fog</div>
+  <div class="palette">
+    <div class="swatch" style="background:#4E1D73"><div class="label">Vapour Violet</div></div>
+    <div class="swatch" style="background:#40C0B8"><div class="label">Turchese</div></div>
+    <div class="swatch" style="background:#E8D840"><div class="label">Lemon Yellow</div></div>
+  </div>
+  <div class="specs">
+    <span class="tag material">Black PVD Finish</span>
+    <span class="tag material">Technical Fiber</span>
+    <span class="tag craft">Starlight Headliner</span>
+    <span class="tag">personal constellation</span>
+    <span class="tag">Body Coloured Wheels</span>
+  </div>
+  <div class="philosophy">
+    伦敦冬季的光——灰暗、短暂、戏剧化。Vapour Violet深紫车身 + Turchese绿松石内饰，Lemon Yellow只在coachline出现——一条金线劈开紫色的雾。Black PVD硬件让所有金属消失，只剩颜色在说话。私人星座在头顶。
+  </div>
+  <div class="critique-prompt">👆 这个设计<strong>对</strong>还是<strong>错</strong>？为什么？</div>
+</div>
+
+<!-- CARD 6: Shanghai Bright -->
+<div class="card" style="--c1:#E8C820;--c2:#B0A8A0;--c3:#40C0B8;">
+  <div class="card-id">06 · Summer · Shanghai</div>
+  <h2>Neon Bund</h2>
+  <div class="subtitle">外滩霓虹 · Bund at midnight</div>
+  <div class="palette">
+    <div class="swatch" style="background:#E8C820"><div class="label">Bright Yellow</div></div>
+    <div class="swatch" style="background:#B0A8A0"><div class="label">Cashmere Grey</div></div>
+    <div class="swatch" style="background:#40C0B8"><div class="label">Turchese</div></div>
+  </div>
+  <div class="specs">
+    <span class="tag material">Crystal Over</span>
+    <span class="tag material">Rainbow Treadplates</span>
+    <span class="tag craft">Starlight Headliner</span>
+    <span class="tag craft">Tri-Tone Interior</span>
+    <span class="tag">Front/Rear split</span>
+  </div>
+  <div class="philosophy">
+    上海夏天 + 公众人物 = 不躲。Bright Yellow明黄车身，但内饰用Cashmere Grey压住——外面是宣言，里面是庇护。Rainbow踏板的彩色光 + 前后排分色 = 你在前座是表演者，在后座是收藏家。两个自己，一辆车。
+  </div>
+  <div class="critique-prompt">👆 这个设计<strong>对</strong>还是<strong>错</strong>？为什么？</div>
+</div>
+
+<footer>
+  Phase 4 Taste Engine · 2026-07-04<br>
+  回复格式：「#3 对。因为…」或「#5 错。因为…」<br>
+  每一条critique都在训练你的T-DNA
+</footer>
+
+</body>
+</html>
