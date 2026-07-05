@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feeling × Features Mapping — 10 Layouts</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#200020;color:#E0E0E0;font-family:Georgia,serif;padding:20px}
+h1{text-align:center;color:#E0E0E0;font-size:2em;margin:20px 0 40px;letter-spacing:0.1em}
+h1 span{color:#A06040;display:block;font-size:0.5em;letter-spacing:0.3em;margin-top:8px}
+.layouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:24px;max-width:1400px;margin:0 auto}
+.card{background:#18001C;border:1px solid #3a2040;border-radius:12px;padding:24px;position:relative;overflow:hidden;min-height:420px}
+.card:hover{border-color:#A06040}
+.card h2{font-size:1em;color:#A06040;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.2em}
+.card h3{font-size:0.75em;color:#888;margin-bottom:16px;font-weight:normal}
+.label{position:absolute;top:12px;right:16px;color:#A06040;font-size:2em;font-weight:bold;opacity:0.3}
+.canvas-wrap{display:flex;justify-content:center;align-items:center;min-height:340px}
+canvas{max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;justify-content:center}
+.legend span{padding:2px 8px;border-radius:10px;font-size:10px;font-family:Calibri,sans-serif}
+</style>
+</head>
+<body>
+
+<h1>FEELING × FEATURES <span>BEATING! HEART II · 10 Layout Approaches</span></h1>
+
+<div class="layouts">
+
+<!-- Layout 1: Matrix Grid -->
+<div class="card">
+<div class="label">01</div>
+<h2>Matrix Grid</h2><h3>X=Feelings · Y=Features · Cell=Score 0-10</h3>
+<div class="canvas-wrap"><canvas id="c1"></canvas></div>
+</div>
+
+<!-- Layout 2: Radar Profile -->
+<div class="card">
+<div class="label">02</div>
+<h2>Radar Profiles</h2><h3>Each feature's feeling fingerprint</h3>
+<div class="canvas-wrap"><canvas id="c2"></canvas></div>
+</div>
+
+<!-- Layout 3: Heatmap -->
+<div class="card">
+<div class="label">03</div>
+<h2>Heatmap</h2><h3>Color intensity = mapping strength</h3>
+<div class="canvas-wrap"><canvas id="c3"></canvas></div>
+</div>
+
+<!-- Layout 4: Flow Diagram -->
+<div class="card">
+<div class="label">04</div>
+<h2>Flow / Chord</h2><h3>Feature → Feeling directional flow</h3>
+<div class="canvas-wrap"><canvas id="c4"></canvas></div>
+</div>
+
+<!-- Layout 5: Bubble Matrix -->
+<div class="card">
+<div class="label">05</div>
+<h2>Bubble Matrix</h2><h3>Bubble size = feeling intensity</h3>
+<div class="canvas-wrap"><canvas id="c5"></canvas></div>
+</div>
+
+<!-- Layout 6: Parallel Bars -->
+<div class="card">
+<div class="label">06</div>
+<h2>Parallel Bars</h2><h3>Each feature's feeling spectrum</h3>
+<div class="canvas-wrap"><canvas id="c6"></canvas></div>
+</div>
+
+<!-- Layout 7: Sankey Flow -->
+<div class="card">
+<div class="label">07</div>
+<h2>Sankey Flow</h2><h3>Weighted streams feature→feeling</h3>
+<div class="canvas-wrap"><canvas id="c7"></canvas></div>
+</div>
+
+<!-- Layout 8: Concentric Rings -->
+<div class="card">
+<div class="label">08</div>
+<h2>Concentric Rings</h2><h3>Features outer → Feelings inner</h3>
+<div class="canvas-wrap"><canvas id="c8"></canvas></div>
+</div>
+
+<!-- Layout 9: Quadrant Map -->
+<div class="card">
+<div class="label">09</div>
+<h2>Quadrant Map</h2><h3>2D space: Exterior↔Interior × Rational↔Emotional</h3>
+<div class="canvas-wrap"><canvas id="c9"></canvas></div>
+</div>
+
+<!-- Layout 10: Stacked Slopes -->
+<div class="card">
+<div class="label">10</div>
+<h2>Stacked Slopes</h2><h3>Terrain view: feature elevation across feelings</h3>
+<div class="canvas-wrap"><canvas id="c10"></canvas></div>
+</div>
+
+</div>
+
+<script>
+// ── DATA ──
+const features = [
+  'Structure\u000bas Ornament',   // 斗拱·结构即装饰
+  'Timber\u000bMateriality',     // 木材质诚实
+  'Flexibility\u000bOver Rigidity',// 柔韧抗震
+  'Proportion\u000bSystem',       // 67m比例系统
+  'Spatial\u000bHierarchy',       // 空间层次
+  'Zaojing\u000bCeiling',         // 藻井天花
+  'Hidden\u000bCraft',            // 隐藏工艺
+  'Light\u000bNarrative',         // 光影叙事
+  'Motif\u000bTranslation',       // 纹样转译
+  'Landscape\u000bIntegration'    // 建筑顺应自然
+];
+
+const feelings = [
+  'Awe', 'Serenity', 'Heritage', 'Craft',
+  'Harmony', 'Confidence', 'Mystery', 'Timeless'
+];
+
+// Scoring matrix [feature][feeling] 0-10
+const scores = [
+  [9,2,5,7,4,9,3,6],  // Structure as Ornament
+  [3,5,6,9,5,3,2,7],  // Timber Materiality
+  [4,3,3,5,6,4,5,9],  // Flexibility Over Rigidity
+  [7,4,8,3,9,5,2,6],  // Proportion System
+  [6,6,6,4,8,5,4,5],  // Spatial Hierarchy
+  [4,8,7,8,6,3,7,5],  // Zaojing Ceiling
+  [2,5,8,9,3,2,7,6],  // Hidden Craft
+  [3,9,3,2,7,2,8,4],  // Light Narrative
+  [3,4,9,6,3,2,6,5],  // Motif Translation
+  [1,8,4,3,9,1,6,7],  // Landscape Integration
+];
+
+const featColors = ['#D4B830','#A06040','#6B3FA0','#3A7D5A','#58A070','#4A6090','#8B5E3C','#9B5FC0','#C47A5A','#5A8A7A'];
+const feelColors = ['#E8A030','#6090C0','#8B6B4A','#B08050','#60A070','#D06040','#7050A0','#90A0B0'];
+
+// ── Canvas helpers ──
+function makeCanvas(id,w,h,dpr){
+  const c=document.getElementById(id);
+  c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  return {c,ctx,w,h};
+}
+
+function text(ctx,t,x,y,size,color,align='left',font='Georgia'){
+  ctx.fillStyle=color||'#E0E0E0';ctx.font=`${size}px ${font}`;
+  ctx.textAlign=align;ctx.fillText(t,x,y);
+}
+
+// ── LAYOUT 1: Matrix Grid ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c1',380,340,2);
+  const mx=100,my=28,gw=(w-mx-10)/feelings.length,gh=(h-my-6)/features.length;
+  // Y-axis labels
+  features.forEach((f,i)=>{
+    ctx.fillStyle=featColors[i];ctx.globalAlpha=0.7;
+    ctx.fillRect(0,my+i*gh+2,88,gh-2);
+    ctx.globalAlpha=1;
+    text(ctx,f,44,my+i*gh+gh/2+4,7,'#200020','center','Calibri');
+  });
+  // X-axis labels
+  feelings.forEach((f,i)=>{
+    text(ctx,f,mx+i*gw+gw/2,22,7,'#A06040','center','Calibri');
+  });
+  // Cells
+  scores.forEach((row,ri)=>{
+    row.forEach((val,ci)=>{
+      const alpha=val/10;
+      ctx.fillStyle=`rgba(160,96,64,${alpha*0.8})`;
+      ctx.fillRect(mx+ci*gw+1,my+ri*gh+1,gw-2,gh-2);
+      text(ctx,val.toFixed(0),mx+ci*gw+gw/2,my+ri*gh+gh/2+4,10,alpha>0.6?'#200020':'#E0E0E0','center','Calibri');
+    });
+  });
+})();
+
+// ── LAYOUT 2: Radar Profiles ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c2',380,340,2);
+  const cx=190,cy=170,r=110,angles=feelings.length;
+  const angleStep=(Math.PI*2)/angles;
+  // Radar grid
+  for(let l=1;l<=5;l++){
+    ctx.beginPath();ctx.strokeStyle='rgba(224,224,224,0.15)';
+    for(let i=0;i<=angles;i++){
+      const a=-Math.PI/2+i*angleStep;
+      const px=cx+Math.cos(a)*r*l/5,py=cy+Math.sin(a)*r*l/5;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.closePath();ctx.stroke();
+  }
+  // Axis labels
+  feelings.forEach((f,i)=>{
+    const a=-Math.PI/2+i*angleStep;
+    const px=cx+Math.cos(a)*(r+18),py=cy+Math.sin(a)*(r+18);
+    text(ctx,f,px,py,6,'#888','center','Calibri');
+  });
+  // Plot 3 key features
+  [0,4,9].forEach((fi,idx)=>{
+    ctx.beginPath();ctx.strokeStyle=featColors[fi];ctx.lineWidth=2;
+    const data=scores[fi];
+    data.forEach((val,i)=>{
+      const a=-Math.PI/2+i*angleStep;
+      const px=cx+Math.cos(a)*r*val/10,py=cy+Math.sin(a)*r*val/10;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    });
+    ctx.closePath();
+    ctx.fillStyle=featColors[fi]+'33';ctx.fill();ctx.stroke();
+    text(ctx,features[fi].split('\n')[0],cx+130,cy-20+idx*16,7,featColors[fi]);
+  });
+})();
+
+// ── LAYOUT 3: Heatmap ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c3',380,340,2);
+  const mx=10,my=30,cellW=(w-2*mx)/feelings.length,cellH=(h-my-10)/features.length;
+  feelings.forEach((f,i)=>text(ctx,f,mx+i*cellW+cellW/2,22,7,'#A06040','center','Calibri'));
+  features.forEach((f,i)=>text(ctx,f.split('\n')[0],mx-4,my+i*cellH+cellH/2+4,6,'#888','right','Calibri'));
+  scores.forEach((row,ri)=>row.forEach((val,ci)=>{
+    const heat=val/10;
+    const r=Math.round(32+heat*80);
+    const g=Math.round(0+heat*60);
+    const b=Math.round(32+heat*100);
+    ctx.fillStyle=`rgb(${r},${g},${b})`;
+    ctx.fillRect(mx+ci*cellW+2,my+ri*cellH+2,cellW-4,cellH-4);
+    text(ctx,val,mx+ci*cellW+cellW/2,my+ri*cellH+cellH/2+4,9,heat>0.5?'#200020':'#E0E0E0','center','Calibri');
+  }));
+})();
+
+// ── LAYOUT 4: Flow / Chord ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c4',380,340,2);
+  const lx=60,rx=320;
+  // Left: Features
+  features.forEach((f,i)=>{
+    const y=20+i*32;
+    ctx.fillStyle=featColors[i];ctx.globalAlpha=0.3;
+    ctx.fillRect(0,y,60,28);ctx.globalAlpha=1;
+    text(ctx,f.split('\n')[0],30,y+18,7,'#E0E0E0','center','Calibri');
+  });
+  // Right: Feelings
+  feelings.forEach((f,i)=>{
+    const y=25+i*40;
+    ctx.fillStyle=feelColors[i];ctx.globalAlpha=0.3;
+    ctx.fillRect(rx-5,y,60,28);ctx.globalAlpha=1;
+    text(ctx,f,rx+25,y+18,7,'#E0E0E0','center','Calibri');
+  });
+  // Flow lines (top 15 strongest)
+  const flows=[];
+  scores.forEach((row,ri)=>row.forEach((val,ci)=>{if(val>=7)flows.push({ri,ci,val})}));
+  flows.sort((a,b)=>b.val-a.val);
+  flows.slice(0,12).forEach(f=>{
+    const sy=20+f.ri*32+14,ey=25+f.ci*40+14;
+    ctx.beginPath();ctx.strokeStyle=featColors[f.ri];ctx.lineWidth=f.val*0.4;
+    ctx.globalAlpha=f.val/10*0.7;
+    ctx.moveTo(60,sy);ctx.quadraticCurveTo(190,(sy+ey)/2,rx-5,ey);
+    ctx.stroke();ctx.globalAlpha=1;
+  });
+})();
+
+// ── LAYOUT 5: Bubble Matrix ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c5',380,340,2);
+  const mx=95,my=30,gw=(w-mx-10)/feelings.length,gh=(h-my-6)/features.length;
+  features.forEach((f,i)=>text(ctx,f.split('\n')[0],mx-4,my+i*gh+gh/2+4,6,'#888','right','Calibri'));
+  feelings.forEach((f,i)=>text(ctx,f,mx+i*gw+gw/2,22,7,'#A06040','center','Calibri'));
+  scores.forEach((row,ri)=>row.forEach((val,ci)=>{
+    const cx=mx+ci*gw+gw/2,cy=my+ri*gh+gh/2;
+    const maxR=Math.min(gw,gh)*0.45;
+    const rad=Math.max(3,val/10*maxR);
+    ctx.beginPath();ctx.fillStyle=featColors[ri];ctx.globalAlpha=0.6;
+    ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+    text(ctx,val,cx,cy+3,rad>12?8:6,rad>12?'#200020':'#E0E0E0','center','bold Calibri');
+  }));
+})();
+
+// ── LAYOUT 6: Parallel Bars ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c6',380,340,2);
+  const barW=16,barGap=2,gapX=22,startX=6;
+  // Feelings legend top
+  feelings.forEach((f,i)=>text(ctx,f,startX+gapX+i*(barW+1)*(features.length+2)-10,16,5,'#888','center','Calibri'));
+  scores.forEach((row,fi)=>{
+    const baseY=28+fi*30;
+    text(ctx,features[fi].split('\n')[0],startX+gapX-4,baseY+18,6,'#E0E0E0','right','Calibri');
+    row.forEach((val,ci)=>{
+      const x=startX+gapX+ci*(barW+1)+fi*(barW+barGap);
+      const barH=val*2;
+      ctx.fillStyle=feelColors[ci];ctx.globalAlpha=0.7;
+      ctx.fillRect(x,baseY+22-barH,barW,barH);
+      ctx.globalAlpha=1;
+      if(val>=7)text(ctx,val,x+barW/2,baseY+22-barH-2,6,'#E0E0E0','center','Calibri');
+    });
+  });
+})();
+
+// ── LAYOUT 7: Sankey ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c7',380,340,2);
+  // Features left
+  features.forEach((f,i)=>{
+    const y=10+i*32;
+    ctx.fillStyle=featColors[i];ctx.globalAlpha=0.4;
+    ctx.fillRect(10,y,85,26);ctx.globalAlpha=1;
+    text(ctx,f.split('\n')[0],52,y+17,7,'#E0E0E0','center','Calibri');
+  });
+  // Feelings right
+  feelings.forEach((f,i)=>{
+    const y=10+i*40;
+    ctx.fillStyle=feelColors[i];ctx.globalAlpha=0.4;
+    ctx.fillRect(290,y,80,30);ctx.globalAlpha=1;
+    text(ctx,f,330,y+20,7,'#E0E0E0','center','Calibri');
+  });
+  // Sankey bands
+  feelings.forEach((_,ci)=>{
+    const fy=10+ci*40+15;
+    let cumY=fy-8;
+    scores.forEach((row,ri)=>{
+      const val=row[ci];
+      if(val>=4){
+        const bandH=Math.max(2,val*1.5);
+        const sy=10+ri*32+13;
+        ctx.fillStyle=feelColors[ci];ctx.globalAlpha=val/10;
+        ctx.beginPath();ctx.moveTo(95,sy-bandH/2);
+        ctx.lineTo(290,cumY);ctx.lineTo(290,cumY+bandH);ctx.lineTo(95,sy+bandH/2);
+        ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+        cumY+=bandH+1;
+      }
+    });
+  });
+})();
+
+// ── LAYOUT 8: Concentric Rings ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c8',380,340,2);
+  const cx=190,cy=170;
+  const rInner=30,rOuter=150;
+  // Feelings rings (inner)
+  feelings.forEach((f,i)=>{
+    const r=rInner+(i+1)*(rOuter-rInner)/feelings.length;
+    const a=(-Math.PI/2+i*Math.PI*2/feelings.length);
+    text(ctx,f,cx+Math.cos(a)*(r+5),cy+Math.sin(a)*(r+5),6,feelColors[i],'center','Calibri');
+    ctx.beginPath();ctx.strokeStyle=feelColors[i];ctx.lineWidth=1;ctx.globalAlpha=0.3;
+    ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+  });
+  // Features rings (outer)
+  features.forEach((f,i)=>{
+    const a=-Math.PI/2+i*Math.PI*2/features.length;
+    const tx=cx+Math.cos(a)*(rOuter+18),ty=cy+Math.sin(a)*(rOuter+18);
+    text(ctx,f.split('\n')[0],tx,ty,6,featColors[i],'center','Calibri');
+    // Dot for each feeling
+    const avgScore=scores[i].reduce((a,b)=>a+b,0)/feelings.length;
+    const dotR=rInner+avgScore/10*(rOuter-rInner);
+    const da=a+Math.PI/features.length;
+    const dx=cx+Math.cos(da)*dotR,dy=cy+Math.sin(da)*dotR;
+    ctx.beginPath();ctx.fillStyle=featColors[i];
+    ctx.arc(dx,dy,avgScore*0.6,0,Math.PI*2);ctx.fill();
+  });
+})();
+
+// ── LAYOUT 9: Quadrant Map ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c9',380,340,2);
+  const mx=50,my=20,plotW=290,plotH=290,cx=mx+plotW/2,cy=my+plotH/2;
+  // Axes
+  ctx.strokeStyle='#444';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(mx,cy);ctx.lineTo(mx+plotW,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,my);ctx.lineTo(cx,my+plotH);ctx.stroke();
+  // Axis labels
+  text(ctx,'EXTERIOR',mx+plotW/2,my+plotH+18,7,'#888','center','Calibri');
+  text(ctx,'INTERIOR',mx+plotW/2,my-6,7,'#888','center','Calibri');
+  ctx.save();ctx.translate(mx-10,my+plotH/2);ctx.rotate(-Math.PI/2);
+  text(ctx,'RATIONAL',0,0,7,'#888','center','Calibri');
+  ctx.translate(0,-plotH);
+  text(ctx,'EMOTIONAL',0,0,7,'#888','center','Calibri');
+  ctx.restore();
+  // Plot features
+  const pos=[[0.75,0.35],[0.3,0.25],[0.6,0.7],[0.85,0.15],[0.1,0.5],[0.05,0.65],[0.2,0.8],[0.15,0.85],[0.4,0.9],[0.05,0.95]];
+  features.forEach((f,i)=>{
+    const px=mx+pos[i][0]*plotW,py=my+pos[i][1]*plotH;
+    const avg=scores[i].reduce((a,b)=>a+b,0)/feelings.length;
+    ctx.beginPath();ctx.fillStyle=featColors[i];ctx.globalAlpha=0.7;
+    ctx.arc(px,py,avg,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+    text(ctx,i+1,px,py-avg-3,8,'#fff','center','bold Calibri');
+    if(i%2===0)text(ctx,f.split('\n')[0],px+avg+4,py+3,5,featColors[i],'left','Calibri');
+    else text(ctx,f.split('\n')[0],px-avg-4,py+3,5,featColors[i],'right','Calibri');
+  });
+})();
+
+// ── LAYOUT 10: Stacked Slopes ──
+(function(){
+  const {ctx,w,h}=makeCanvas('c10',380,340,2);
+  const mx=90,my=20,plotW=w-mx-10,plotH=h-my-30;
+  const stepX=plotW/(feelings.length-1);
+  // Feelings X-axis
+  feelings.forEach((f,i)=>text(ctx,f,mx+i*stepX,my+plotH+16,6,'#888','center','Calibri'));
+  // Features as stacked slope lines
+  features.forEach((f,i)=>{
+    const yBase=my+plotH-(i*plotH/(features.length+1)+10);
+    ctx.beginPath();ctx.strokeStyle=featColors[i];ctx.lineWidth=2;
+    scores[i].forEach((val,ci)=>{
+      const px=mx+ci*stepX,py=yBase-val*3;
+      ci===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    });
+    ctx.stroke();
+    // Label at end
+    text(ctx,f.split('\n')[0],mx+plotW+4,yBase-scores[i][feelings.length-1]*3,6,featColors[i],'left','Calibri');
+  });
+  // Y grid
+  for(let v=0;v<=10;v+=2){
+    const gy=my+plotH/2-v*3*features.length/20;
+    ctx.strokeStyle='rgba(224,224,224,0.08)';ctx.beginPath();
+    ctx.moveTo(mx,gy);ctx.lineTo(mx+plotW,gy);ctx.stroke();
+    text(ctx,v,mx-6,gy+4,6,'#555','right','Calibri');
+  }
+})();
+</script>
+</body>
+</html>
